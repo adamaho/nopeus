@@ -66,8 +66,8 @@ when it becomes shared or needs an explicit public API and dependency boundary.
 
 Do not apply category-based prefixes or suffixes to packages under `packages/*`.
 The directory name must match the package's `package.json` name, excluding the
-npm scope when present. For example, `packages/oxlint-policy/package.json` may use the name
-`@adamaho/oxlint-policy`.
+npm scope when present. For example, `packages/oxlint-policy/package.json`
+may use the name `@adamaho/oxlint-policy`.
 
 ## Dependency Management
 
@@ -129,7 +129,7 @@ Allowed types:
 - `test`
 
 Use the affected package name without the npm scope as the commit scope. For
-root-only template changes, use `monorepo`.
+root-only changes, use `nopeus`.
 
 Examples:
 
