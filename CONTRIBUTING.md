@@ -67,7 +67,7 @@ when it becomes shared or needs an explicit public API and dependency boundary.
 Do not apply category-based prefixes or suffixes to packages under `packages/*`.
 The directory name must match the package's `package.json` name, excluding the
 npm scope when present. For example, `packages/oxlint-policy/package.json`
-may use the name `@adamaho/oxlint-policy`.
+may use the name `@adamaho/noveus-oxlint-policy`.
 
 ## Dependency Management
 
