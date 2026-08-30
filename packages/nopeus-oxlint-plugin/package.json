@@ -1,0 +1,49 @@
+{
+  "name": "@adamaho/nopeus-oxlint-plugin",
+  "version": "0.0.0",
+  "description": "Strict Oxlint rules for preserving type evidence in AI-assisted codebases.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamaho/nopeus.git",
+    "directory": "packages/nopeus-oxlint-plugin"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./effect": "./src/effect/index.ts",
+    "./recommended": "./src/recommended.ts"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
+    "lint": "oxlint --config ../../tools/oxlint-config/src/base.json src",
+    "test:unit": "node --import tsx --test src/*.test.ts src/rules/*.test.ts src/effect/rules/*.test.ts",
+    "tsc": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@oxlint/plugins": "catalog:"
+  },
+  "devDependencies": {
+    "@monorepo/tool-tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "oxlint": "catalog:",
+    "rimraf": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "oxlint": ">=1.79.0 <2"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.0.0"
+  }
+}
