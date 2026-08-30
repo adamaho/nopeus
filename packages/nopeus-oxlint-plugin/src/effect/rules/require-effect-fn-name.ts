@@ -12,7 +12,7 @@ function isStaticName(argument: ESTree.CallExpression["arguments"][number] | und
   return argument.type === "TemplateLiteral" && argument.expressions.length === 0;
 }
 
-/** Require Effect.fn declarations to carry a stable trace name. */
+/** Require traced Effect functions to carry a stable operation name. */
 export const requireEffectFnNameRule = defineRule({
   meta: {
     type: "problem",
@@ -25,32 +25,43 @@ export const requireEffectFnNameRule = defineRule({
     },
   },
   createOnce(context) {
-    const effectBindings = new Set<string>();
+    const effectNamespaces = new Set<string>();
+    const effectFnBindings = new Set<string>();
 
     return {
       ImportDeclaration(node) {
-        if (node.source.value !== "effect") return;
+        if (node.source.value === "effect") {
+          for (const specifier of node.specifiers) {
+            if (specifier.type === "ImportSpecifier" && importedName(specifier) === "Effect") {
+              effectNamespaces.add(specifier.local.name);
+            }
+          }
+          return;
+        }
 
+        if (node.source.value !== "effect/Effect") return;
         for (const specifier of node.specifiers) {
-          if (specifier.type === "ImportSpecifier" && importedName(specifier) === "Effect") {
-            effectBindings.add(specifier.local.name);
+          if (specifier.type === "ImportNamespaceSpecifier") {
+            effectNamespaces.add(specifier.local.name);
+            continue;
+          }
+          if (specifier.type === "ImportSpecifier" && importedName(specifier) === "fn") {
+            effectFnBindings.add(specifier.local.name);
           }
         }
       },
       CallExpression(node) {
         const callee = node.callee;
-        if (
-          callee.type !== "MemberExpression" ||
-          callee.computed ||
-          callee.object.type !== "Identifier" ||
-          !effectBindings.has(callee.object.name) ||
-          callee.property.type !== "Identifier" ||
-          callee.property.name !== "fn"
-        ) {
-          return;
-        }
+        const isEffectFn =
+          (callee.type === "Identifier" && effectFnBindings.has(callee.name)) ||
+          (callee.type === "MemberExpression" &&
+            !callee.computed &&
+            callee.object.type === "Identifier" &&
+            effectNamespaces.has(callee.object.name) &&
+            callee.property.type === "Identifier" &&
+            callee.property.name === "fn");
 
-        if (isStaticName(node.arguments[0])) return;
+        if (!isEffectFn || isStaticName(node.arguments[0])) return;
         context.report({ node: callee, messageId: "missingName" });
       },
     };

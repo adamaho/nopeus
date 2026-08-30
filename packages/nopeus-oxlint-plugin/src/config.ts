@@ -1,6 +1,6 @@
 import { defineConfig } from "oxlint";
 
-export interface RecommendedOptions {
+export interface NopeusOptions {
   /** The consuming repository's root package name. */
   readonly packageName: string;
 }
@@ -12,11 +12,11 @@ export function serviceKeyPrefixFromPackageName(packageName: string): string {
     throw new TypeError("packageName must contain a project name");
   }
 
-  return `@${projectName}/`;
+  return "@" + projectName + "/";
 }
 
-/** Build the strict shared policy for a consuming repository. */
-export default function recommended({ packageName }: RecommendedOptions) {
+/** Build the canonical Nopeus policy for a consuming repository. */
+export default function nopeus({ packageName }: NopeusOptions) {
   return defineConfig({
     jsPlugins: [
       {
@@ -26,37 +26,23 @@ export default function recommended({ packageName }: RecommendedOptions) {
     ],
     rules: {
       "nopeus/no-chained-type-assertions": "error",
+      "nopeus/no-conditional-empty-object-spread": "error",
       "nopeus/no-known-value-widening": "error",
       "nopeus/no-module-mocking": "error",
       "nopeus/no-object-parameters": "error",
       "nopeus/no-reflect-apply": "error",
       "nopeus/no-reflect-get": "error",
-      "nopeus/no-service-constructor-imports": "error",
-      "nopeus/no-unknown-parameters": "error",
+      "nopeus/no-runtime-typeof": ["error", { allowInTypeGuards: true }],
       "nopeus/no-unknown-returns": "error",
       "nopeus/no-unknown-type-aliases": "error",
       "nopeus/no-unsafe-dictionary-type": "error",
       "nopeus/no-widen-then-assert": "error",
       "nopeus/require-effect-fn-name": "error",
+      "nopeus/require-safety-comment-for-type-assertion": "error",
       "nopeus/require-service-key-prefix": [
         "error",
         { prefix: serviceKeyPrefixFromPackageName(packageName) },
       ],
-      "nopeus/require-safety-comment-for-type-assertion": "error",
     },
-    overrides: [
-      {
-        files: ["**/*.{test,spec}.{js,jsx,ts,tsx}"],
-        rules: {
-          "nopeus/no-chained-type-assertions": "off",
-          "nopeus/no-known-value-widening": "off",
-          "nopeus/no-object-parameters": "off",
-          "nopeus/no-unknown-type-aliases": "off",
-          "nopeus/no-unsafe-dictionary-type": "off",
-          "nopeus/no-widen-then-assert": "off",
-          "nopeus/require-safety-comment-for-type-assertion": "off",
-        },
-      },
-    ],
   });
 }

@@ -2,4 +2,4 @@
 "@adamaho/nopeus-oxlint-plugin": minor
 ---
 
-Add the initial shared Nopeus Oxlint plugin and recommended strict policy.
+Add the initial Nopeus Oxlint plugin and its canonical, all-or-nothing strict policy.

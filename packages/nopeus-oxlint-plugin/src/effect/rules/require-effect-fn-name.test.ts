@@ -7,8 +7,11 @@ const error = { messageId: "missingName" };
 
 tester.run("nopeus/require-effect-fn-name", requireEffectFnNameRule, {
   valid: [
-    'import { Effect } from "effect"; const load = Effect.fn("App.load")(function* () {});',
-    'import { Effect as Fx } from "effect"; const load = Fx.fn(`App.load`)(function* () {});',
+    'import { Effect } from "effect"; const load = Effect.fn("load")(function* () {});',
+    'import { Effect as Fx } from "effect"; const load = Fx.fn("load")(function* () {});',
+    'import * as Effect from "effect/Effect"; const load = Effect.fn("load")(function* () {});',
+    'import { fn as effectFn } from "effect/Effect"; const load = effectFn("load")(() => 1);',
+    'import * as Effect from "effect/Effect"; const load = Effect.fnUntraced(function* () {});',
     "const Effect = { fn() {} }; Effect.fn(function* () {});",
   ],
   invalid: [
@@ -17,7 +20,15 @@ tester.run("nopeus/require-effect-fn-name", requireEffectFnNameRule, {
       errors: [error],
     },
     {
-      code: 'import { Effect as Fx } from "effect"; const name = "App.load"; Fx.fn(name)(() => 1);',
+      code: 'import { Effect as Fx } from "effect"; const name = "load"; Fx.fn(name)(() => 1);',
+      errors: [error],
+    },
+    {
+      code: 'import * as Effect from "effect/Effect"; const load = Effect.fn(function* () {});',
+      errors: [error],
+    },
+    {
+      code: 'import { fn as effectFn } from "effect/Effect"; effectFn(() => 1);',
       errors: [error],
     },
   ],

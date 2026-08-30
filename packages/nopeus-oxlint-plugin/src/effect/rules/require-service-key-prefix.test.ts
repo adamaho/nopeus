@@ -15,6 +15,18 @@ tester.run("nopeus/require-service-key-prefix", requireServiceKeyPrefixRule, {
       code: 'import { Context as Ctx } from "effect"; class Service extends Ctx.Service<Service, {}>()("@app/Service") {}',
       options,
     },
+    {
+      code: 'import * as Context from "effect/Context"; class Service extends Context.Service<Service, {}>()("@app/Service") {}',
+      options,
+    },
+    {
+      code: 'import * as Context from "effect/Context"; const Service = Context.Service<{}, {}>("@app/Service" satisfies string);',
+      options,
+    },
+    {
+      code: 'import { Service as makeService } from "effect/Context"; const Tag = makeService<{}, {}>("@app/Service");',
+      options,
+    },
     'const Context = { Service: () => () => class {} }; class Service extends Context.Service()("other") {}',
   ],
   invalid: [
@@ -25,6 +37,16 @@ tester.run("nopeus/require-service-key-prefix", requireServiceKeyPrefixRule, {
     },
     {
       code: 'import { Context } from "effect"; const key = "@app/Service"; class Service extends Context.Service<Service, {}>()(key) {}',
+      options,
+      errors: [{ messageId: "staticKey" }],
+    },
+    {
+      code: 'import * as Context from "effect/Context"; const Service = Context.Service<{}, {}>("@other/Service");',
+      options,
+      errors: [{ messageId: "wrongPrefix" }],
+    },
+    {
+      code: 'import { Service as makeService } from "effect/Context"; const key = "@app/Service"; const Tag = makeService<{}, {}>(key);',
       options,
       errors: [{ messageId: "staticKey" }],
     },

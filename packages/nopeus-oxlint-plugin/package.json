@@ -1,7 +1,7 @@
 {
   "name": "@adamaho/nopeus-oxlint-plugin",
   "version": "0.0.0",
-  "description": "Strict Oxlint rules for preserving type evidence in AI-assisted codebases.",
+  "description": "The canonical strict Oxlint policy for AI-assisted TypeScript codebases.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -17,8 +17,7 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./effect": "./src/effect/index.ts",
-    "./recommended": "./src/recommended.ts"
+    "./config": "./src/config.ts"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
