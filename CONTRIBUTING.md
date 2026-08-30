@@ -1,7 +1,7 @@
 # Contributing
 
-This repository is a template monorepo. Keep changes small, explicit, and easy
-to carry forward into future projects created from the template.
+Nopeus houses AI-assisted development tools. Keep changes small, explicit,
+and easy to review.
 
 ## Prerequisites
 
@@ -47,7 +47,7 @@ Useful focused commands:
 - `pnpm fmt` formats the repository
 - `pnpm fmt:check` checks formatting without writing changes
 - `pnpm lint` runs package lint tasks through Turbo
-- `pnpm test:unit` runs package unit test tasks through Turbo
+- `pnpm turbo run test:unit` runs package unit test tasks through Turbo
 - `pnpm tsc` runs package TypeScript tasks through Turbo
 
 ## Workspace Layout
@@ -66,8 +66,8 @@ when it becomes shared or needs an explicit public API and dependency boundary.
 
 Do not apply category-based prefixes or suffixes to packages under `packages/*`.
 The directory name must match the package's `package.json` name, excluding the
-npm scope when present. For example, `packages/billing/package.json` uses the
-name `@monorepo/billing`.
+npm scope when present. For example, `packages/oxlint-policy/package.json`
+may use the name `@adamaho/noveus-oxlint-policy`.
 
 ## Dependency Management
 
@@ -77,6 +77,22 @@ review.
 
 Use exact versions. The root `.npmrc` sets `save-exact=true` and
 `engine-strict=true`.
+
+## Changesets
+
+Add a changeset when a pull request changes the public behavior of a publishable
+package:
+
+```bash
+pnpm changeset
+```
+
+Select every affected package, choose the appropriate semantic version bump,
+and commit the generated `.changeset/*.md` file with the change.
+
+A changeset is not required for documentation, infrastructure,
+application-only, or private-package changes. Run `pnpm changeset:status` to
+inspect pending releases.
 
 ## Documentation Comments
 
@@ -113,12 +129,12 @@ Allowed types:
 - `test`
 
 Use the affected package name without the npm scope as the commit scope. For
-root-only template changes, use `monorepo`.
+root-only changes, use `nopeus`.
 
 Examples:
 
 ```text
-chore(monorepo): add contributor documentation
+chore(nopeus): add contributor documentation
 feat(web): add account settings page
 fix(api): validate missing request body
 ```

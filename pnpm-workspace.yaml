@@ -10,6 +10,7 @@ allowBuilds:
   msgpackr-extract: true
 
 catalog:
+  "@changesets/cli": 3.0.1
   "@effect/tsgo": 0.36.5
   oxfmt: 0.64.0
   oxlint: 1.79.0
