@@ -6,10 +6,47 @@ function importedName(specifier: ESTree.ImportSpecifier): string {
     : specifier.imported.value;
 }
 
-function isStaticName(argument: ESTree.CallExpression["arguments"][number] | undefined): boolean {
-  if (argument === undefined || argument.type === "SpreadElement") return false;
-  if (argument.type === "Literal") return typeof argument.value === "string";
-  return argument.type === "TemplateLiteral" && argument.expressions.length === 0;
+function staticName(
+  argument: ESTree.CallExpression["arguments"][number] | undefined,
+): string | null {
+  if (argument === undefined || argument.type === "SpreadElement") return null;
+  if (argument.type === "Literal") {
+    return typeof argument.value === "string" ? argument.value : null;
+  }
+  if (argument.type === "TemplateLiteral" && argument.expressions.length === 0) {
+    return argument.quasis[0]?.value.cooked ?? argument.quasis[0]?.value.raw ?? "";
+  }
+  return null;
+}
+
+function propertyName(key: ESTree.PropertyKey): string | null {
+  if (key.type === "Identifier" || key.type === "PrivateIdentifier") return key.name;
+  return key.type === "Literal" && typeof key.value === "string" ? key.value : null;
+}
+
+function ownerName(node: ESTree.CallExpression): string | null {
+  let current: ESTree.Node = node;
+  while (current.parent.type === "CallExpression" && current.parent.callee === current) {
+    current = current.parent;
+  }
+
+  const owner = current.parent;
+  if (owner.type === "VariableDeclarator" && owner.id.type === "Identifier") {
+    return owner.id.name;
+  }
+  if (
+    (owner.type === "Property" ||
+      owner.type === "PropertyDefinition" ||
+      owner.type === "AccessorProperty") &&
+    owner.value === current
+  ) {
+    return propertyName(owner.key);
+  }
+  return null;
+}
+
+function nameMatchesOwner(name: string, owner: string): boolean {
+  return name === owner || name.endsWith("." + owner);
 }
 
 /** Require traced Effect functions to carry a stable operation name. */
@@ -22,6 +59,8 @@ export const requireEffectFnNameRule = defineRule({
     messages: {
       missingName:
         "Give this Effect.fn a static operation name so traces and diagnostics identify the workflow.",
+      mismatchedName:
+        'Effect.fn name "{{name}}" must match its owning symbol "{{owner}}" or end with ".{{owner}}".',
     },
   },
   createOnce(context) {
@@ -61,8 +100,20 @@ export const requireEffectFnNameRule = defineRule({
             callee.property.type === "Identifier" &&
             callee.property.name === "fn");
 
-        if (!isEffectFn || isStaticName(node.arguments[0])) return;
-        context.report({ node: callee, messageId: "missingName" });
+        if (!isEffectFn) return;
+        const name = staticName(node.arguments[0]);
+        if (name === null) {
+          context.report({ node: callee, messageId: "missingName" });
+          return;
+        }
+        const owner = ownerName(node);
+        if (owner !== null && !nameMatchesOwner(name, owner)) {
+          context.report({
+            node: node.arguments[0] ?? callee,
+            messageId: "mismatchedName",
+            data: { name, owner },
+          });
+        }
       },
     };
   },

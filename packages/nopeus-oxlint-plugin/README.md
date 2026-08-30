@@ -325,9 +325,11 @@ Keep the precise type from initialization through use.
 
 ### nopeus/require-effect-fn-name
 
-Requires every Effect.fn call to begin with a static string name. The name makes
-stack traces and tracing spans identify the operation. A variable containing a
-name is not accepted because the trace boundary should be visible at the call.
+Requires every Effect.fn call to begin with a static string name. When the
+function has an owning binding or property, the trace name must equal that
+symbol or end with a dot followed by that symbol. This permits both loadUser and
+Users.loadUser while rejecting unrelated names. A variable containing a name is
+not accepted because the trace boundary should be visible at the call.
 
 Bad:
 
@@ -349,8 +351,8 @@ const loadUser = Effect.fn("loadUser")(function* (id: UserId) {
 });
 ```
 
-Use a name matching the function. Effect.fnUntraced remains valid when tracing
-would not add value, particularly in library implementations and hot paths.
+Effect.fnUntraced remains valid when tracing would not add value, particularly
+in library implementations and hot paths.
 
 ### nopeus/require-safety-comment-for-type-assertion
 
