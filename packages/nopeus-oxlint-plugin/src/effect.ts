@@ -1,6 +1,6 @@
 import { defineConfig } from "oxlint";
 
-export interface NopeusOptions {
+export interface NopeusEffectOptions {
   /** The consuming repository's root package name. */
   readonly packageName: string;
 }
@@ -15,8 +15,8 @@ export function serviceKeyPrefixFromPackageName(packageName: string): string {
   return "@" + projectName + "/";
 }
 
-/** Build the canonical Nopeus policy for a consuming repository. */
-export default function nopeus({ packageName }: NopeusOptions) {
+/** Build the canonical Nopeus policy for an Effect repository. */
+export default function effect({ packageName }: NopeusEffectOptions) {
   return defineConfig({
     jsPlugins: [
       {
@@ -25,7 +25,6 @@ export default function nopeus({ packageName }: NopeusOptions) {
       },
     ],
     rules: {
-      "nopeus/no-chained-type-assertions": "error",
       "nopeus/no-conditional-empty-object-spread": "error",
       "nopeus/no-known-value-widening": "error",
       "nopeus/no-module-mocking": "error",
@@ -33,13 +32,12 @@ export default function nopeus({ packageName }: NopeusOptions) {
       "nopeus/no-reflect-apply": "error",
       "nopeus/no-reflect-get": "error",
       "nopeus/no-runtime-typeof": ["error", { allowInTypeGuards: true }],
+      "nopeus/no-type-assertions": "error",
       "nopeus/no-unknown-returns": "error",
       "nopeus/no-unknown-type-aliases": "error",
       "nopeus/no-unsafe-dictionary-type": "error",
-      "nopeus/no-widen-then-assert": "error",
       "nopeus/require-effect-fn-name": "error",
       "nopeus/require-public-jsdoc": "error",
-      "nopeus/require-safety-comment-for-type-assertion": "error",
       "nopeus/require-service-key-prefix": [
         "error",
         { prefix: serviceKeyPrefixFromPackageName(packageName) },

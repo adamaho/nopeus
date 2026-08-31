@@ -2,15 +2,15 @@
 
 The canonical strict Oxlint policy for AI-assisted TypeScript codebases.
 
-Nopeus is intentionally all or nothing. It exposes one supported configuration,
-enables every shipped rule at error severity, and applies the same policy to
-production and test code. There are no partial presets or blanket test
-overrides.
+Nopeus is intentionally all or nothing. Each project profile is a complete,
+canonical policy for its target and applies the same rules to production and
+test code. There are no partial presets or blanket test overrides.
 
-The package combines and adapts the MIT-licensed rules from
-[dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) and
-[HumanLayer's Effect Machine](https://github.com/humanlayer/effect-machine/tree/main/tools/oxlint/anti-slop).
-Its public API documentation rule follows the format enforced by
+The current `effect` profile covers Effect TypeScript repositories. Future
+profiles can be added as scoped entry points such as `solid` or `svelte`
+without weakening or adding switches to the Effect policy.
+
+The public API documentation rule follows the format enforced by
 [Effect's JSDoc checker](https://github.com/Effect-TS/effect/tree/main/packages/tools/jsdocs).
 
 ## Usage
@@ -25,11 +25,11 @@ Extend the canonical policy from an oxlint.config.ts file:
 
 ```ts
 import packageJson from "./package.json" with { type: "json" };
-import nopeus from "@adamaho/nopeus-oxlint-plugin/config";
+import effect from "@adamaho/nopeus-oxlint-plugin/effect";
 import { defineConfig } from "oxlint";
 
 export default defineConfig({
-  extends: [nopeus({ packageName: packageJson.name })],
+  extends: [effect({ packageName: packageJson.name })],
 });
 ```
 
@@ -55,19 +55,19 @@ Effect rules follow the current Effect conventions:
 - Importing from either the effect barrel or the effect/Effect and
   effect/Context module paths is supported.
 
-Every rule below is enabled by the canonical config.
+Every rule below is enabled by the canonical `effect` profile.
 
 ## Rules
 
-### nopeus/no-chained-type-assertions
+### nopeus/no-type-assertions
 
-Rejects nested TypeScript assertions. A chain such as value as unknown as User
-erases the original evidence before inventing a new type.
+Rejects every non-const TypeScript assertion. A comment cannot prove a runtime
+invariant, so the policy has no assertion escape hatch.
 
 Bad:
 
 ```ts
-const user = input as unknown as User;
+const user = input as User;
 ```
 
 Good:
@@ -77,7 +77,8 @@ const decodeUser = Schema.decodeUnknownSync(User);
 const user = decodeUser(input);
 ```
 
-Const assertions remain allowed.
+Effect SQL, Drizzle, and other typed data APIs should carry their result types
+without assertions. Const assertions remain allowed.
 
 ### nopeus/no-conditional-empty-object-spread
 
@@ -301,30 +302,6 @@ type UsersById = Readonly<Record<UserId, User>>;
 
 Use a concrete owner type for dictionary values.
 
-### nopeus/no-widen-then-assert
-
-Rejects immutable local flows that widen a known value and later assert the
-widened binding back to a narrower type.
-
-Bad:
-
-```ts
-const preciseUser = { id: userId, name };
-const value: unknown = preciseUser;
-const user = value as User;
-```
-
-Good:
-
-```ts
-const user = {
-  id: userId,
-  name,
-} satisfies User;
-```
-
-Keep the precise type from initialization through use.
-
 ### nopeus/require-effect-fn-name
 
 Requires every Effect.fn call to begin with a static string name. When the
@@ -416,27 +393,6 @@ Oxlint cannot perform Effect's separate type-aware link resolution or execute
 documentation examples. This rule enforces the authoring format at lint time;
 projects may additionally run doctests for executable examples.
 
-### nopeus/require-safety-comment-for-type-assertion
-
-Requires every non-const TypeScript assertion to have a nearby SAFETY comment
-that states the invariant TypeScript cannot express. Decoding is preferred; the
-comment is for rare invariants established outside the type system.
-
-Bad:
-
-```ts
-const first = rows[0] as UserRow;
-```
-
-Good:
-
-```ts
-// SAFETY: the query schema guarantees at least one UserRow.
-const first = rows[0] as UserRow;
-```
-
-The comment must immediately precede the assertion or its containing statement.
-
 ### nopeus/require-service-key-prefix
 
 Requires every Context.Service key to be a static string inside the namespace
@@ -466,8 +422,6 @@ rejected.
 
 ## Exceptions
 
-The canonical config does not disable rules for tests or offer partial presets.
-When an exceptional invariant is real, prefer the narrow mechanism built into
-the rule, such as a SAFETY comment for an assertion. Any project-level Oxlint
-disable should be local, documented, and reviewed as an explicit departure from
-the canonical policy.
+Canonical profiles do not disable rules for tests or offer partial presets. Any
+project-level Oxlint disable should be local, documented, and reviewed as an
+explicit departure from the canonical policy.
