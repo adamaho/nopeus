@@ -1,15 +1,16 @@
 {
-  "name": "@adamaho/nopeus-oxlint-config",
+  "name": "@nopeus/oxlint-config",
   "version": "0.0.0",
   "description": "Shared base Oxlint configuration for strict TypeScript codebases.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adamaho/nopeus.git",
-    "directory": "packages/nopeus-oxlint-config"
+    "directory": "packages/oxlint-config"
   },
   "files": [
     "src",
+    "LICENSE",
     "README.md"
   ],
   "type": "module",

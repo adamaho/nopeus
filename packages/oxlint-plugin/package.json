@@ -1,12 +1,12 @@
 {
-  "name": "@adamaho/nopeus-oxlint-plugin",
+  "name": "@nopeus/oxlint-plugin",
   "version": "0.0.0",
   "description": "The canonical strict Oxlint policy for AI-assisted TypeScript codebases.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adamaho/nopeus.git",
-    "directory": "packages/nopeus-oxlint-plugin"
+    "directory": "packages/oxlint-plugin"
   },
   "files": [
     "src",
@@ -20,11 +20,12 @@
     "./effect": "./src/effect.ts"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
-    "lint": "oxlint --config ../nopeus-oxlint-config/src/base.ts src",
+    "lint": "oxlint --config ../oxlint-config/src/base.ts src",
     "test:unit": "vitest run",
     "tsc": "tsc --noEmit"
   },

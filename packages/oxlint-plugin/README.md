@@ -1,4 +1,4 @@
-# @adamaho/nopeus-oxlint-plugin
+# @nopeus/oxlint-plugin
 
 Strict Oxlint rules for AI-assisted TypeScript codebases. The `effect` profile
 applies one complete policy to production and test code.
@@ -8,14 +8,14 @@ applies one complete policy to production and test code.
 Install Nopeus and its Oxlint peer:
 
 ```bash
-pnpm add --save-dev @adamaho/nopeus-oxlint-plugin oxlint
+pnpm add --save-dev @nopeus/oxlint-plugin oxlint
 ```
 
 Extend the canonical policy from an oxlint.config.ts file:
 
 ```ts
 import packageJson from "./package.json" with { type: "json" };
-import effect from "@adamaho/nopeus-oxlint-plugin/effect";
+import effect from "@nopeus/oxlint-plugin/effect";
 import { defineConfig } from "oxlint";
 
 export default defineConfig({
@@ -598,3 +598,8 @@ construction is reusable independently from Layer composition.
 Canonical profiles do not disable rules for tests or offer partial presets. Any
 project-level Oxlint disable should be local, documented, and reviewed as an
 explicit departure from the canonical policy.
+
+## Credits
+
+The initial policy and rule set were inspired by
+[anti-slop](https://github.com/dmmulroy/anti-slop).

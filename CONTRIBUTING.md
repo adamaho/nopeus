@@ -67,8 +67,8 @@ when it becomes shared or needs an explicit public API and dependency boundary.
 Do not apply category-based prefixes or suffixes to packages under `packages/*`.
 The directory name must match the package's `package.json` name, excluding the
 npm scope when present. For example,
-`packages/nopeus-oxlint-plugin/package.json` uses the name
-`@adamaho/nopeus-oxlint-plugin`.
+`packages/oxlint-plugin/package.json` uses the name
+`@nopeus/oxlint-plugin`.
 
 ## Dependency Management
 
@@ -136,8 +136,8 @@ Examples:
 
 ```text
 chore(nopeus): add contributor documentation
-feat(nopeus-oxlint-plugin): add strict Effect rule
-fix(nopeus-oxlint-plugin): recognize aliased imports
+feat(oxlint-plugin): add strict Effect rule
+fix(oxlint-plugin): recognize aliased imports
 ```
 
 ## Coding Agents
