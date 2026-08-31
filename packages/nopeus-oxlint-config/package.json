@@ -1,0 +1,39 @@
+{
+  "name": "@adamaho/nopeus-oxlint-config",
+  "version": "0.0.0",
+  "description": "Shared base Oxlint configuration for strict TypeScript codebases.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamaho/nopeus.git",
+    "directory": "packages/nopeus-oxlint-config"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/base.ts",
+    "./base": "./src/base.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "clean": "rimraf node_modules dist build .turbo coverage",
+    "lint": "oxlint --config ./src/base.ts src"
+  },
+  "devDependencies": {
+    "oxlint": "catalog:",
+    "rimraf": "catalog:"
+  },
+  "peerDependencies": {
+    "oxlint": ">=1.79.0 <2"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.0.0"
+  }
+}

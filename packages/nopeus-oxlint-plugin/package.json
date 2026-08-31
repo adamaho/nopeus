@@ -24,7 +24,7 @@
   },
   "scripts": {
     "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
-    "lint": "oxlint --config ../../tools/oxlint-config/src/base.json src",
+    "lint": "oxlint --config ../nopeus-oxlint-config/src/base.ts src",
     "test:unit": "vitest run",
     "tsc": "tsc --noEmit"
   },
