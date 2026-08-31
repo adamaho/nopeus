@@ -598,3 +598,8 @@ construction is reusable independently from Layer composition.
 Canonical profiles do not disable rules for tests or offer partial presets. Any
 project-level Oxlint disable should be local, documented, and reviewed as an
 explicit departure from the canonical policy.
+
+## Credits
+
+The initial policy and rule set were inspired by
+[anti-slop](https://github.com/dmmulroy/anti-slop).
