@@ -15,6 +15,15 @@ tester.run("nopeus/require-service-make-layer", requireServiceMakeLayerRule, {
      export class Storage extends Context.Service<Storage, {}>()("@app/Storage") {}
      export function makeMemory() { return Storage.of({}); }
      export const layerMemory = Layer.sync(Storage)(makeMemory);`,
+    `class Users extends Context.Service<Users, {}>()("@app/Users") {}
+     const make = Effect.succeed(Users.of({}));
+     const layer = Layer.effect(Users, make);
+     export { Users, make, layer };
+     import { Context, Effect, Layer } from "effect";`,
+    `import { Context, Effect, Layer } from "effect";
+     export default class Users extends Context.Service<Users, {}>()("@app/Users") {}
+     export const make = Effect.succeed(Users.of({}));
+     export const layer = Layer.effect(Users, make);`,
     'const Context = { Service: () => () => class {} }; export class Users extends Context.Service()("Users") {}',
   ],
   invalid: [
@@ -35,6 +44,17 @@ tester.run("nopeus/require-service-make-layer", requireServiceMakeLayerRule, {
              export const makeMemory = Effect.succeed(Users.of({}));
              export const layer = Layer.effect(Users, makeMemory);`,
       errors: [{ messageId: "missingLayer" }],
+    },
+    {
+      code: `import { Context } from "effect";
+             class Users extends Context.Service<Users, {}>()("@app/Users") {}
+             export { Users };`,
+      errors: [{ messageId: "missingMake" }],
+    },
+    {
+      code: `import { Context } from "effect";
+             export default class Users extends Context.Service<Users, {}>()("@app/Users") {}`,
+      errors: [{ messageId: "missingMake" }],
     },
   ],
 });

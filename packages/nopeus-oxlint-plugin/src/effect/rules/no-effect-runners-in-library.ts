@@ -1,6 +1,6 @@
 import { defineRule } from "@oxlint/plugins";
 
-import { isModuleCall, moduleBindings, recordModuleImport } from "./effect-call.ts";
+import { isModuleCall, moduleBindings } from "./effect-call.ts";
 
 const runners = [
   "runCallback",
@@ -21,15 +21,17 @@ function normalizedPath(path: string): string {
   return path.replaceAll("\\", "/");
 }
 
-function isAllowed(filename: string, allowFiles: readonly string[]): boolean {
+function repositoryRelativePath(filename: string, cwd: string): string {
   const normalizedFilename = normalizedPath(filename);
-  return allowFiles.some((path) => {
-    const normalizedAllowed = normalizedPath(path).replace(/^\.\//u, "");
-    return (
-      normalizedFilename === normalizedAllowed ||
-      normalizedFilename.endsWith("/" + normalizedAllowed)
-    );
-  });
+  const normalizedCwd = normalizedPath(cwd).replace(/\/$/u, "");
+  return normalizedFilename.startsWith(normalizedCwd + "/")
+    ? normalizedFilename.slice(normalizedCwd.length + 1)
+    : normalizedFilename;
+}
+
+function isAllowed(filename: string, cwd: string, allowFiles: readonly string[]): boolean {
+  const relativeFilename = repositoryRelativePath(filename, cwd);
+  return allowFiles.some((path) => relativeFilename === normalizedPath(path).replace(/^\.\//u, ""));
 }
 
 /** Keep Effect runtime execution in explicitly configured entrypoints. */
@@ -54,11 +56,8 @@ export const noEffectRunnersInLibraryRule = defineRule({
     },
   },
   createOnce(context) {
-    const effect = moduleBindings();
+    const effect = moduleBindings("effect/Effect", "Effect");
     return {
-      ImportDeclaration(node) {
-        recordModuleImport(node, "effect/Effect", "Effect", effect);
-      },
       CallExpression(node) {
         const option = context.options?.[0];
         const allowFiles =
@@ -68,8 +67,8 @@ export const noEffectRunnersInLibraryRule = defineRule({
           Array.isArray(option.allowFiles)
             ? option.allowFiles.filter((value): value is string => typeof value === "string")
             : [];
-        if (isAllowed(context.filename, allowFiles)) return;
-        if (runners.some((name) => isModuleCall(node.callee, effect, name))) {
+        if (isAllowed(context.filename, context.cwd, allowFiles)) return;
+        if (runners.some((name) => isModuleCall(context.sourceCode, node.callee, effect, name))) {
           context.report({ node: node.callee, messageId: "libraryRunner" });
         }
       },

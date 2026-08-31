@@ -1,13 +1,13 @@
-import type { ESTree } from "@oxlint/plugins";
+import type { ESTree, Scope, SourceCode, Variable } from "@oxlint/plugins";
 
 export interface ModuleBindings {
-  readonly namespaces: Set<string>;
-  readonly named: Map<string, Set<string>>;
+  readonly barrelName: string;
+  readonly moduleName: string;
 }
 
-/** Create mutable import bindings for one Effect module. */
-export function moduleBindings(): ModuleBindings {
-  return { namespaces: new Set(), named: new Map() };
+/** Describe the barrel and direct module imports for one Effect module. */
+export function moduleBindings(moduleName: string, barrelName: string): ModuleBindings {
+  return { barrelName, moduleName };
 }
 
 function importedName(specifier: ESTree.ImportSpecifier): string {
@@ -16,48 +16,88 @@ function importedName(specifier: ESTree.ImportSpecifier): string {
     : specifier.imported.value;
 }
 
-/** Record namespace and named imports from an Effect module. */
-export function recordModuleImport(
-  node: ESTree.ImportDeclaration,
-  moduleName: string,
-  barrelName: string,
-  bindings: ModuleBindings,
-): void {
-  if (node.source.value === "effect") {
-    for (const specifier of node.specifiers) {
-      if (specifier.type === "ImportSpecifier" && importedName(specifier) === barrelName) {
-        bindings.namespaces.add(specifier.local.name);
-      }
-    }
-    return;
+function resolveVariable(
+  sourceCode: SourceCode,
+  identifier: ESTree.IdentifierReference,
+): Variable | null {
+  let scope: Scope | null = sourceCode.getScope(identifier);
+  while (scope !== null) {
+    const variable = scope.set.get(identifier.name);
+    if (variable !== undefined) return variable;
+    scope = scope.upper;
   }
-
-  if (node.source.value !== moduleName) return;
-  for (const specifier of node.specifiers) {
-    if (specifier.type === "ImportNamespaceSpecifier") {
-      bindings.namespaces.add(specifier.local.name);
-      continue;
-    }
-    if (specifier.type !== "ImportSpecifier") continue;
-    const imported = importedName(specifier);
-    const locals = bindings.named.get(imported) ?? new Set<string>();
-    locals.add(specifier.local.name);
-    bindings.named.set(imported, locals);
-  }
+  return null;
 }
 
-/** Test whether a callee is a tracked Effect module function. */
+/** Test whether an identifier resolves to one global binding. */
+export function isGlobalIdentifier(
+  sourceCode: SourceCode,
+  identifier: ESTree.IdentifierReference,
+  name: string,
+): boolean {
+  if (identifier.name !== name) return false;
+  if (sourceCode.isGlobalReference(identifier)) return true;
+  const variable = resolveVariable(sourceCode, identifier);
+  return variable === null || variable.defs.length === 0;
+}
+
+function isNamedModuleImport(
+  sourceCode: SourceCode,
+  identifier: ESTree.IdentifierReference,
+  bindings: ModuleBindings,
+  name: string,
+): boolean {
+  const variable = resolveVariable(sourceCode, identifier);
+  return (
+    variable?.defs.some(
+      (definition) =>
+        definition.type === "ImportBinding" &&
+        definition.parent?.type === "ImportDeclaration" &&
+        definition.parent.source.value === bindings.moduleName &&
+        definition.node.type === "ImportSpecifier" &&
+        importedName(definition.node) === name,
+    ) === true
+  );
+}
+
+function isModuleNamespace(
+  sourceCode: SourceCode,
+  identifier: ESTree.IdentifierReference,
+  bindings: ModuleBindings,
+): boolean {
+  const variable = resolveVariable(sourceCode, identifier);
+  return (
+    variable?.defs.some((definition) => {
+      if (definition.type !== "ImportBinding" || definition.parent?.type !== "ImportDeclaration") {
+        return false;
+      }
+      if (definition.parent.source.value === bindings.moduleName) {
+        return definition.node.type === "ImportNamespaceSpecifier";
+      }
+      return (
+        definition.parent.source.value === "effect" &&
+        definition.node.type === "ImportSpecifier" &&
+        importedName(definition.node) === bindings.barrelName
+      );
+    }) === true
+  );
+}
+
+/** Test whether a callee resolves to an imported Effect module function. */
 export function isModuleCall(
+  sourceCode: SourceCode,
   callee: ESTree.CallExpression["callee"],
   bindings: ModuleBindings,
   name: string,
 ): boolean {
-  if (callee.type === "Identifier") return bindings.named.get(name)?.has(callee.name) === true;
+  if (callee.type === "Identifier") {
+    return isNamedModuleImport(sourceCode, callee, bindings, name);
+  }
   return (
     callee.type === "MemberExpression" &&
     !callee.computed &&
     callee.object.type === "Identifier" &&
-    bindings.namespaces.has(callee.object.name) &&
+    isModuleNamespace(sourceCode, callee.object, bindings) &&
     callee.property.type === "Identifier" &&
     callee.property.name === name
   );

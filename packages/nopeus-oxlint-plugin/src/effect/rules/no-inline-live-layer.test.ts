@@ -19,5 +19,18 @@ tester.run("nopeus/no-inline-live-layer", noInlineLiveLayerRule, {
       code: 'import * as Effect from "effect/Effect"; import * as Layer from "effect/Layer"; Effect.provide(program, Layer.unwrap(makeLayer));',
       errors: [{ messageId: "extractLayer" }],
     },
+    {
+      code: `import { Effect, Layer } from "effect";
+             Effect.provide(program, Layer.effectContext(makeContext));
+             Effect.provide(program, Layer.syncContext(makeContext));
+             Effect.provide(program, Layer.effectDiscard(initialize));
+             Effect.provide(program, Layer.merge(Layer.effect(Service, make), Layer.empty));`,
+      errors: [
+        { messageId: "extractLayer" },
+        { messageId: "extractLayer" },
+        { messageId: "extractLayer" },
+        { messageId: "extractLayer" },
+      ],
+    },
   ],
 });

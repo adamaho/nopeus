@@ -1,6 +1,6 @@
 import { defineRule } from "@oxlint/plugins";
 
-import { isModuleCall, moduleBindings, recordModuleImport } from "./effect-call.ts";
+import { isModuleCall, moduleBindings } from "./effect-call.ts";
 
 /** Keep rejected promises in Effect's typed error channel. */
 export const noFallibleEffectPromiseRule = defineRule({
@@ -13,13 +13,10 @@ export const noFallibleEffectPromiseRule = defineRule({
     },
   },
   createOnce(context) {
-    const effect = moduleBindings();
+    const effect = moduleBindings("effect/Effect", "Effect");
     return {
-      ImportDeclaration(node) {
-        recordModuleImport(node, "effect/Effect", "Effect", effect);
-      },
       CallExpression(node) {
-        if (isModuleCall(node.callee, effect, "promise")) {
+        if (isModuleCall(context.sourceCode, node.callee, effect, "promise")) {
           context.report({ node: node.callee, messageId: "useTryPromise" });
         }
       },

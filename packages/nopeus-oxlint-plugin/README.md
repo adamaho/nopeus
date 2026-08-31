@@ -303,7 +303,9 @@ Use a concrete owner type for dictionary values.
 
 Rejects Effect runtime runners outside the files listed in
 `runtimeEntryPoints`. Library modules should return Effects so callers retain
-control of runtime configuration, interruption, and observability.
+control of runtime configuration, interruption, and observability. Entrypoints
+are exact repository-relative paths; `src/main.ts` does not allow a nested
+`packages/example/src/main.ts`.
 
 Bad outside an entrypoint:
 
@@ -343,8 +345,9 @@ const response = Effect.tryPromise({
 
 ### nopeus/no-inline-live-layer
 
-Rejects live Layer constructors nested directly inside Effect.provide. Build
-stable live Layers at module scope and provide them at a composition boundary.
+Rejects live Layer constructors inside Effect.provide, including effectful and
+context constructors nested in Layer composition. Build stable live Layers at
+module scope and provide them at a composition boundary.
 
 Bad:
 
@@ -407,7 +410,8 @@ yield * new UserNotFound({ id });
 
 Rejects direct Node filesystem, path, and child-process imports. Effect
 platform services preserve typed failures and make platform behavior replaceable
-with Layers in tests.
+with Layers in tests. Type-only imports remain allowed because they perform no
+platform I/O.
 
 Bad:
 

@@ -1,6 +1,6 @@
 import { defineRule } from "@oxlint/plugins";
 
-import { isModuleCall, moduleBindings, recordModuleImport } from "./effect-call.ts";
+import { isModuleCall, moduleBindings } from "./effect-call.ts";
 
 /** Keep background fibers attached to an explicit lifetime. */
 export const noUnscopedForkRule = defineRule({
@@ -13,13 +13,10 @@ export const noUnscopedForkRule = defineRule({
     },
   },
   createOnce(context) {
-    const effect = moduleBindings();
+    const effect = moduleBindings("effect/Effect", "Effect");
     return {
-      ImportDeclaration(node) {
-        recordModuleImport(node, "effect/Effect", "Effect", effect);
-      },
       CallExpression(node) {
-        if (isModuleCall(node.callee, effect, "forkDetach")) {
+        if (isModuleCall(context.sourceCode, node.callee, effect, "forkDetach")) {
           context.report({ node: node.callee, messageId: "scopedFork" });
         }
       },

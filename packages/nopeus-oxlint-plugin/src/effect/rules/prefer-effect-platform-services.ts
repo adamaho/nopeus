@@ -1,4 +1,4 @@
-import { defineRule } from "@oxlint/plugins";
+import { defineRule, type ESTree } from "@oxlint/plugins";
 
 const replacements = new Map([
   ["node:fs", "Effect FileSystem"],
@@ -10,6 +10,16 @@ const replacements = new Map([
   ["node:child_process", "effect/unstable/process ChildProcess"],
   ["child_process", "effect/unstable/process ChildProcess"],
 ]);
+
+function hasValueImport(node: ESTree.ImportDeclaration): boolean {
+  if (node.importKind === "type") return false;
+  return (
+    node.specifiers.length === 0 ||
+    node.specifiers.some(
+      (specifier) => specifier.type !== "ImportSpecifier" || specifier.importKind !== "type",
+    )
+  );
+}
 
 /** Keep platform I/O replaceable through Effect services. */
 export const preferEffectPlatformServicesRule = defineRule({
@@ -25,7 +35,7 @@ export const preferEffectPlatformServicesRule = defineRule({
     return {
       ImportDeclaration(node) {
         const replacement = replacements.get(node.source.value);
-        if (replacement === undefined) return;
+        if (replacement === undefined || !hasValueImport(node)) return;
         context.report({
           node: node.source,
           messageId: "platformService",

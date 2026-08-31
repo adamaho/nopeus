@@ -1,6 +1,6 @@
-import { defineRule, type ESTree } from "@oxlint/plugins";
+import { defineRule, type ESTree, type SourceCode } from "@oxlint/plugins";
 
-import { isModuleCall, moduleBindings, recordModuleImport } from "./effect-call.ts";
+import { isGlobalIdentifier, isModuleCall, moduleBindings } from "./effect-call.ts";
 
 const builtInErrors = new Set([
   "AggregateError",
@@ -18,28 +18,63 @@ function unwrap(
 ): Exclude<ESTree.CallExpression["arguments"][number], ESTree.SpreadElement> | undefined {
   if (node === undefined || node.type === "SpreadElement") return undefined;
   let current = node;
-  while (current.type === "ParenthesizedExpression" || current.type === "TSSatisfiesExpression") {
+  while (
+    current.type === "ParenthesizedExpression" ||
+    current.type === "TSAsExpression" ||
+    current.type === "TSSatisfiesExpression" ||
+    current.type === "TSTypeAssertion" ||
+    current.type === "TSNonNullExpression"
+  ) {
     current = current.expression;
   }
   return current;
 }
 
-function isUntypedError(node: ESTree.CallExpression["arguments"][number] | undefined): boolean {
+function memberName(node: ESTree.MemberExpression): string | null {
+  if (!node.computed && node.property.type === "Identifier") return node.property.name;
+  return node.computed &&
+    node.property.type === "Literal" &&
+    typeof node.property.value === "string"
+    ? node.property.value
+    : null;
+}
+
+function isGlobalBuiltInError(sourceCode: SourceCode, callee: ESTree.Expression): boolean {
+  if (callee.type === "Identifier") {
+    return builtInErrors.has(callee.name) && isGlobalIdentifier(sourceCode, callee, callee.name);
+  }
+  if (
+    callee.type !== "MemberExpression" ||
+    callee.object.type !== "Identifier" ||
+    !isGlobalIdentifier(sourceCode, callee.object, "globalThis")
+  ) {
+    return false;
+  }
+  const name = memberName(callee);
+  return name !== null && builtInErrors.has(name);
+}
+
+function isUntypedError(
+  sourceCode: SourceCode,
+  node: ESTree.CallExpression["arguments"][number] | undefined,
+): boolean {
   const argument = unwrap(node);
   if (argument === undefined) return false;
   if (
     argument.type === "Literal" ||
     argument.type === "TemplateLiteral" ||
     argument.type === "ObjectExpression" ||
-    (argument.type === "Identifier" && argument.name === "undefined") ||
+    (argument.type === "Identifier" && isGlobalIdentifier(sourceCode, argument, "undefined")) ||
     (argument.type === "UnaryExpression" && argument.operator === "void")
   ) {
     return true;
   }
+  if (argument.type !== "NewExpression" && argument.type !== "CallExpression") return false;
+  const callee = argument.callee;
   return (
-    argument.type === "NewExpression" &&
-    argument.callee.type === "Identifier" &&
-    builtInErrors.has(argument.callee.name)
+    callee.type !== "Super" &&
+    callee.type !== "V8IntrinsicExpression" &&
+    isGlobalBuiltInError(sourceCode, callee)
   );
 }
 
@@ -54,13 +89,13 @@ export const noUntypedEffectErrorsRule = defineRule({
     },
   },
   createOnce(context) {
-    const effect = moduleBindings();
+    const effect = moduleBindings("effect/Effect", "Effect");
     return {
-      ImportDeclaration(node) {
-        recordModuleImport(node, "effect/Effect", "Effect", effect);
-      },
       CallExpression(node) {
-        if (isModuleCall(node.callee, effect, "fail") && isUntypedError(node.arguments[0])) {
+        if (
+          isModuleCall(context.sourceCode, node.callee, effect, "fail") &&
+          isUntypedError(context.sourceCode, node.arguments[0])
+        ) {
           context.report({ node, messageId: "domainError" });
         }
       },

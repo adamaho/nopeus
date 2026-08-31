@@ -1,11 +1,6 @@
-import { defineRule, type ESTree } from "@oxlint/plugins";
+import { defineRule, type ESTree, type SourceCode } from "@oxlint/plugins";
 
-import {
-  isModuleCall,
-  moduleBindings,
-  recordModuleImport,
-  type ModuleBindings,
-} from "./effect-call.ts";
+import { isModuleCall, moduleBindings, type ModuleBindings } from "./effect-call.ts";
 
 interface ServiceDeclaration {
   readonly name: string;
@@ -19,28 +14,67 @@ interface LayerPair {
 
 const layerConstructors = ["effect", "succeed", "sync"] as const;
 
-function isExported(node: ESTree.Node): boolean {
-  return node.parent?.type === "ExportNamedDeclaration";
+function exportName(node: ESTree.ModuleExportName): string {
+  return node.type === "Identifier" ? node.name : node.value;
+}
+
+function exportedNames(program: ESTree.Program): Set<string> {
+  const names = new Set<string>();
+  for (const statement of program.body) {
+    if (statement.type === "ExportDefaultDeclaration") {
+      const declaration = statement.declaration;
+      if (
+        (declaration.type === "ClassDeclaration" || declaration.type === "FunctionDeclaration") &&
+        declaration.id !== null
+      ) {
+        names.add(declaration.id.name);
+      }
+      continue;
+    }
+    if (statement.type !== "ExportNamedDeclaration") continue;
+    const declaration = statement.declaration;
+    if (
+      (declaration?.type === "ClassDeclaration" || declaration?.type === "FunctionDeclaration") &&
+      declaration.id !== null
+    ) {
+      names.add(declaration.id.name);
+    }
+    if (declaration?.type === "VariableDeclaration") {
+      for (const declarator of declaration.declarations) {
+        if (declarator.id.type === "Identifier") names.add(declarator.id.name);
+      }
+    }
+    if (statement.source !== null) continue;
+    for (const specifier of statement.specifiers) {
+      if (specifier.type === "ExportSpecifier") names.add(exportName(specifier.local));
+    }
+  }
+  return names;
 }
 
 function isServiceFactory(
+  sourceCode: SourceCode,
   callee: ESTree.CallExpression["callee"],
   context: ModuleBindings,
 ): boolean {
-  return isModuleCall(callee, context, "Service");
+  return isModuleCall(sourceCode, callee, context, "Service");
 }
 
-function isContextService(superClass: ESTree.Expression | null, context: ModuleBindings): boolean {
+function isContextService(
+  sourceCode: SourceCode,
+  superClass: ESTree.Expression | null,
+  context: ModuleBindings,
+): boolean {
   if (superClass?.type !== "CallExpression") return false;
-  if (isServiceFactory(superClass.callee, context)) return true;
+  if (isServiceFactory(sourceCode, superClass.callee, context)) return true;
   return (
     superClass.callee.type === "CallExpression" &&
-    isServiceFactory(superClass.callee.callee, context)
+    isServiceFactory(sourceCode, superClass.callee.callee, context)
   );
 }
 
-function exportedVariable(node: ESTree.VariableDeclarator): boolean {
-  return node.parent.type === "VariableDeclaration" && isExported(node.parent);
+function exportedVariable(node: ESTree.VariableDeclarator, exports: ReadonlySet<string>): boolean {
+  return node.id.type === "Identifier" && exports.has(node.id.name);
 }
 
 function makeName(name: string): boolean {
@@ -66,14 +100,18 @@ function identifierName(
   return current.type === "Identifier" ? current.name : null;
 }
 
-function layerPair(initializer: ESTree.Expression, layer: ModuleBindings): LayerPair | null {
+function layerPair(
+  sourceCode: SourceCode,
+  initializer: ESTree.Expression,
+  layer: ModuleBindings,
+): LayerPair | null {
   let current = initializer;
   while (current.type === "ParenthesizedExpression" || current.type === "TSSatisfiesExpression") {
     current = current.expression;
   }
   if (current.type !== "CallExpression") return null;
 
-  if (layerConstructors.some((name) => isModuleCall(current.callee, layer, name))) {
+  if (layerConstructors.some((name) => isModuleCall(sourceCode, current.callee, layer, name))) {
     const service = identifierName(current.arguments[0]);
     const make = identifierName(current.arguments[1]);
     return service === null || make === null ? null : { service, make };
@@ -81,7 +119,7 @@ function layerPair(initializer: ESTree.Expression, layer: ModuleBindings): Layer
 
   const inner = current.callee;
   if (inner.type !== "CallExpression") return null;
-  if (!layerConstructors.some((name) => isModuleCall(inner.callee, layer, name))) {
+  if (!layerConstructors.some((name) => isModuleCall(sourceCode, inner.callee, layer, name))) {
     return null;
   }
   const service = identifierName(inner.arguments[0]);
@@ -105,36 +143,36 @@ export const requireServiceMakeLayerRule = defineRule({
     },
   },
   createOnce(context) {
-    const contextModule = moduleBindings();
-    const layerModule = moduleBindings();
+    const contextModule = moduleBindings("effect/Context", "Context");
+    const layerModule = moduleBindings("effect/Layer", "Layer");
     const services: ServiceDeclaration[] = [];
     const makes = new Set<string>();
     const layers = new Map<string, LayerPair>();
+    let exports = new Set<string>();
 
     return {
-      ImportDeclaration(node) {
-        recordModuleImport(node, "effect/Context", "Context", contextModule);
-        recordModuleImport(node, "effect/Layer", "Layer", layerModule);
+      Program(node) {
+        exports = exportedNames(node);
       },
       ClassDeclaration(node) {
         if (
           node.id !== null &&
-          isExported(node) &&
-          isContextService(node.superClass, contextModule)
+          exports.has(node.id.name) &&
+          isContextService(context.sourceCode, node.superClass, contextModule)
         ) {
           services.push({ name: node.id.name, node });
         }
       },
       FunctionDeclaration(node) {
-        if (node.id !== null && isExported(node) && makeName(node.id.name)) {
+        if (node.id !== null && exports.has(node.id.name) && makeName(node.id.name)) {
           makes.add(node.id.name);
         }
       },
       VariableDeclarator(node) {
-        if (!exportedVariable(node) || node.id.type !== "Identifier") return;
+        if (!exportedVariable(node, exports) || node.id.type !== "Identifier") return;
         if (makeName(node.id.name)) makes.add(node.id.name);
         if (!layerName(node.id.name) || node.init === null) return;
-        const pair = layerPair(node.init, layerModule);
+        const pair = layerPair(context.sourceCode, node.init, layerModule);
         if (pair !== null) layers.set(node.id.name, pair);
       },
       "Program:exit"() {
