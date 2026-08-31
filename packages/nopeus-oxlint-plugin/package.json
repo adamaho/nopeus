@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@nopeus/tool-tsconfig": "workspace:*",
+    "@types/node": "catalog:",
     "oxlint": "catalog:",
     "rimraf": "catalog:",
     "typescript": "catalog:",
