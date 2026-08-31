@@ -3,6 +3,11 @@ import { expect, test } from "vitest";
 import effect, { serviceKeyPrefixFromPackageName } from "./effect.ts";
 
 const canonicalRules = [
+  "nopeus/no-effect-runners-in-library",
+  "nopeus/no-fallible-effect-promise",
+  "nopeus/no-inline-live-layer",
+  "nopeus/no-unscoped-fork",
+  "nopeus/no-untyped-effect-errors",
   "nopeus/no-conditional-empty-object-spread",
   "nopeus/no-known-value-widening",
   "nopeus/no-module-mocking",
@@ -14,9 +19,13 @@ const canonicalRules = [
   "nopeus/no-unknown-returns",
   "nopeus/no-unknown-type-aliases",
   "nopeus/no-unsafe-dictionary-type",
+  "nopeus/prefer-effect-callback",
+  "nopeus/prefer-effect-platform-services",
+  "nopeus/prefer-effect-void",
   "nopeus/require-effect-fn-name",
   "nopeus/require-public-jsdoc",
   "nopeus/require-service-key-prefix",
+  "nopeus/require-service-make-layer",
 ].sort();
 
 test("derives a service-key prefix from an unscoped package name", () => {
@@ -43,6 +52,15 @@ test("configures the service-key rule from the package name", () => {
   expect(config.rules?.["nopeus/require-service-key-prefix"]).toEqual([
     "error",
     { prefix: "@nopeus/" },
+  ]);
+});
+
+test("configures the runtime boundary from explicit entrypoints", () => {
+  const config = effect({ packageName: "nopeus", runtimeEntryPoints: ["src/main.ts"] });
+
+  expect(config.rules?.["nopeus/no-effect-runners-in-library"]).toEqual([
+    "error",
+    { allowFiles: ["src/main.ts"] },
   ]);
 });
 

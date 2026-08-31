@@ -19,7 +19,12 @@ import effect from "@adamaho/nopeus-oxlint-plugin/effect";
 import { defineConfig } from "oxlint";
 
 export default defineConfig({
-  extends: [effect({ packageName: packageJson.name })],
+  extends: [
+    effect({
+      packageName: packageJson.name,
+      runtimeEntryPoints: ["src/main.ts"],
+    }),
+  ],
 });
 ```
 
@@ -40,6 +45,10 @@ Effect rules follow the current Effect conventions:
 - Use Effect.fnUntraced for library implementations and hot paths that do not
   represent a useful tracing boundary.
 - Define services with Context.Service and a static repository-owned key.
+- Separate service implementation construction from Layer assembly with exported
+  make/layer pairs.
+- Keep runtime execution and live Layer provisioning at explicit application
+  boundaries.
 - Importing from either the effect barrel or the effect/Effect and
   effect/Context module paths is supported.
 
@@ -290,6 +299,175 @@ type UsersById = Readonly<Record<UserId, User>>;
 
 Use a concrete owner type for dictionary values.
 
+### nopeus/no-effect-runners-in-library
+
+Rejects Effect runtime runners outside the files listed in
+`runtimeEntryPoints`. Library modules should return Effects so callers retain
+control of runtime configuration, interruption, and observability.
+
+Bad outside an entrypoint:
+
+```ts
+export const loadUsers = () => Effect.runPromise(Users.all);
+```
+
+Good:
+
+```ts
+export const loadUsers = Users.all;
+
+// src/main.ts, configured as a runtime entrypoint
+Effect.runPromise(loadUsers);
+```
+
+### nopeus/no-fallible-effect-promise
+
+Rejects Effect.promise. The canonical policy treats every external Promise as
+potentially rejecting; Effect.tryPromise keeps rejection in the typed error
+channel instead of turning it into a defect.
+
+Bad:
+
+```ts
+const response = Effect.promise(() => fetch(url));
+```
+
+Good:
+
+```ts
+const response = Effect.tryPromise({
+  try: () => fetch(url),
+  catch: (cause) => new RequestFailed({ cause }),
+});
+```
+
+### nopeus/no-inline-live-layer
+
+Rejects live Layer constructors nested directly inside Effect.provide. Build
+stable live Layers at module scope and provide them at a composition boundary.
+
+Bad:
+
+```ts
+const program = load.pipe(Effect.provide(Layer.effect(Users, makeUsers)));
+```
+
+Good:
+
+```ts
+export const usersLayer = Layer.effect(Users, makeUsers);
+
+const program = load.pipe(Effect.provide(usersLayer));
+```
+
+### nopeus/no-unscoped-fork
+
+Rejects Effect.fork and Effect.forkDaemon. Background work needs an explicit
+lifetime so shutdown and interruption remain structured.
+
+Bad:
+
+```ts
+yield * Effect.fork(refreshCache);
+```
+
+Good:
+
+```ts
+yield * Effect.forkScoped(refreshCache);
+```
+
+Use Effect.forkIn when an existing Scope should own the fiber.
+
+### nopeus/no-untyped-effect-errors
+
+Rejects primitive values and the built-in Error class in Effect.fail. This is a
+syntax-level rule: identifiers and custom error classes remain valid, while the
+common ways of erasing domain error information are rejected.
+
+Bad:
+
+```ts
+yield * Effect.fail("user not found");
+yield * Effect.fail(new Error("user not found"));
+```
+
+Good:
+
+```ts
+class UserNotFound extends Schema.TaggedErrorClass<UserNotFound>()("UserNotFound", {
+  id: UserId,
+}) {}
+
+yield * new UserNotFound({ id });
+```
+
+### nopeus/prefer-effect-platform-services
+
+Rejects direct Node filesystem, path, and child-process imports. Effect
+platform services preserve typed failures and make platform behavior replaceable
+with Layers in tests.
+
+Bad:
+
+```ts
+import { readFile } from "node:fs/promises";
+
+const text = await readFile(path, "utf8");
+```
+
+Good:
+
+```ts
+import { Effect, FileSystem } from "effect";
+
+const text = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem;
+  return yield* fs.readFileString(path);
+});
+```
+
+Use Effect Path for path operations and `effect/unstable/process`
+ChildProcess for process execution.
+
+### nopeus/prefer-effect-callback
+
+Rejects Effect.async in favor of the current Effect.callback API. Registration
+may return an Effect cleanup action when the callback source allocates a
+resource.
+
+Bad:
+
+```ts
+const next = Effect.async<Message>((resume) => socket.once("message", resume));
+```
+
+Good:
+
+```ts
+const next = Effect.callback<Message>((resume) => {
+  socket.once("message", resume);
+  return Effect.sync(() => socket.off("message", resume));
+});
+```
+
+### nopeus/prefer-effect-void
+
+Rejects Effect.succeed(undefined) and Effect.succeed(void 0). Effect.void is the
+canonical shared value and makes intent immediate.
+
+Bad:
+
+```ts
+const done = Effect.succeed(undefined);
+```
+
+Good:
+
+```ts
+const done = Effect.void;
+```
+
 ### nopeus/require-effect-fn-name
 
 Requires every Effect.fn call to begin with a static string name. When the
@@ -407,6 +585,49 @@ The rule checks both curried and direct Context.Service forms, the effect barrel
 namespace imports from effect/Context, and direct Service imports. Static string
 literals wrapped with satisfies are accepted; variables and computed keys are
 rejected.
+
+### nopeus/require-service-make-layer
+
+Requires every exported Context.Service class to have an exported module-level
+constructor and a matching exported Layer. The unsuffixed pair is `make` and
+`layer` (or `defaultLayer`); named implementations pair by suffix, such as
+`makeMemory` and `layerMemory`.
+
+Bad:
+
+```ts
+export class Users extends Context.Service<Users, Interface>()("@goho/Users") {}
+
+export const layer = Layer.effect(
+  Users,
+  Effect.gen(function* () {
+    const database = yield* Database;
+    return Users.of({ find: (id) => database.findUser(id) });
+  }),
+);
+```
+
+Good:
+
+```ts
+export interface Interface {
+  readonly find: (id: UserId) => Effect.Effect<User, UserNotFound>;
+}
+
+export class Users extends Context.Service<Users, Interface>()("@goho/Users") {}
+
+export const make = Effect.gen(function* () {
+  const database = yield* Database;
+  return Users.of({ find: (id) => database.findUser(id) });
+});
+
+export const layer = Layer.effect(Users, make);
+```
+
+The rule does not require the interface name `Interface`, a namespace
+self-reexport, or one particular file layout. Those are useful module
+conventions, but the enforceable architectural contract is that implementation
+construction is reusable independently from Layer composition.
 
 ## Exceptions
 
