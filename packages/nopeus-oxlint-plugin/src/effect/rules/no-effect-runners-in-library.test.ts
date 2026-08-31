@@ -22,9 +22,9 @@ tester.run("nopeus/no-effect-runners-in-library", noEffectRunnersInLibraryRule, 
       errors: [{ messageId: "libraryRunner" }],
     },
     {
-      code: 'import { runSync as run } from "effect/Effect"; run(program);',
+      code: 'import { runSync as run, runCallbackWith } from "effect/Effect"; run(program); runCallbackWith(context)(program);',
       options: [{ allowFiles: [] }],
-      errors: [{ messageId: "libraryRunner" }],
+      errors: [{ messageId: "libraryRunner" }, { messageId: "libraryRunner" }],
     },
   ],
 });

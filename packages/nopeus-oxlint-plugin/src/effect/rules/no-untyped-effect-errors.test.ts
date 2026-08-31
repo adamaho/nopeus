@@ -15,8 +15,12 @@ tester.run("nopeus/no-untyped-effect-errors", noUntypedEffectErrorsRule, {
       errors: [{ messageId: "domainError" }],
     },
     {
-      code: 'import * as Effect from "effect/Effect"; Effect.fail(new Error("not found"));',
-      errors: [{ messageId: "domainError" }],
+      code: 'import * as Effect from "effect/Effect"; Effect.fail(new Error("not found")); Effect.fail(new TypeError("bad user")); Effect.fail({ message: "bad user" });',
+      errors: [
+        { messageId: "domainError" },
+        { messageId: "domainError" },
+        { messageId: "domainError" },
+      ],
     },
   ],
 });

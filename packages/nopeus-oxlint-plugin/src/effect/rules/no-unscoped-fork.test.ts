@@ -11,8 +11,12 @@ tester.run("nopeus/no-unscoped-fork", noUnscopedForkRule, {
   ],
   invalid: [
     {
-      code: 'import { Effect } from "effect"; Effect.fork(worker); Effect.forkDaemon(worker);',
-      errors: [{ messageId: "scopedFork" }, { messageId: "scopedFork" }],
+      code: 'import { Effect } from "effect"; Effect.fork(worker); Effect.forkDaemon(worker); Effect.forkDetach(worker);',
+      errors: [
+        { messageId: "scopedFork" },
+        { messageId: "scopedFork" },
+        { messageId: "scopedFork" },
+      ],
     },
   ],
 });

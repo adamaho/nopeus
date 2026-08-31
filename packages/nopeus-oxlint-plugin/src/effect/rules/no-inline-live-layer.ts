@@ -2,7 +2,7 @@ import { defineRule, type ESTree } from "@oxlint/plugins";
 
 import { isModuleCall, moduleBindings, recordModuleImport } from "./effect-call.ts";
 
-const liveConstructors = new Set(["effect", "scoped", "sync", "succeed", "unwrap"]);
+const liveConstructors = new Set(["effect", "scoped", "sync", "unwrap"]);
 
 function isInlineLayer(
   argument: ESTree.CallExpression["arguments"][number] | undefined,

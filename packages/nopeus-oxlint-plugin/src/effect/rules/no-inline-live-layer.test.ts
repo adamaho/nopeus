@@ -7,6 +7,7 @@ const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" }
 tester.run("nopeus/no-inline-live-layer", noInlineLiveLayerRule, {
   valid: [
     'import { Effect, Layer } from "effect"; const live = Layer.effect(Service, make); program.pipe(Effect.provide(live));',
+    'import { Effect, Layer } from "effect"; program.pipe(Effect.provide(Layer.succeed(Service, testService)));',
     "const Layer = { effect() {} }; const Effect = { provide() {} }; Effect.provide(Layer.effect(Service, make));",
   ],
   invalid: [

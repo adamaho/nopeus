@@ -362,13 +362,14 @@ const program = load.pipe(Effect.provide(usersLayer));
 
 ### nopeus/no-unscoped-fork
 
-Rejects Effect.fork and Effect.forkDaemon. Background work needs an explicit
-lifetime so shutdown and interruption remain structured.
+Rejects Effect.forkDetach and the legacy Effect.fork and Effect.forkDaemon APIs.
+Background work needs an explicit lifetime so shutdown and interruption remain
+structured.
 
 Bad:
 
 ```ts
-yield * Effect.fork(refreshCache);
+yield * Effect.forkDetach(refreshCache);
 ```
 
 Good:
@@ -381,9 +382,10 @@ Use Effect.forkIn when an existing Scope should own the fiber.
 
 ### nopeus/no-untyped-effect-errors
 
-Rejects primitive values and the built-in Error class in Effect.fail. This is a
-syntax-level rule: identifiers and custom error classes remain valid, while the
-common ways of erasing domain error information are rejected.
+Rejects primitive values, object literals, and built-in error classes in
+Effect.fail. This is a syntax-level rule: identifiers and custom error classes
+remain valid, while the common ways of erasing domain error information are
+rejected.
 
 Bad:
 
@@ -446,8 +448,9 @@ Good:
 
 ```ts
 const next = Effect.callback<Message>((resume) => {
-  socket.once("message", resume);
-  return Effect.sync(() => socket.off("message", resume));
+  const listener = (message: Message) => resume(Effect.succeed(message));
+  socket.once("message", listener);
+  return Effect.sync(() => socket.off("message", listener));
 });
 ```
 

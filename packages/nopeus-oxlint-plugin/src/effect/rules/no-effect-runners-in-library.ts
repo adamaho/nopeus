@@ -2,7 +2,20 @@ import { defineRule } from "@oxlint/plugins";
 
 import { isModuleCall, moduleBindings, recordModuleImport } from "./effect-call.ts";
 
-const runners = ["runFork", "runPromise", "runPromiseExit", "runSync", "runSyncExit"] as const;
+const runners = [
+  "runCallback",
+  "runCallbackWith",
+  "runFork",
+  "runForkWith",
+  "runPromise",
+  "runPromiseExit",
+  "runPromiseExitWith",
+  "runPromiseWith",
+  "runSync",
+  "runSyncExit",
+  "runSyncExitWith",
+  "runSyncWith",
+] as const;
 
 function normalizedPath(path: string): string {
   return path.replaceAll("\\", "/");
