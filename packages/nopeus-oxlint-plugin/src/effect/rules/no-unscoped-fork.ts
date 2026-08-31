@@ -19,11 +19,7 @@ export const noUnscopedForkRule = defineRule({
         recordModuleImport(node, "effect/Effect", "Effect", effect);
       },
       CallExpression(node) {
-        if (
-          isModuleCall(node.callee, effect, "fork") ||
-          isModuleCall(node.callee, effect, "forkDaemon") ||
-          isModuleCall(node.callee, effect, "forkDetach")
-        ) {
+        if (isModuleCall(node.callee, effect, "forkDetach")) {
           context.report({ node: node.callee, messageId: "scopedFork" });
         }
       },

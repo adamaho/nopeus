@@ -19,7 +19,6 @@ const canonicalRules = [
   "nopeus/no-unknown-returns",
   "nopeus/no-unknown-type-aliases",
   "nopeus/no-unsafe-dictionary-type",
-  "nopeus/prefer-effect-callback",
   "nopeus/prefer-effect-platform-services",
   "nopeus/prefer-effect-void",
   "nopeus/require-effect-fn-name",

@@ -17,7 +17,7 @@ interface LayerPair {
   readonly make: string;
 }
 
-const layerConstructors = ["effect", "scoped", "succeed", "sync"] as const;
+const layerConstructors = ["effect", "succeed", "sync"] as const;
 
 function isExported(node: ESTree.Node): boolean {
   return node.parent?.type === "ExportNamedDeclaration";

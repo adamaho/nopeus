@@ -43,7 +43,6 @@ export default function effect({ packageName, runtimeEntryPoints = [] }: NopeusE
       "nopeus/no-unknown-returns": "error",
       "nopeus/no-unknown-type-aliases": "error",
       "nopeus/no-unsafe-dictionary-type": "error",
-      "nopeus/prefer-effect-callback": "error",
       "nopeus/prefer-effect-platform-services": "error",
       "nopeus/prefer-effect-void": "error",
       "nopeus/require-effect-fn-name": "error",

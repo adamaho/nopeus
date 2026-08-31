@@ -5,7 +5,6 @@ import { noFallibleEffectPromiseRule } from "./effect/rules/no-fallible-effect-p
 import { noInlineLiveLayerRule } from "./effect/rules/no-inline-live-layer.ts";
 import { noUnscopedForkRule } from "./effect/rules/no-unscoped-fork.ts";
 import { noUntypedEffectErrorsRule } from "./effect/rules/no-untyped-effect-errors.ts";
-import { preferEffectCallbackRule } from "./effect/rules/prefer-effect-callback.ts";
 import { preferEffectPlatformServicesRule } from "./effect/rules/prefer-effect-platform-services.ts";
 import { preferEffectVoidRule } from "./effect/rules/prefer-effect-void.ts";
 import { requireEffectFnNameRule } from "./effect/rules/require-effect-fn-name.ts";
@@ -44,7 +43,6 @@ const nopeusPlugin = eslintCompatPlugin({
     "no-unsafe-dictionary-type": noUnsafeDictionaryTypeRule,
     "no-unknown-returns": noUnknownReturnsRule,
     "no-unknown-type-aliases": noUnknownTypeAliasesRule,
-    "prefer-effect-callback": preferEffectCallbackRule,
     "prefer-effect-platform-services": preferEffectPlatformServicesRule,
     "prefer-effect-void": preferEffectVoidRule,
     "require-public-jsdoc": requirePublicJSDocRule,

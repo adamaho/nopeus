@@ -16,7 +16,7 @@ tester.run("nopeus/no-inline-live-layer", noInlineLiveLayerRule, {
       errors: [{ messageId: "extractLayer" }],
     },
     {
-      code: 'import * as Effect from "effect/Effect"; import * as Layer from "effect/Layer"; Effect.provide(program, Layer.scoped(Service, make));',
+      code: 'import * as Effect from "effect/Effect"; import * as Layer from "effect/Layer"; Effect.provide(program, Layer.unwrap(makeLayer));',
       errors: [{ messageId: "extractLayer" }],
     },
   ],

@@ -362,9 +362,8 @@ const program = load.pipe(Effect.provide(usersLayer));
 
 ### nopeus/no-unscoped-fork
 
-Rejects Effect.forkDetach and the legacy Effect.fork and Effect.forkDaemon APIs.
-Background work needs an explicit lifetime so shutdown and interruption remain
-structured.
+Rejects Effect.forkDetach. Background work needs an explicit lifetime so
+shutdown and interruption remain structured.
 
 Bad:
 
@@ -431,28 +430,6 @@ const text = Effect.gen(function* () {
 
 Use Effect Path for path operations and `effect/unstable/process`
 ChildProcess for process execution.
-
-### nopeus/prefer-effect-callback
-
-Rejects Effect.async in favor of the current Effect.callback API. Registration
-may return an Effect cleanup action when the callback source allocates a
-resource.
-
-Bad:
-
-```ts
-const next = Effect.async<Message>((resume) => socket.once("message", resume));
-```
-
-Good:
-
-```ts
-const next = Effect.callback<Message>((resume) => {
-  const listener = (message: Message) => resume(Effect.succeed(message));
-  socket.once("message", listener);
-  return Effect.sync(() => socket.off("message", listener));
-});
-```
 
 ### nopeus/prefer-effect-void
 
