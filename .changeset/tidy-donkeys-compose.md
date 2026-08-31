@@ -1,5 +1,5 @@
 ---
-"@adamaho/nopeus-oxlint-plugin": minor
+"@nopeus/oxlint-plugin": minor
 ---
 
 Add Effect v4 runtime-boundary, typed-error, platform-service, void, fiber, Layer

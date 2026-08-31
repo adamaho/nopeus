@@ -1,4 +1,4 @@
-# @adamaho/nopeus-oxlint-config
+# @nopeus/oxlint-config
 
 Shared base Oxlint configuration for strict TypeScript codebases.
 
@@ -7,13 +7,13 @@ Shared base Oxlint configuration for strict TypeScript codebases.
 Install the config and its Oxlint peer:
 
 ```bash
-pnpm add --save-dev @adamaho/nopeus-oxlint-config oxlint
+pnpm add --save-dev @nopeus/oxlint-config oxlint
 ```
 
 Extend the base config from an `oxlint.config.ts` file:
 
 ```ts
-import base from "@adamaho/nopeus-oxlint-config";
+import base from "@nopeus/oxlint-config";
 import { defineConfig } from "oxlint";
 
 export default defineConfig({
