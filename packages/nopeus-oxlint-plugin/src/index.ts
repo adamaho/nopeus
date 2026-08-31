@@ -14,6 +14,7 @@ import { noUnknownReturnsRule } from "./rules/no-unknown-returns.ts";
 import { noUnknownTypeAliasesRule } from "./rules/no-unknown-type-aliases.ts";
 import { noUnsafeDictionaryTypeRule } from "./rules/no-unsafe-dictionary-type.ts";
 import { noWidenThenAssertRule } from "./rules/no-widen-then-assert.ts";
+import { requirePublicJSDocRule } from "./rules/require-public-jsdoc.ts";
 import { requireSafetyCommentForTypeAssertionRule } from "./rules/require-safety-comment-for-type-assertion.ts";
 
 /** Strict Oxlint rules for preserving type evidence and explicit Effect architecture. */
@@ -32,6 +33,7 @@ const nopeusPlugin = eslintCompatPlugin({
     "no-unknown-returns": noUnknownReturnsRule,
     "no-unknown-type-aliases": noUnknownTypeAliasesRule,
     "no-widen-then-assert": noWidenThenAssertRule,
+    "require-public-jsdoc": requirePublicJSDocRule,
     "require-safety-comment-for-type-assertion": requireSafetyCommentForTypeAssertionRule,
     "require-effect-fn-name": requireEffectFnNameRule,
     "require-service-key-prefix": requireServiceKeyPrefixRule,

@@ -32,7 +32,7 @@
     "@oxlint/plugins": "catalog:"
   },
   "devDependencies": {
-    "@monorepo/tool-tsconfig": "workspace:*",
+    "@nopeus/tool-tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "oxlint": "catalog:",
     "rimraf": "catalog:",

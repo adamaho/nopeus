@@ -38,6 +38,7 @@ export default function nopeus({ packageName }: NopeusOptions) {
       "nopeus/no-unsafe-dictionary-type": "error",
       "nopeus/no-widen-then-assert": "error",
       "nopeus/require-effect-fn-name": "error",
+      "nopeus/require-public-jsdoc": "error",
       "nopeus/require-safety-comment-for-type-assertion": "error",
       "nopeus/require-service-key-prefix": [
         "error",

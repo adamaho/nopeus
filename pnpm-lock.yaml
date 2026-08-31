@@ -44,7 +44,7 @@ importers:
       '@changesets/cli':
         specifier: 'catalog:'
         version: 3.0.1
-      '@monorepo/tool-oxfmt-config':
+      '@nopeus/tool-oxfmt-config':
         specifier: workspace:*
         version: link:tools/oxfmt-config
       oxfmt:
@@ -57,15 +57,13 @@ importers:
         specifier: 'catalog:'
         version: 2.10.11
 
-  infra/local: {}
-
   packages/nopeus-oxlint-plugin:
     dependencies:
       '@oxlint/plugins':
         specifier: 'catalog:'
         version: 1.79.0
     devDependencies:
-      '@monorepo/tool-tsconfig':
+      '@nopeus/tool-tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
       '@types/node':

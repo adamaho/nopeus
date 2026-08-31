@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "catalog:",
-    "@monorepo/tool-oxfmt-config": "workspace:*",
+    "@nopeus/tool-oxfmt-config": "workspace:*",
     "oxfmt": "catalog:",
     "rimraf": "catalog:",
     "turbo": "catalog:"

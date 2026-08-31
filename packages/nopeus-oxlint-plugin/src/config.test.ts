@@ -17,6 +17,7 @@ const canonicalRules = [
   "nopeus/no-unsafe-dictionary-type",
   "nopeus/no-widen-then-assert",
   "nopeus/require-effect-fn-name",
+  "nopeus/require-public-jsdoc",
   "nopeus/require-safety-comment-for-type-assertion",
   "nopeus/require-service-key-prefix",
 ].sort();

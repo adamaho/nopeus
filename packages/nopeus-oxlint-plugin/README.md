@@ -10,6 +10,8 @@ overrides.
 The package combines and adapts the MIT-licensed rules from
 [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) and
 [HumanLayer's Effect Machine](https://github.com/humanlayer/effect-machine/tree/main/tools/oxlint/anti-slop).
+Its public API documentation rule follows the format enforced by
+[Effect's JSDoc checker](https://github.com/Effect-TS/effect/tree/main/packages/tools/jsdocs).
 
 ## Usage
 
@@ -353,6 +355,66 @@ const loadUser = Effect.fn("loadUser")(function* (id: UserId) {
 
 Effect.fnUntraced remains valid when tracing would not add value, particularly
 in library implementations and hot paths.
+
+### nopeus/require-public-jsdoc
+
+Requires every named public export to have the public API JSDoc format used by
+Effect. Default exports are ignored, as are declarations explicitly marked
+@internal.
+
+Bad:
+
+```ts
+/** Fetches a user. */
+export const getUser = (id: UserId) => Users.findById(id);
+```
+
+Good:
+
+````ts
+/**
+ * Fetches a user by identifier.
+ *
+ * **When to use**
+ *
+ * Use when the caller needs the complete user record.
+ *
+ * **Gotchas**
+ *
+ * Fails with `UserNotFound` when the identifier is unknown.
+ *
+ * **Example** (Fetch a known user)
+ *
+ * ```ts
+ * const user = yield* getUser(userId)
+ * ```
+ *
+ * @see {@link findOptionalUser}
+ * @category models
+ * @since 1.0.0
+ */
+export const getUser = Effect.fn("getUser")(function* (id: UserId) {
+  return yield* Users.findById(id);
+});
+````
+
+The comment contract is deliberately narrow:
+
+- Start with one practical description paragraph.
+- Optional sections appear once and in this order: **When to use**, **Details**,
+  **Gotchas**. A **When to use** body starts with `Use to`, `Use when`, `Use as`,
+  or `Use with`.
+- Examples use `**Example** (Unique title)` and exactly one non-empty TypeScript
+  fence. The `@example` tag and loose TypeScript fences are rejected.
+- Tags appear in this order: `@deprecated`, repeated `@see`, `@category`, then
+  `@since`. Category must be non-empty and since must be a stable `x.y.z`
+  version. Other tags are rejected.
+- Descriptions, sections, examples, and tags are separated by exactly one blank
+  line.
+
+Oxlint cannot perform Effect's separate type-aware link resolution or execute
+documentation examples. This rule enforces the authoring format at lint time;
+projects may additionally run doctests for executable examples.
 
 ### nopeus/require-safety-comment-for-type-assertion
 
