@@ -25,7 +25,7 @@
   "scripts": {
     "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
     "lint": "oxlint --config ../../tools/oxlint-config/src/base.json src",
-    "test:unit": "node --import tsx --test src/*.test.ts src/rules/*.test.ts src/effect/rules/*.test.ts",
+    "test:unit": "vitest run",
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
@@ -33,11 +33,10 @@
   },
   "devDependencies": {
     "@nopeus/tool-tsconfig": "workspace:*",
-    "@types/node": "catalog:",
     "oxlint": "catalog:",
     "rimraf": "catalog:",
-    "tsx": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "oxlint": ">=1.79.0 <2"

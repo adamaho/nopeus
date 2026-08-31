@@ -1,17 +1,7 @@
 # @adamaho/nopeus-oxlint-plugin
 
-The canonical strict Oxlint policy for AI-assisted TypeScript codebases.
-
-Nopeus is intentionally all or nothing. Each project profile is a complete,
-canonical policy for its target and applies the same rules to production and
-test code. There are no partial presets or blanket test overrides.
-
-The current `effect` profile covers Effect TypeScript repositories. Future
-profiles can be added as scoped entry points such as `solid` or `svelte`
-without weakening or adding switches to the Effect policy.
-
-The public API documentation rule follows the format enforced by
-[Effect's JSDoc checker](https://github.com/Effect-TS/effect/tree/main/packages/tools/jsdocs).
+Strict Oxlint rules for AI-assisted TypeScript codebases. The `effect` profile
+applies one complete policy to production and test code.
 
 ## Usage
 
@@ -41,10 +31,8 @@ newer, or Node.js 24 or newer, where type stripping is enabled by default.
 
 ## Policy
 
-Nopeus preserves type evidence from input boundary to use site. Unknown input is
-valid at an I/O boundary, where it should be decoded with Schema or another
-parser. After decoding, code should carry named domain types rather than widen,
-erase, and reconstruct them.
+Decode unknown input at I/O boundaries, then preserve the inferred or domain
+type throughout the program.
 
 Effect rules follow the current Effect conventions:
 

@@ -1,5 +1,4 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { expect, test } from "vitest";
 
 import effect, { serviceKeyPrefixFromPackageName } from "./effect.ts";
 
@@ -21,27 +20,27 @@ const canonicalRules = [
 ].sort();
 
 test("derives a service-key prefix from an unscoped package name", () => {
-  assert.equal(serviceKeyPrefixFromPackageName("goho"), "@goho/");
+  expect(serviceKeyPrefixFromPackageName("goho")).toBe("@goho/");
 });
 
 test("derives a service-key prefix from the project part of a scoped package name", () => {
-  assert.equal(serviceKeyPrefixFromPackageName("@adamaho/goho"), "@goho/");
+  expect(serviceKeyPrefixFromPackageName("@adamaho/goho")).toBe("@goho/");
 });
 
 test("enables every shipped rule without overrides", () => {
   const config = effect({ packageName: "nopeus" });
 
-  assert.deepEqual(Object.keys(config.rules ?? {}).sort(), canonicalRules);
-  assert.equal("overrides" in config, false);
+  expect(Object.keys(config.rules ?? {}).sort()).toEqual(canonicalRules);
+  expect("overrides" in config).toBe(false);
   for (const value of Object.values(config.rules ?? {})) {
-    assert.equal(Array.isArray(value) ? value[0] : value, "error");
+    expect(Array.isArray(value) ? value[0] : value).toBe("error");
   }
 });
 
 test("configures the service-key rule from the package name", () => {
   const config = effect({ packageName: "nopeus" });
 
-  assert.deepEqual(config.rules?.["nopeus/require-service-key-prefix"], [
+  expect(config.rules?.["nopeus/require-service-key-prefix"]).toEqual([
     "error",
     { prefix: "@nopeus/" },
   ]);
@@ -50,15 +49,14 @@ test("configures the service-key rule from the package name", () => {
 test("allows typeof only inside explicit type guards", () => {
   const config = effect({ packageName: "nopeus" });
 
-  assert.deepEqual(config.rules?.["nopeus/no-runtime-typeof"], [
+  expect(config.rules?.["nopeus/no-runtime-typeof"]).toEqual([
     "error",
     { allowInTypeGuards: true },
   ]);
 });
 
 test("rejects a package name without a project segment", () => {
-  assert.throws(() => serviceKeyPrefixFromPackageName("@adamaho/"), {
-    name: "TypeError",
-    message: "packageName must contain a project name",
-  });
+  expect(() => serviceKeyPrefixFromPackageName("@adamaho/")).toThrowError(
+    new TypeError("packageName must contain a project name"),
+  );
 });
