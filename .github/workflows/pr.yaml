@@ -162,19 +162,3 @@ jobs:
 
       - name: Build
         run: pnpm turbo run build
-
-  pack:
-    name: pack
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm and install
-        uses: ./.github/actions/setup-pnpm
-
-      - name: Pack publishable packages
-        run: |
-          mkdir -p /tmp/nopeus-packages
-          pnpm --filter @nopeus/oxlint-config pack --pack-destination /tmp/nopeus-packages
-          pnpm --filter @nopeus/oxlint-plugin pack --pack-destination /tmp/nopeus-packages
