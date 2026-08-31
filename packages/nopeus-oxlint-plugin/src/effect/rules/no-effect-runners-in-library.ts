@@ -52,8 +52,8 @@ export const noEffectRunnersInLibraryRule = defineRule({
           typeof option === "object" &&
           option !== null &&
           !Array.isArray(option) &&
-          option.allowFiles !== undefined
-            ? [...option.allowFiles].filter((value): value is string => typeof value === "string")
+          Array.isArray(option.allowFiles)
+            ? option.allowFiles.filter((value): value is string => typeof value === "string")
             : [];
         if (isAllowed(context.filename, allowFiles)) return;
         if (runners.some((name) => isModuleCall(node.callee, effect, name))) {

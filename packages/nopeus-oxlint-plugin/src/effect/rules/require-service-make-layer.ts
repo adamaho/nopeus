@@ -20,7 +20,7 @@ interface LayerPair {
 const layerConstructors = ["effect", "scoped", "succeed", "sync"] as const;
 
 function isExported(node: ESTree.Node): boolean {
-  return node.parent.type === "ExportNamedDeclaration";
+  return node.parent?.type === "ExportNamedDeclaration";
 }
 
 function isServiceFactory(
@@ -79,11 +79,12 @@ function layerPair(initializer: ESTree.Expression, layer: ModuleBindings): Layer
     return service === null || make === null ? null : { service, make };
   }
 
-  if (current.callee.type !== "CallExpression") return null;
-  if (!layerConstructors.some((name) => isModuleCall(current.callee.callee, layer, name))) {
+  const inner = current.callee;
+  if (inner.type !== "CallExpression") return null;
+  if (!layerConstructors.some((name) => isModuleCall(inner.callee, layer, name))) {
     return null;
   }
-  const service = identifierName(current.callee.arguments[0]);
+  const service = identifierName(inner.arguments[0]);
   const make = identifierName(current.arguments[0]);
   return service === null || make === null ? null : { service, make };
 }
