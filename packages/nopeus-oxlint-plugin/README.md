@@ -34,26 +34,6 @@ The root package name defines the owned Effect service namespace. Both goho and
 The package publishes TypeScript source and therefore requires Node.js 22.18 or
 newer, or Node.js 24 or newer, where type stripping is enabled by default.
 
-## Policy
-
-Decode unknown input at I/O boundaries, then preserve the inferred or domain
-type throughout the program.
-
-Effect rules follow the current Effect conventions:
-
-- Use Effect.fn with a static trace name for traced reusable operations.
-- Use Effect.fnUntraced for library implementations and hot paths that do not
-  represent a useful tracing boundary.
-- Define services with Context.Service and a static repository-owned key.
-- Separate service implementation construction from Layer assembly with exported
-  make/layer pairs.
-- Keep runtime execution and live Layer provisioning at explicit application
-  boundaries.
-- Importing from either the effect barrel or the effect/Effect and
-  effect/Context module paths is supported.
-
-Every rule below is enabled by the canonical `effect` profile.
-
 ## Rules
 
 ### nopeus/no-type-assertions
