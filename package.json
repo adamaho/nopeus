@@ -5,7 +5,7 @@
   "scripts": {
     "changeset": "changeset",
     "changeset:status": "changeset status",
-    "check": "pnpm fmt:check && turbo run lint tsc",
+    "check": "pnpm fmt:check && turbo run lint test:unit tsc",
     "clean": "turbo run clean && rimraf node_modules",
     "dev": "turbo run dev --ui=tui",
     "lint": "turbo run lint",
@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "catalog:",
-    "@monorepo/tool-oxfmt-config": "workspace:*",
+    "@nopeus/tool-oxfmt-config": "workspace:*",
     "oxfmt": "catalog:",
     "rimraf": "catalog:",
     "turbo": "catalog:"

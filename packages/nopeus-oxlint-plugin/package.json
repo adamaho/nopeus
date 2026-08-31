@@ -1,0 +1,48 @@
+{
+  "name": "@adamaho/nopeus-oxlint-plugin",
+  "version": "0.0.0",
+  "description": "The canonical strict Oxlint policy for AI-assisted TypeScript codebases.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamaho/nopeus.git",
+    "directory": "packages/nopeus-oxlint-plugin"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./effect": "./src/effect.ts"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
+    "lint": "oxlint --config ../../tools/oxlint-config/src/base.json src",
+    "test:unit": "vitest run",
+    "tsc": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@oxlint/plugins": "catalog:"
+  },
+  "devDependencies": {
+    "@nopeus/tool-tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "oxlint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "oxlint": ">=1.79.0 <2"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.0.0"
+  }
+}
