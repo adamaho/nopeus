@@ -1,6 +1,6 @@
 {
   "name": "@nopeus/oxlint-plugin",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The canonical strict Oxlint policy for AI-assisted TypeScript codebases.",
   "license": "MIT",
   "repository": {
