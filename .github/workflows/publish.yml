@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
   pull-requests: write
 
 concurrency:
@@ -42,5 +43,5 @@ jobs:
           title: "chore(nopeus): version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}
-          NODE_AUTH_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}
-          NPM_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}
+          NODE_AUTH_TOKEN: ${{ github.token }}
+          NPM_TOKEN: ${{ github.token }}
