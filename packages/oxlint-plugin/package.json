@@ -9,7 +9,7 @@
     "directory": "packages/oxlint-plugin"
   },
   "files": [
-    "src",
+    "dist",
     "LICENSE",
     "README.md"
   ],
@@ -20,12 +20,24 @@
     "./effect": "./src/effect.ts"
   },
   "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.mts",
+        "import": "./dist/index.mjs"
+      },
+      "./effect": {
+        "types": "./dist/effect.d.mts",
+        "import": "./dist/effect.mjs"
+      }
+    },
     "access": "restricted",
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
+    "build": "tsdown src/index.ts src/effect.ts --dts --format esm --out-dir dist --sourcemap",
     "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
     "lint": "oxlint --config ../oxlint-config/src/base.ts src",
+    "prepack": "pnpm build",
     "test:unit": "vitest run",
     "tsc": "tsc --noEmit"
   },
@@ -37,6 +49,7 @@
     "@types/node": "catalog:",
     "oxlint": "catalog:",
     "rimraf": "catalog:",
+    "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },

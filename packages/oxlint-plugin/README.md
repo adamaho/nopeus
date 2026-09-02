@@ -31,8 +31,8 @@ export default defineConfig({
 The root package name defines the owned Effect service namespace. Both goho and
 @adamaho/goho require service keys beginning with @goho/.
 
-The package publishes TypeScript source and therefore requires Node.js 22.18 or
-newer, or Node.js 24 or newer, where type stripping is enabled by default.
+The package publishes compiled ESM and requires Node.js 22.18 or newer, or
+Node.js 24 or newer.
 
 ## Rules
 
