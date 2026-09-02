@@ -16,21 +16,25 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": {
-      "types": "./dist/base.d.ts",
-      "import": "./dist/base.js"
-    },
-    "./base": {
-      "types": "./dist/base.d.ts",
-      "import": "./dist/base.js"
-    }
+    ".": "./src/base.ts",
+    "./base": "./src/base.ts"
   },
   "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/base.d.mts",
+        "import": "./dist/base.mjs"
+      },
+      "./base": {
+        "types": "./dist/base.d.mts",
+        "import": "./dist/base.mjs"
+      }
+    },
     "access": "restricted",
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsdown src/base.ts --dts --format esm --out-dir dist --sourcemap",
     "clean": "rimraf node_modules dist build .turbo coverage",
     "lint": "oxlint --config ./src/base.ts src",
     "prepack": "pnpm build",
@@ -41,6 +45,7 @@
     "@types/node": "catalog:",
     "oxlint": "catalog:",
     "rimraf": "catalog:",
+    "tsdown": "catalog:",
     "typescript": "catalog:"
   },
   "peerDependencies": {
