@@ -1,6 +1,6 @@
 {
   "name": "@adamaho/nopeus-oxlint-config",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Shared base Oxlint configuration for strict TypeScript codebases.",
   "license": "MIT",
   "repository": {
