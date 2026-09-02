@@ -62,7 +62,7 @@ importers:
 
   infra/local: {}
 
-  packages/oxlint-config:
+  packages/nopeus-oxlint-config:
     devDependencies:
       '@nopeus/tool-tsconfig':
         specifier: workspace:*
@@ -83,7 +83,7 @@ importers:
         specifier: 'catalog:'
         version: 7.0.2
 
-  packages/oxlint-plugin:
+  packages/nopeus-oxlint-plugin:
     dependencies:
       '@oxlint/plugins':
         specifier: 'catalog:'

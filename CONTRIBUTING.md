@@ -66,7 +66,7 @@ when it becomes shared or needs an explicit public API and dependency boundary.
 
 Keep package directory names concise and domain-based. Publishable packages use
 the `@adamaho` scope and the `nopeus-` name prefix. For example,
-`packages/oxlint-plugin/package.json` uses the published name
+`packages/nopeus-oxlint-plugin/package.json` uses the published name
 `@adamaho/nopeus-oxlint-plugin`.
 
 ## Dependency Management
@@ -135,8 +135,8 @@ Examples:
 
 ```text
 chore(nopeus): add contributor documentation
-feat(oxlint-plugin): add strict Effect rule
-fix(oxlint-plugin): recognize aliased imports
+feat(nopeus-oxlint-plugin): add strict Effect rule
+fix(nopeus-oxlint-plugin): recognize aliased imports
 ```
 
 ## Coding Agents
