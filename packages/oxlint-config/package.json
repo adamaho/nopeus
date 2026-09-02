@@ -1,5 +1,5 @@
 {
-  "name": "@nopeus/oxlint-config",
+  "name": "@adamaho/nopeus-oxlint-config",
   "version": "0.1.0",
   "description": "Shared base Oxlint configuration for strict TypeScript codebases.",
   "license": "MIT",
@@ -20,8 +20,8 @@
     "./base": "./src/base.ts"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "clean": "rimraf node_modules dist build .turbo coverage",

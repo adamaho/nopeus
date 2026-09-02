@@ -23,7 +23,7 @@ export default function effect({ packageName, runtimeEntryPoints = [] }: NopeusE
     jsPlugins: [
       {
         name: "nopeus",
-        specifier: "@nopeus/oxlint-plugin",
+        specifier: "@adamaho/nopeus-oxlint-plugin",
       },
     ],
     rules: {

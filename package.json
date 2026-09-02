@@ -9,6 +9,7 @@
     "clean": "turbo run clean && rimraf node_modules",
     "dev": "turbo run dev --ui=tui",
     "lint": "turbo run lint",
+    "changeset:publish": "changeset publish",
     "fmt": "oxfmt --config ./tools/oxfmt-config/src/base.json .",
     "fmt:check": "oxfmt --check --config ./tools/oxfmt-config/src/base.json .",
     "tsc": "turbo run tsc",
@@ -25,5 +26,5 @@
     "node": "^24.15.0",
     "pnpm": "^11.21.0"
   },
-  "packageManager": "pnpm@11.21.0"
+  "packageManager": "pnpm@11.25.0"
 }

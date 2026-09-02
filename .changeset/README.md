@@ -6,4 +6,4 @@ Run `pnpm changeset` when a pull request changes a publishable package. Select t
 
 Changesets are not required for documentation, infrastructure, application-only, or private-package changes.
 
-Run `pnpm changeset:status` to inspect pending releases. Release automation is intentionally not configured by this template; repositories that publish packages should add a release workflow for their chosen registry.
+Run `pnpm changeset:status` to inspect pending releases. The publish workflow opens a version pull request when changesets are pending and publishes updated packages to GitHub Packages after that pull request is merged.
