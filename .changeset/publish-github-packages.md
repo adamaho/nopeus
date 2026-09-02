@@ -3,4 +3,4 @@
 "@adamaho/nopeus-oxlint-plugin": patch
 ---
 
-Publish the config and plugin under the `@adamaho/nopeus-*` names through GitHub Packages.
+Publish the config and plugin privately under the `@adamaho/nopeus-*` names through GitHub Packages.

@@ -64,8 +64,8 @@ Keep code used by only one deployable local to it, such as under
 `programs/web/src/features/*`. Move a feature or capability into `packages/*`
 when it becomes shared or needs an explicit public API and dependency boundary.
 
-Keep package directory names concise and domain-based. Public packages use the
-`@adamaho` scope and the `nopeus-` name prefix. For example,
+Keep package directory names concise and domain-based. Publishable packages use
+the `@adamaho` scope and the `nopeus-` name prefix. For example,
 `packages/oxlint-plugin/package.json` uses the published name
 `@adamaho/nopeus-oxlint-plugin`.
 

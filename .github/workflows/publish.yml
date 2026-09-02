@@ -37,7 +37,7 @@ jobs:
       - name: Version or publish packages
         uses: changesets/action@v1
         with:
-          publish: pnpm release
+          publish: pnpm changeset:publish
           commit: "chore(nopeus): version packages"
           title: "chore(nopeus): version packages"
         env:

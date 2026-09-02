@@ -9,7 +9,7 @@
     "clean": "turbo run clean && rimraf node_modules",
     "dev": "turbo run dev --ui=tui",
     "lint": "turbo run lint",
-    "release": "changeset publish",
+    "changeset:publish": "changeset publish",
     "fmt": "oxfmt --config ./tools/oxfmt-config/src/base.json .",
     "fmt:check": "oxfmt --check --config ./tools/oxfmt-config/src/base.json .",
     "tsc": "turbo run tsc",
