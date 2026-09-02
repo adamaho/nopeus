@@ -1,0 +1,46 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ADAMAHO_BOT_PAT }}
+
+      - name: Setup pnpm and install
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Configure GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          registry-url: https://npm.pkg.github.com
+          scope: "@adamaho"
+
+      - name: Version or publish packages
+        uses: changesets/action@v1
+        with:
+          publish: pnpm release
+          commit: "chore(nopeus): version packages"
+          title: "chore(nopeus): version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}
+          NODE_AUTH_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}
+          NPM_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}

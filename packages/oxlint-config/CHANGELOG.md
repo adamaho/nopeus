@@ -1,4 +1,4 @@
-# @nopeus/oxlint-config
+# @adamaho/nopeus-oxlint-config
 
 ## 0.1.0
 

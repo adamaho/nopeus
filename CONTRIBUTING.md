@@ -64,11 +64,10 @@ Keep code used by only one deployable local to it, such as under
 `programs/web/src/features/*`. Move a feature or capability into `packages/*`
 when it becomes shared or needs an explicit public API and dependency boundary.
 
-Do not apply category-based prefixes or suffixes to packages under `packages/*`.
-The directory name must match the package's `package.json` name, excluding the
-npm scope when present. For example,
-`packages/oxlint-plugin/package.json` uses the name
-`@nopeus/oxlint-plugin`.
+Keep package directory names concise and domain-based. Public packages use the
+`@adamaho` scope and the `nopeus-` name prefix. For example,
+`packages/oxlint-plugin/package.json` uses the published name
+`@adamaho/nopeus-oxlint-plugin`.
 
 ## Dependency Management
 
@@ -129,8 +128,8 @@ Allowed types:
 - `refactor`
 - `test`
 
-Use the affected package name without the npm scope as the commit scope. For
-root-only changes, use `nopeus`.
+Use the affected workspace directory name as the commit scope. For root-only
+changes, use `nopeus`.
 
 Examples:
 

@@ -1,4 +1,4 @@
-# @nopeus/oxlint-plugin
+# @adamaho/nopeus-oxlint-plugin
 
 ## 0.1.0
 
