@@ -59,6 +59,24 @@ importers:
 
   infra/local: {}
 
+  packages/oxlint-config:
+    devDependencies:
+      '@nopeus/tool-tsconfig':
+        specifier: workspace:*
+        version: link:../../tools/tsconfig
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.3
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.79.0
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
   packages/oxlint-plugin:
     dependencies:
       '@oxlint/plugins':
@@ -86,15 +104,6 @@ importers:
 
   tools/oxfmt-config:
     devDependencies:
-      rimraf:
-        specifier: 'catalog:'
-        version: 6.1.3
-
-  packages/oxlint-config:
-    devDependencies:
-      oxlint:
-        specifier: 'catalog:'
-        version: 1.79.0
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3

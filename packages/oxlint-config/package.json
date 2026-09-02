@@ -9,27 +9,39 @@
     "directory": "packages/oxlint-config"
   },
   "files": [
-    "src",
+    "dist",
     "LICENSE",
     "README.md"
   ],
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/base.ts",
-    "./base": "./src/base.ts"
+    ".": {
+      "types": "./dist/base.d.ts",
+      "import": "./dist/base.js"
+    },
+    "./base": {
+      "types": "./dist/base.d.ts",
+      "import": "./dist/base.js"
+    }
   },
   "publishConfig": {
     "access": "restricted",
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json",
     "clean": "rimraf node_modules dist build .turbo coverage",
-    "lint": "oxlint --config ./src/base.ts src"
+    "lint": "oxlint --config ./src/base.ts src",
+    "prepack": "pnpm build",
+    "tsc": "tsc --noEmit"
   },
   "devDependencies": {
+    "@nopeus/tool-tsconfig": "workspace:*",
+    "@types/node": "catalog:",
     "oxlint": "catalog:",
-    "rimraf": "catalog:"
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
   },
   "peerDependencies": {
     "oxlint": ">=1.79.0 <2"

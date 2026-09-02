@@ -24,5 +24,5 @@ export default defineConfig({
 Oxlint does not resolve package imports from `.oxlintrc.json`; use a TypeScript
 config when consuming this package.
 
-The package publishes TypeScript source and therefore requires Node.js 22.18 or
-newer, or Node.js 24 or newer, where type stripping is enabled by default.
+The package publishes compiled ESM and requires Node.js 22.18 or newer, or
+Node.js 24 or newer.
