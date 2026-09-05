@@ -80,7 +80,10 @@ test("packed configs work in base-only and Effect projects", () => {
     ).toContain("TS2322");
 
     // Match the repository's approval for the Effect compiler's native dependency.
-    writeFileSync(join(directory, "pnpm-workspace.yaml"), "allowBuilds:\n  msgpackr-extract: true\n");
+    writeFileSync(
+      join(directory, "pnpm-workspace.yaml"),
+      "allowBuilds:\n  msgpackr-extract: true\n",
+    );
     writeFileSync(
       join(directory, "package.json"),
       JSON.stringify({
