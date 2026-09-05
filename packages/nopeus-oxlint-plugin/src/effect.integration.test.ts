@@ -109,3 +109,61 @@ test("the syntax policy accepts v4 code and executes both added rules", () => {
     rmSync(directory, { recursive: true, force: true });
   }
 }, 120_000);
+
+test("service construction checks stay independent across files", () => {
+  const directory = mkdtempSync(join(packageRoot, ".layer-factories-"));
+  try {
+    writeFileSync(
+      join(directory, "oxlint.json"),
+      JSON.stringify({
+        jsPlugins: [{ name: "nopeus", specifier: join(packageRoot, "src/index.ts") }],
+        rules: { "nopeus/require-service-make-layer": "error" },
+      }),
+    );
+    for (const name of ["MissingA", "MissingB"]) {
+      writeFileSync(
+        join(directory, name + ".ts"),
+        `import { Context } from "effect";
+         export class ${name} extends Context.Service<${name}, {}>()("@fixture/${name}") {}`,
+      );
+    }
+    writeFileSync(
+      join(directory, "factory.ts"),
+      `import { Context, Effect, Layer } from "effect";
+       export class Service extends Context.Service<Service, {}>()("@fixture/Auth") {}
+       export const make = (options: Options) => Effect.succeed(Service.of(options));
+       export function layer(options: Options) { return Layer.effect(Service, make(options)); }`,
+    );
+    const result = spawnSync(
+      process.execPath,
+      [
+        oxlint,
+        "--config",
+        "oxlint.json",
+        "--no-ignore",
+        "--threads",
+        "1",
+        "--format",
+        "json",
+        "MissingA.ts",
+        "factory.ts",
+        "MissingB.ts",
+      ],
+      { cwd: directory, encoding: "utf8", timeout: 60_000 },
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.status, result.stdout + result.stderr).toBe(1);
+    const { diagnostics } = JSON.parse(result.stdout);
+    expect(diagnostics, result.stdout).toHaveLength(2);
+    for (const name of ["MissingA", "MissingB"]) {
+      expect(diagnostics).toContainEqual(
+        expect.objectContaining({
+          filename: expect.stringContaining(name + ".ts"),
+          message: expect.stringContaining("Export a module-level make constructor for " + name),
+        }),
+      );
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}, 60_000);

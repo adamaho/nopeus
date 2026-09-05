@@ -663,6 +663,33 @@ constructor and a matching exported Layer. The unsuffixed pair is `make` and
 `layer` (or `defaultLayer`); named implementations pair by suffix, such as
 `makeMemory` and `layerMemory`.
 
+Layers may also be synchronous factories that accept explicit configuration:
+
+```ts
+export const make = (options: AuthOptions) =>
+  Effect.tryPromise({
+    try: () => createAuthClient(options),
+    catch: (cause) => new AuthenticationError({ cause }),
+  });
+
+export function layer(options: AuthOptions) {
+  return Layer.effect(Service, make(options));
+}
+```
+
+Function declarations, arrow functions, and function expressions are supported.
+Named factories still pair by suffix, for example `makeServiceAccount` and
+`layerServiceAccount`. Both constructors must be exported. Configuration can
+remain with the caller; the rule does not require environment reads in services.
+
+The rule follows direct returned `Layer.effect`, `Layer.succeed`, and `Layer.sync`
+calls, including curried calls and `.pipe(...)` on the resulting layer.
+`Layer.sync(Service, () => make(options))` keeps synchronous construction lazy.
+Every explicit return in a recognized factory must use the matching service and
+constructor. Nested callbacks and shadowed bindings do not count. Indirect
+factories and arbitrary control flow are outside this syntax check; TypeScript
+checks the factory's return type.
+
 Bad:
 
 ```ts
