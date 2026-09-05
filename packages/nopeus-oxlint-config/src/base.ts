@@ -5,38 +5,6 @@ export default defineConfig({
   rules: {
     "eslint/no-debugger": "error",
     "eslint/no-duplicate-imports": "error",
-    "eslint/no-restricted-imports": [
-      "error",
-      {
-        paths: [
-          {
-            name: "@effect/platform",
-            message:
-              "Use Effect v4 consolidated modules from `effect` (for example `effect/unstable/httpapi` or `effect/unstable/http`).",
-          },
-          {
-            name: "@effect/sql",
-            message:
-              "Use `effect/unstable/sql` and driver-specific `@effect/sql-*` packages in Effect v4.",
-          },
-          {
-            name: "@effect/rpc",
-            message: "Use `effect/unstable/rpc` in Effect v4.",
-          },
-          {
-            name: "@effect/cluster",
-            message: "Use `effect/unstable/cluster` in Effect v4.",
-          },
-        ],
-        patterns: [
-          {
-            group: ["@effect/platform/*", "@effect/sql/*", "@effect/rpc/*", "@effect/cluster/*"],
-            message:
-              "Do not import v3 split Effect packages. Use consolidated `effect` module imports in v4.",
-          },
-        ],
-      },
-    ],
   },
   overrides: [
     {

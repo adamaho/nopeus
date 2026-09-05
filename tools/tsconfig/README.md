@@ -4,9 +4,10 @@ Shared TypeScript configurations and Effect LSP-based linting for this workspace
 
 ## Workspace setup
 
-- `@nopeus/tool-tsconfig/base`: strict compiler defaults and Effect diagnostics.
+- `@nopeus/tool-tsconfig/base`: strict compiler defaults, without Effect diagnostics.
 - `@nopeus/tool-tsconfig/service`: NodeNext defaults for backend workspaces.
 - `@nopeus/tool-tsconfig/app-vite`: bundler and React defaults for Vite workspaces.
+- `@nopeus/tool-tsconfig/effect`: opt-in Effect LSP policy, layered after a base config.
 
 Add `@nopeus/tool-tsconfig` with `workspace:*` to a package's devDependencies,
 then extend the relevant config:
@@ -18,11 +19,24 @@ then extend the relevant config:
 }
 ```
 
-`pnpm install` runs this package's existing `effect-tsgo patch` preparation step.
-The selected Effect errors then fail ordinary package `tsc --noEmit` commands,
-the root `pnpm tsc`, and CI. `pnpm check` runs both compiler checks and Oxlint.
+The base, service, and app-vite configs do not activate Effect diagnostics.
+Effect projects explicitly add the Effect overlay:
+
+```json
+{
+  "extends": ["@nopeus/tool-tsconfig/service", "@nopeus/tool-tsconfig/effect"],
+  "include": ["src/**/*.ts"]
+}
+```
+
+The workspace's `pnpm install` runs the existing `effect-tsgo patch` preparation
+step for development and compiler tests. Selected Effect errors fail `tsc` only
+in projects opting into the overlay. `pnpm check` runs compiler checks and Oxlint.
 A child config that sets `compilerOptions.plugins` replaces the inherited array;
-keep the Effect entry and its policy when adding other plugins.
+keep the Effect entry when opting into its diagnostics alongside other plugins.
+
+This is private workspace tooling. Users of the published Oxlint packages do
+not install its development dependencies or run its preparation script.
 
 ## Effect v4 LSP-based linting
 
@@ -102,7 +116,7 @@ compiler alone does not configure an editor's language-server selection. See
 
 ## Effect v4 diagnostics
 
-The shared baseline promotes these eight upstream diagnostics to errors. Existing
+The opt-in Effect overlay promotes these eight upstream diagnostics to errors. Existing
 upstream defaults remain in effect for other diagnostics. Errors fail `tsc`;
 unpromoted suggestions remain advisory.
 

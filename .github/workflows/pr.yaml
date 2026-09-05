@@ -162,3 +162,6 @@ jobs:
 
       - name: Build
         run: pnpm turbo run build
+
+      - name: Base-only published consumer
+        run: node --test packages/nopeus-oxlint-plugin/test/base-consumer.mjs

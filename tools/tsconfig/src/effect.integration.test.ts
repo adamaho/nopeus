@@ -81,13 +81,13 @@ const invalid = [
   ],
 ] as const;
 
-function typecheck(code: string) {
+function typecheck(code: string, useEffect = true) {
   const directory = mkdtempSync(join(packageRoot, ".effect-v4-"));
   try {
     writeFileSync(
       join(directory, "tsconfig.json"),
       JSON.stringify({
-        extends: "../src/base.json",
+        extends: useEffect ? ["../src/base.json", "../src/effect.json"] : "../src/base.json",
         compilerOptions: { module: "NodeNext", moduleResolution: "NodeNext" },
         files: ["fixture.test.ts"],
       }),
@@ -124,3 +124,12 @@ test.each(invalid)(
   },
   60_000,
 );
+
+test("base compiler policy does not activate Effect diagnostics", () => {
+  const result = typecheck(
+    'import { Effect } from "effect"; Effect.log("not a compiler error without the Effect preset");',
+    false,
+  );
+  expect(result.error).toBeUndefined();
+  expect(result.status, result.stdout + result.stderr).toBe(0);
+}, 60_000);

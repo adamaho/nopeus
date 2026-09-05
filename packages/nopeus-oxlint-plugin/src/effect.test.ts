@@ -3,6 +3,7 @@ import { expect, test } from "vitest";
 import effect, { serviceKeyPrefixFromPackageName } from "./effect.ts";
 
 const canonicalRules = [
+  "eslint/no-restricted-imports",
   "nopeus/no-module-level-mutable-state",
   "nopeus/require-fetch-abort-signal",
   "nopeus/no-effect-runners-in-library",

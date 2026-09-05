@@ -1,7 +1,8 @@
 # @adamaho/nopeus-oxlint-plugin
 
-Strict Oxlint rules for AI-assisted TypeScript codebases. The `effect` profile
-applies one complete policy to production and test code.
+Custom Oxlint rules for AI-assisted TypeScript codebases. The `base` preset
+enables general TypeScript rules; `effect` adds Effect-specific syntax rules.
+Both apply to production and test code.
 
 ## Usage
 
@@ -11,10 +12,36 @@ Install Nopeus and its Oxlint peer:
 pnpm add --save-dev @adamaho/nopeus-oxlint-plugin oxlint
 ```
 
-Effect's upstream type-aware diagnostics run through the patched TypeScript
-compiler and language server. The Oxlint plugin handles syntax rules and needs
-no native Effect patch. See the [shared TypeScript setup](../../tools/tsconfig/README.md)
-for compiler enforcement and editor support.
+Neither preset requires `effect`, `@effect/tsgo`, `@effect/language-service`,
+`@effect/vitest`, or `oxlint-tsgolint` to be installed. Effect packages listed in
+this repository's devDependencies are for developing and testing Nopeus; they
+are not installed with the published plugin.
+
+### General TypeScript rules
+
+Use `@adamaho/nopeus-oxlint-plugin/base` in `oxlint.config.ts`:
+
+```ts
+import base from "@adamaho/nopeus-oxlint-plugin/base";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({ extends: [base] });
+```
+
+This enables the general rules for type assertions, type widening, dictionaries,
+parameters, reflection, module mocking, conditional spreads, and public JSDoc.
+It does not enable Effect service, runtime, state-lifetime, or v4 migration rules.
+No compiler patch or Effect-specific tsconfig is needed.
+
+The separate `@adamaho/nopeus-oxlint-config` package selects built-in Oxlint rules.
+It does not contain the custom rule implementations in this plugin. To combine
+both, install that package too and use `extends: [builtins, base]`, importing
+`builtins` from `@adamaho/nopeus-oxlint-config`.
+
+### Effect syntax rules
+
+The `effect` preset includes the general preset, so choose it when the project
+uses Effect; there is no need to extend both plugin presets.
 
 Extend the canonical policy from an oxlint.config.ts file:
 
@@ -35,6 +62,12 @@ export default defineConfig({
 
 The root package name defines the owned Effect service namespace. Both goho and
 @adamaho/goho require service keys beginning with @goho/.
+
+### Optional Effect LSP diagnostics
+
+Compiler-aware checks are a separate opt-in using the official Effect language
+server and patched `tsc`. See the [Effect TypeScript setup](../../tools/tsconfig/README.md#effect-v4-lsp-based-linting).
+Installing this plugin or choosing either syntax preset does not activate the LSP.
 
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
