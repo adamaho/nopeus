@@ -41,7 +41,7 @@ test("packed configs work in base-only and Effect projects", () => {
       },
     };
     writeFileSync(join(directory, "package.json"), JSON.stringify(manifest));
-    run(directory, ["install"]);
+    run(directory, ["install", "--no-frozen-lockfile"]);
 
     expect(
       readdirSync(join(directory, "node_modules/.pnpm")).filter((name) =>
@@ -90,7 +90,7 @@ test("packed configs work in base-only and Effect projects", () => {
         },
       }),
     );
-    run(directory, ["install"]);
+    run(directory, ["install", "--no-frozen-lockfile"]);
     run(directory, ["exec", "effect-tsgo", "patch"]);
     check(
       "effect",
