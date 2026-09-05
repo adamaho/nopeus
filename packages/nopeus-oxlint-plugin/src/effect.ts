@@ -20,8 +20,6 @@ export function serviceKeyPrefixFromPackageName(packageName: string): string {
 /** Build the canonical Nopeus policy for an Effect repository. */
 export default function effect({ packageName, runtimeEntryPoints = [] }: NopeusEffectOptions) {
   return defineConfig({
-    options: { typeAware: true },
-    plugins: ["eslint", "typescript", "unicorn", "oxc", "effecttsgo"],
     jsPlugins: [
       {
         name: "nopeus",
@@ -29,14 +27,6 @@ export default function effect({ packageName, runtimeEntryPoints = [] }: NopeusE
       },
     ],
     rules: {
-      "effecttsgo/floating-effect": "error",
-      "effecttsgo/return-effect-in-gen": "error",
-      "effecttsgo/effect-in-void-success": "error",
-      "effecttsgo/lazy-promise-in-effect-sync": "error",
-      "effecttsgo/promise-in-effect-success": "error",
-      "effecttsgo/schema-sync-in-effect": "error",
-      "effecttsgo/leaking-requirements": "error",
-      "effecttsgo/floating-effect-in-vitest": "error",
       "nopeus/no-module-level-mutable-state": "error",
       "nopeus/require-fetch-abort-signal": "error",
       "nopeus/no-effect-runners-in-library": ["error", { allowFiles: [...runtimeEntryPoints] }],

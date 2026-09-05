@@ -3,14 +3,6 @@ import { expect, test } from "vitest";
 import effect, { serviceKeyPrefixFromPackageName } from "./effect.ts";
 
 const canonicalRules = [
-  "effecttsgo/floating-effect",
-  "effecttsgo/return-effect-in-gen",
-  "effecttsgo/effect-in-void-success",
-  "effecttsgo/lazy-promise-in-effect-sync",
-  "effecttsgo/promise-in-effect-success",
-  "effecttsgo/schema-sync-in-effect",
-  "effecttsgo/leaking-requirements",
-  "effecttsgo/floating-effect-in-vitest",
   "nopeus/no-module-level-mutable-state",
   "nopeus/require-fetch-abort-signal",
   "nopeus/no-effect-runners-in-library",
@@ -73,12 +65,11 @@ test("configures the runtime boundary from explicit entrypoints", () => {
   ]);
 });
 
-test("enables the Effect type-aware engine without importing unrelated preset rules", () => {
+test("keeps the syntax policy independent of the native Effect toolchain", () => {
   const config = effect({ packageName: "nopeus" });
-  expect(config.options?.typeAware).toBe(true);
-  expect(config.plugins).toContain("effecttsgo");
-  expect(config.rules).not.toHaveProperty("effecttsgo/multiple-effect-provide");
-  expect(config.rules).not.toHaveProperty("effecttsgo/scope-in-layer-effect");
+  expect("options" in config).toBe(false);
+  expect("plugins" in config).toBe(false);
+  expect(Object.keys(config.rules).some((name) => name.startsWith("effecttsgo/"))).toBe(false);
 });
 
 test("allows typeof only inside explicit type guards", () => {

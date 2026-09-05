@@ -46,35 +46,6 @@ it.effect("decodes a user", () => Effect.gen(function* () {
 `;
 
 const invalid = [
-  ["floating-effect", 'import { Effect } from "effect"; Effect.log("forgotten");'],
-  [
-    "return-effect-in-gen",
-    'import { Effect } from "effect"; export const run = Effect.gen(function* () { return Effect.succeed(1); });',
-  ],
-  [
-    "effect-in-void-success",
-    'import { Effect } from "effect"; export const run: Effect.Effect<void> = Effect.succeed(Effect.log("forgotten"));',
-  ],
-  [
-    "lazy-promise-in-effect-sync",
-    'import { Effect } from "effect"; export const run = Effect.sync(() => Promise.resolve(1));',
-  ],
-  [
-    "promise-in-effect-success",
-    'import { Effect } from "effect"; export const run = Effect.succeed(Promise.resolve(1));',
-  ],
-  [
-    "schema-sync-in-effect",
-    'import { Effect, Schema } from "effect"; const User = Schema.Struct({ id: Schema.String }); export const run = Effect.gen(function* () { return Schema.decodeUnknownSync(User)({ id: "1" }); });',
-  ],
-  [
-    "leaking-requirements",
-    'import { Context, Effect } from "effect"; class Database extends Context.Service<Database, {}>()("@fixture/Database") {} export class Users extends Context.Service<Users, { readonly load: Effect.Effect<string, never, Database>; readonly save: () => Effect.Effect<void, never, Database> }>()("@fixture/Users") {}',
-  ],
-  [
-    "floating-effect-in-vitest",
-    'import { it } from "@effect/vitest"; import { Effect } from "effect"; it("forgotten", () => Effect.void);',
-  ],
   ["no-module-level-mutable-state", "export const cache = new Map<string, string>();"],
   [
     "require-fetch-abort-signal",
@@ -82,7 +53,7 @@ const invalid = [
   ],
 ] as const;
 
-test("the canonical policy accepts v4 code and executes every added diagnostic", () => {
+test("the syntax policy accepts v4 code and executes both added rules", () => {
   const directory = mkdtempSync(join(packageRoot, ".effect-v4-"));
   try {
     writeFileSync(

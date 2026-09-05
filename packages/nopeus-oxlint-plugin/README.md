@@ -5,30 +5,16 @@ applies one complete policy to production and test code.
 
 ## Usage
 
-Install Nopeus and its compatible type-aware toolchain:
+Install Nopeus and its Oxlint peer:
 
 ```bash
-pnpm add --save-dev @adamaho/nopeus-oxlint-plugin @effect/tsgo@0.41.0 oxlint@1.79.0 oxlint-tsgolint@7.0.2001
+pnpm add --save-dev @adamaho/nopeus-oxlint-plugin oxlint
 ```
 
-Add the following to the consuming repository's `package.json`, then run
-`pnpm install`:
-
-```json
-{
-  "scripts": {
-    "prepare": "effect-tsgo patch --no-typescript --oxlint"
-  }
-}
-```
-
-Merge this command into an existing prepare script rather than replacing its
-other work. The patch installs the Effect-aware engine; enabling rule names alone
-does not install it. CI must run this preparation after dependency installation.
-The profile enables type-aware mode itself and requires a TypeScript project.
-The three toolchain versions above are tested together; upgrade them together
-when changing the supported integration. This release's examples and consumer
-tests use `effect@4.0.0-rc.112` and `@effect/vitest@4.0.0-rc.112`.
+Effect's upstream type-aware diagnostics run through the patched TypeScript
+compiler and language server. The Oxlint plugin handles syntax rules and needs
+no native Effect patch. See the [shared TypeScript setup](../../tools/tsconfig/README.md)
+for compiler enforcement and editor support.
 
 Extend the canonical policy from an oxlint.config.ts file:
 
@@ -54,117 +40,6 @@ The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
 
 ## Rules
-
-### Effect v4 type-aware checks
-
-The canonical profile adds these upstream `effecttsgo` diagnostics as errors.
-It does not import an entire upstream preset or add v3-only conventions.
-
-| Rule                                     | Required behavior                                                      |
-| ---------------------------------------- | ---------------------------------------------------------------------- |
-| `effecttsgo/floating-effect`             | Yield, return, or retain Effect values instead of discarding them.     |
-| `effecttsgo/return-effect-in-gen`        | Execute returned Effects with `return yield*` inside generators.       |
-| `effecttsgo/effect-in-void-success`      | Do not hide unexecuted Effects in a void success channel.              |
-| `effecttsgo/lazy-promise-in-effect-sync` | Keep Promise-returning callbacks out of `Effect.sync`.                 |
-| `effecttsgo/promise-in-effect-success`   | Await Promise work through an Effect adapter, not a success value.     |
-| `effecttsgo/schema-sync-in-effect`       | Decode through the typed Effect error channel inside Effect workflows. |
-| `effecttsgo/leaking-requirements`        | Capture implementation dependencies when constructing a service.       |
-| `effecttsgo/floating-effect-in-vitest`   | Run Effect tests through an Effect-aware test API.                     |
-
-Bad inside an Effect generator:
-
-```ts
-saveUser(user);
-return loadUser(id);
-```
-
-Good:
-
-```ts
-yield * saveUser(user);
-return yield * loadUser(id);
-```
-
-Bad Promise adapters:
-
-```ts
-const user = Effect.sync(() => client.loadUser(id));
-const alsoNested = Effect.succeed(client.loadUser(id));
-```
-
-Good:
-
-```ts
-const user = Effect.tryPromise({
-  try: () => client.loadUser(id),
-  catch: (cause) => new LoadUserFailed({ cause }),
-});
-```
-
-Bad decoding inside `Effect.gen`:
-
-```ts
-const user = Schema.decodeUnknownSync(User)(input);
-```
-
-Good, using the v4 Effect-returning decoder:
-
-```ts
-const user = yield * Schema.decodeUnknownEffect(User)(input);
-```
-
-Synchronous decoders remain available at intentionally synchronous boundaries.
-
-Bad service contract:
-
-```ts
-class Users extends Context.Service<
-  Users,
-  {
-    readonly find: (id: UserId) => Effect.Effect<User, UserNotFound, Database>;
-    readonly save: (user: User) => Effect.Effect<void, SaveFailed, Database>;
-  }
->()("@app/Users") {}
-```
-
-Good: `make` captures `Database`, so every caller does not need to supply it:
-
-```ts
-class Users extends Context.Service<
-  Users,
-  {
-    readonly find: (id: UserId) => Effect.Effect<User, UserNotFound>;
-    readonly save: (user: User) => Effect.Effect<void, SaveFailed>;
-  }
->()("@app/Users") {}
-```
-
-The upstream dependency-leak check is a heuristic: it reports a dependency shared
-by every Effect member when the service has at least two such members. It does
-not catch single-method services or dependencies shared by only some methods.
-Scope is already excluded. For intentional caller-owned requirements, document
-the reason and use `@effect-expect-leaking RequestContext` on the service or
-`@effect-leakable-service` on the dependency declaration. Intentionally returning
-an Effect as data needs a local exception to the corresponding execution check.
-Do not erase requirements with a cast.
-
-Bad test:
-
-```ts
-import { it } from "@effect/vitest";
-
-it("saves a user", () => saveUser(user));
-```
-
-Good:
-
-```ts
-import { it } from "@effect/vitest";
-
-it.effect("saves a user", () => saveUser(user));
-```
-
-Ordinary synchronous and Promise-based tests can still use ordinary Vitest.
 
 ### nopeus/no-module-level-mutable-state
 

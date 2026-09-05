@@ -38,7 +38,6 @@
     "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
     "lint": "oxlint --config ../nopeus-oxlint-config/src/base.ts src",
     "prepack": "pnpm build",
-    "prepare": "effect-tsgo patch --no-typescript --oxlint",
     "test:unit": "vitest run",
     "tsc": "tsc --noEmit"
   },
@@ -46,22 +45,18 @@
     "@oxlint/plugins": "catalog:"
   },
   "devDependencies": {
-    "@effect/tsgo": "catalog:",
     "@effect/vitest": "catalog:",
     "@nopeus/tool-tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "effect": "catalog:",
     "oxlint": "catalog:",
-    "oxlint-tsgolint": "catalog:",
     "rimraf": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@effect/tsgo": "0.41.0",
-    "oxlint": "1.79.0",
-    "oxlint-tsgolint": "7.0.2001"
+    "oxlint": ">=1.79.0 <2"
   },
   "engines": {
     "node": "^22.18.0 || >=24.0.0"
