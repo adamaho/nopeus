@@ -87,7 +87,7 @@ function typecheck(code: string, useEffect = true) {
     writeFileSync(
       join(directory, "tsconfig.json"),
       JSON.stringify({
-        extends: useEffect ? ["../src/base.json", "../src/effect.json"] : "../src/base.json",
+        extends: useEffect ? "../src/effect.json" : "../src/base.json",
         compilerOptions: { module: "NodeNext", moduleResolution: "NodeNext" },
         files: ["fixture.test.ts"],
       }),
