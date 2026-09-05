@@ -42,7 +42,7 @@ test(
           },
         }),
       );
-      run(directory, "pnpm", ["install", "--offline"]);
+      run(directory, "pnpm", ["install"]);
       const packages = readdirSync(join(directory, "node_modules/.pnpm"));
       assert.deepEqual(
         packages.filter((name) =>
