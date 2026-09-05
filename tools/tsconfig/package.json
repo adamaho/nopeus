@@ -12,9 +12,11 @@
   "scripts": {
     "clean": "rimraf node_modules dist build .turbo coverage",
     "prepare": "effect-tsgo patch",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "test:consumer": "vitest run --config vitest.consumer.config.ts"
   },
   "devDependencies": {
+    "@adamaho/nopeus-tsconfig": "workspace:*",
     "@effect/tsgo": "catalog:",
     "@effect/vitest": "catalog:",
     "@types/node": "catalog:",

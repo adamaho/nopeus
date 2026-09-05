@@ -63,10 +63,10 @@ export default defineConfig({
 The root package name defines the owned Effect service namespace. Both goho and
 @adamaho/goho require service keys beginning with @goho/.
 
-### Optional Effect LSP diagnostics
+### Effect compiler diagnostics
 
 Compiler-aware checks are a separate opt-in using the official Effect language
-server and patched `tsc`. See the [Effect TypeScript setup](../../tools/tsconfig/README.md#effect-v4-lsp-based-linting).
+server and patched `tsc`. See the [shared TypeScript policy and setup](../nopeus-tsconfig/README.md#effect-projects).
 Installing this plugin or choosing either syntax preset does not activate the LSP.
 
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or

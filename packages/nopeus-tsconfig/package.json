@@ -1,0 +1,27 @@
+{
+  "name": "@adamaho/nopeus-tsconfig",
+  "version": "0.0.0",
+  "description": "Canonical base and Effect TypeScript compiler policies.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamaho/nopeus.git",
+    "directory": "packages/nopeus-tsconfig"
+  },
+  "files": [
+    "base.json",
+    "effect.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./base": "./base.json",
+    "./effect": "./effect.json"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
+  }
+}
