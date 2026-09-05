@@ -73,10 +73,7 @@ function isContextService(
   );
 }
 
-type Factory =
-  | ESTree.FunctionDeclaration
-  | ESTree.FunctionExpression
-  | ESTree.ArrowFunctionExpression;
+type Factory = ESTree.Function | ESTree.ArrowFunctionExpression;
 
 function isFactory(node: ESTree.Node): node is Factory {
   return (
@@ -88,9 +85,9 @@ function isFactory(node: ESTree.Node): node is Factory {
 
 function isModuleDeclaration(node: ESTree.Node): boolean {
   return (
-    node.parent.type === "Program" ||
-    node.parent.type === "ExportNamedDeclaration" ||
-    node.parent.type === "ExportDefaultDeclaration"
+    node.parent?.type === "Program" ||
+    node.parent?.type === "ExportNamedDeclaration" ||
+    node.parent?.type === "ExportDefaultDeclaration"
   );
 }
 
@@ -206,13 +203,13 @@ export const requireServiceMakeLayerRule = defineRule({
     const factories = new Map<Factory, Array<LayerPair | null>>();
     let exports = new Set<string>();
 
-    function registerLayer(name: string, node: ESTree.Expression | ESTree.FunctionDeclaration) {
+    function registerLayer(name: string, node: ESTree.Expression | ESTree.Function) {
       if (!layerName(name)) return;
       if (!isFactory(node)) {
         layers.set(name, [layerPair(context.sourceCode, node, layerModule)]);
         return;
       }
-      if (node.async || node.generator) return;
+      if (node.async || node.generator || node.body === null) return;
       const pairs: Array<LayerPair | null> = [];
       layers.set(name, pairs);
       factories.set(node, pairs);
@@ -256,8 +253,9 @@ export const requireServiceMakeLayerRule = defineRule({
       },
       ReturnStatement(node) {
         let parent = node.parent;
-        while (parent.type !== "Program" && !isFactory(parent)) parent = parent.parent;
-        if (!isFactory(parent)) return;
+        while (parent !== null && parent.type !== "Program" && !isFactory(parent))
+          parent = parent.parent;
+        if (parent === null || !isFactory(parent)) return;
         factories
           .get(parent)
           ?.push(
