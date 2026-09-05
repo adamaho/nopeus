@@ -115,25 +115,38 @@ const user = yield * Schema.decodeUnknownEffect(User)(input);
 
 Synchronous decoders remain available at intentionally synchronous boundaries.
 
-Bad service method contract:
+Bad service contract:
 
 ```ts
-interface UsersApi {
-  readonly find: (id: UserId) => Effect.Effect<User, UserNotFound, Database>;
-}
+class Users extends Context.Service<
+  Users,
+  {
+    readonly find: (id: UserId) => Effect.Effect<User, UserNotFound, Database>;
+    readonly save: (user: User) => Effect.Effect<void, SaveFailed, Database>;
+  }
+>()("@app/Users") {}
 ```
 
 Good: `make` captures `Database`, so every caller does not need to supply it:
 
 ```ts
-interface UsersApi {
-  readonly find: (id: UserId) => Effect.Effect<User, UserNotFound>;
-}
+class Users extends Context.Service<
+  Users,
+  {
+    readonly find: (id: UserId) => Effect.Effect<User, UserNotFound>;
+    readonly save: (user: User) => Effect.Effect<void, SaveFailed>;
+  }
+>()("@app/Users") {}
 ```
 
-Intentionally returning an Effect as data, or passing caller-owned requirements
-such as request context or Scope through a service, requires a local documented
-exception to the specific diagnostic. Do not erase those requirements with a cast.
+The upstream dependency-leak check is a heuristic: it reports a dependency shared
+by every Effect member when the service has at least two such members. It does
+not catch single-method services or dependencies shared by only some methods.
+Scope is already excluded. For intentional caller-owned requirements, document
+the reason and use `@effect-expect-leaking RequestContext` on the service or
+`@effect-leakable-service` on the dependency declaration. Intentionally returning
+an Effect as data needs a local exception to the corresponding execution check.
+Do not erase requirements with a cast.
 
 Bad test:
 

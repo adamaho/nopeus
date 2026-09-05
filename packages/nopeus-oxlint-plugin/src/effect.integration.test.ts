@@ -69,7 +69,7 @@ const invalid = [
   ],
   [
     "leaking-requirements",
-    'import { Context, Effect } from "effect"; class Database extends Context.Service<Database, {}>()("@fixture/Database") {} export class Users extends Context.Service<Users, { readonly load: Effect.Effect<string, never, Database> }>()("@fixture/Users") {}',
+    'import { Context, Effect } from "effect"; class Database extends Context.Service<Database, {}>()("@fixture/Database") {} export class Users extends Context.Service<Users, { readonly load: Effect.Effect<string, never, Database>; readonly save: () => Effect.Effect<void, never, Database> }>()("@fixture/Users") {}',
   ],
   [
     "floating-effect-in-vitest",
@@ -125,7 +125,7 @@ test("the canonical policy accepts v4 code and executes every added diagnostic",
       expect(rejected.error).toBeUndefined();
       expect(rejected.status, rejected.stdout + rejected.stderr).toBe(1);
       const output = JSON.parse(rejected.stdout);
-      expect(output.diagnostics, rule).toEqual(
+      expect.soft(output.diagnostics, rule).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             code: expect.stringContaining(rule),
