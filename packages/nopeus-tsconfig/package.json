@@ -1,6 +1,6 @@
 {
   "name": "@adamaho/nopeus-tsconfig",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Canonical base and Effect TypeScript compiler policies.",
   "license": "MIT",
   "repository": {
