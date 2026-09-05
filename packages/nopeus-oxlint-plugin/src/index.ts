@@ -3,11 +3,13 @@ import { eslintCompatPlugin } from "@oxlint/plugins";
 import { noEffectRunnersInLibraryRule } from "./effect/rules/no-effect-runners-in-library.ts";
 import { noFallibleEffectPromiseRule } from "./effect/rules/no-fallible-effect-promise.ts";
 import { noInlineLiveLayerRule } from "./effect/rules/no-inline-live-layer.ts";
+import { noModuleLevelMutableStateRule } from "./effect/rules/no-module-level-mutable-state.ts";
 import { noUnscopedForkRule } from "./effect/rules/no-unscoped-fork.ts";
 import { noUntypedEffectErrorsRule } from "./effect/rules/no-untyped-effect-errors.ts";
 import { preferEffectPlatformServicesRule } from "./effect/rules/prefer-effect-platform-services.ts";
 import { preferEffectVoidRule } from "./effect/rules/prefer-effect-void.ts";
 import { requireEffectFnNameRule } from "./effect/rules/require-effect-fn-name.ts";
+import { requireFetchAbortSignalRule } from "./effect/rules/require-fetch-abort-signal.ts";
 import { requireServiceKeyPrefixRule } from "./effect/rules/require-service-key-prefix.ts";
 import { requireServiceMakeLayerRule } from "./effect/rules/require-service-make-layer.ts";
 import { noConditionalEmptyObjectSpreadRule } from "./rules/no-conditional-empty-object-spread.ts";
@@ -30,6 +32,8 @@ const nopeusPlugin = eslintCompatPlugin({
     "no-effect-runners-in-library": noEffectRunnersInLibraryRule,
     "no-fallible-effect-promise": noFallibleEffectPromiseRule,
     "no-inline-live-layer": noInlineLiveLayerRule,
+    "no-module-level-mutable-state": noModuleLevelMutableStateRule,
+    "require-fetch-abort-signal": requireFetchAbortSignalRule,
     "no-unscoped-fork": noUnscopedForkRule,
     "no-untyped-effect-errors": noUntypedEffectErrorsRule,
     "no-conditional-empty-object-spread": noConditionalEmptyObjectSpreadRule,
