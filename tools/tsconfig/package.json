@@ -6,15 +6,21 @@
   "exports": {
     "./base": "./src/base.json",
     "./service": "./src/service.json",
-    "./app-vite": "./src/app-vite.json"
+    "./app-vite": "./src/app-vite.json",
+    "./effect": "./src/effect.json"
   },
   "scripts": {
     "clean": "rimraf node_modules dist build .turbo coverage",
-    "prepare": "effect-tsgo patch"
+    "prepare": "effect-tsgo patch",
+    "test:unit": "vitest run"
   },
   "devDependencies": {
     "@effect/tsgo": "catalog:",
+    "@effect/vitest": "catalog:",
+    "@types/node": "catalog:",
+    "effect": "catalog:",
     "rimraf": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

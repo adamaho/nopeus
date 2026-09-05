@@ -1,6 +1,7 @@
 # @adamaho/nopeus-oxlint-config
 
-Shared base Oxlint configuration for strict TypeScript codebases.
+Shared configuration selecting built-in Oxlint rules for TypeScript codebases.
+This package has no Effect runtime or LSP dependency.
 
 ## Usage
 
@@ -26,3 +27,11 @@ config when consuming this package.
 
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
+
+## Custom Nopeus rules
+
+The separate `@adamaho/nopeus-oxlint-plugin` package implements custom rules.
+Its `/base` preset adds general TypeScript rules without requiring any Effect
+packages. Its `/effect` preset adds Effect syntax checks, including the v4 import
+restrictions previously included in this base config. The Effect LSP is an
+independent opt-in. See the [plugin setup](../nopeus-oxlint-plugin/README.md).

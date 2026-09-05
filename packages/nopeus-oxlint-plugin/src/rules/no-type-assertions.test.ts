@@ -9,7 +9,7 @@ tester.run("nopeus/no-type-assertions", noTypeAssertionsRule, {
   valid: [
     "const method = 'GET' as const;",
     "const user = input satisfies User;",
-    "const decodeUser = Schema.decodeUnknown(User); const user = decodeUser(input);",
+    "const decodeUser = Schema.decodeUnknownEffect(User); const user = decodeUser(input);",
     "const rows = yield* sql<User>`select * from users`; const first = rows[0];",
     "const users = yield* database.select().from(userTable);",
   ],

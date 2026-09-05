@@ -1,0 +1,4 @@
+{
+  "extends": "@nopeus/tool-tsconfig/service",
+  "include": ["src/**/*.ts"]
+}

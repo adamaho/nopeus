@@ -1,7 +1,8 @@
 # @adamaho/nopeus-oxlint-plugin
 
-Strict Oxlint rules for AI-assisted TypeScript codebases. The `effect` profile
-applies one complete policy to production and test code.
+Custom Oxlint rules for AI-assisted TypeScript codebases. The `base` preset
+enables general TypeScript rules; `effect` adds Effect-specific syntax rules.
+Both apply to production and test code.
 
 ## Usage
 
@@ -10,6 +11,37 @@ Install Nopeus and its Oxlint peer:
 ```bash
 pnpm add --save-dev @adamaho/nopeus-oxlint-plugin oxlint
 ```
+
+Neither preset requires `effect`, `@effect/tsgo`, `@effect/language-service`,
+`@effect/vitest`, or `oxlint-tsgolint` to be installed. Effect packages listed in
+this repository's devDependencies are for developing and testing Nopeus; they
+are not installed with the published plugin.
+
+### General TypeScript rules
+
+Use `@adamaho/nopeus-oxlint-plugin/base` in `oxlint.config.ts`:
+
+```ts
+import base from "@adamaho/nopeus-oxlint-plugin/base";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({ extends: [base] });
+```
+
+This enables the general rules for type assertions, type widening, dictionaries,
+parameters, reflection, module mocking, conditional spreads, and public JSDoc.
+It does not enable Effect service, runtime, state-lifetime, or v4 migration rules.
+No compiler patch or Effect-specific tsconfig is needed.
+
+The separate `@adamaho/nopeus-oxlint-config` package selects built-in Oxlint rules.
+It does not contain the custom rule implementations in this plugin. To combine
+both, install that package too and use `extends: [builtins, base]`, importing
+`builtins` from `@adamaho/nopeus-oxlint-config`.
+
+### Effect syntax rules
+
+The `effect` preset includes the general preset, so choose it when the project
+uses Effect; there is no need to extend both plugin presets.
 
 Extend the canonical policy from an oxlint.config.ts file:
 
@@ -31,10 +63,84 @@ export default defineConfig({
 The root package name defines the owned Effect service namespace. Both goho and
 @adamaho/goho require service keys beginning with @goho/.
 
+### Optional Effect LSP diagnostics
+
+Compiler-aware checks are a separate opt-in using the official Effect language
+server and patched `tsc`. See the [Effect TypeScript setup](../../tools/tsconfig/README.md#effect-v4-lsp-based-linting).
+Installing this plugin or choosing either syntax preset does not activate the LSP.
+
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
 
 ## Rules
+
+### nopeus/no-module-level-mutable-state
+
+Rejects module-level `let`/`var` and direct construction of writable global
+`Map`, `Set`, `WeakMap`, or `WeakSet` values. Service state belongs to construction.
+
+Bad:
+
+```ts
+const cache = new Map<UserId, User>();
+export const make = Effect.sync(() => buildUsers(cache));
+```
+
+Good:
+
+```ts
+export const make = Effect.sync(() => {
+  const cache = new Map<UserId, User>();
+  return buildUsers(cache);
+});
+```
+
+Immutable lookup tables can use an explicit readonly contract:
+
+```ts
+const statusCodes: ReadonlyMap<string, number> = new Map([["ok", 200]]);
+```
+
+`satisfies ReadonlyMap` alone does not remove the mutable methods from an inferred
+Map type and is not an exception. Imported persistent collection constructors
+and function-local state remain allowed. This syntax-level rule does not infer
+arbitrary factories, nested object state, clients, or mutation through aliases.
+Explicitly owned process-wide mutable infrastructure needs a local exception.
+
+In v4, separate `Effect.provide` calls can share memoized Layers. Construction
+owns state per acquired service instance, not per provide call. Use `Layer.fresh`
+or `Effect.provide(layer, { local: true })` only where isolation is intentional;
+this rule does not require either mechanism.
+
+### nopeus/require-fetch-abort-signal
+
+Requires global `fetch` calls directly inside an `Effect.tryPromise` callback to
+forward that callback's AbortSignal in a visible options object.
+
+Bad:
+
+```ts
+Effect.tryPromise({
+  try: () => fetch(url),
+  catch: toRequestFailed,
+});
+```
+
+Good:
+
+```ts
+Effect.tryPromise({
+  try: (signal) => fetch(url, { ...requestOptions, signal }),
+  catch: toRequestFailed,
+});
+```
+
+Put `signal` after spreads and computed properties that could overwrite it.
+`globalThis.fetch`, aliased Effect imports, renamed callback parameters, and
+shadowed globals are handled. SDK methods and deferred nested callbacks are
+outside this narrow rule. Prebuilt Request/options objects, combined signals,
+and indirect signal aliases require an explicit local exception or forwarding
+the callback parameter directly at the adapter boundary.
 
 ### nopeus/no-type-assertions
 
@@ -207,7 +313,7 @@ if (typeof input === "string") {
 Good:
 
 ```ts
-const decodeName = Schema.decodeUnknown(Name);
+const decodeName = Schema.decodeUnknownEffect(Name);
 const name = yield * decodeName(input);
 ```
 
@@ -379,7 +485,7 @@ yield * Effect.fail(new Error("user not found"));
 Good:
 
 ```ts
-class UserNotFound extends Schema.TaggedErrorClass<UserNotFound>()("UserNotFound", {
+class UserNotFound extends Schema.TaggedError<UserNotFound>()("UserNotFound", {
   id: UserId,
 }) {}
 

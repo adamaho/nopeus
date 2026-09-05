@@ -34,7 +34,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsdown src/base.ts --dts --format esm --out-dir dist --sourcemap",
+    "build": "tsdown",
     "clean": "rimraf node_modules dist build .turbo coverage",
     "lint": "oxlint --config ./src/base.ts src",
     "prepack": "pnpm build",
@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@nopeus/tool-tsconfig": "workspace:*",
+    "@nopeus/tool-tsdown-config": "workspace:*",
     "@types/node": "catalog:",
     "oxlint": "catalog:",
     "rimraf": "catalog:",

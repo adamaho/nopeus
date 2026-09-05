@@ -3,6 +3,9 @@ import { expect, test } from "vitest";
 import effect, { serviceKeyPrefixFromPackageName } from "./effect.ts";
 
 const canonicalRules = [
+  "eslint/no-restricted-imports",
+  "nopeus/no-module-level-mutable-state",
+  "nopeus/require-fetch-abort-signal",
   "nopeus/no-effect-runners-in-library",
   "nopeus/no-fallible-effect-promise",
   "nopeus/no-inline-live-layer",
@@ -61,6 +64,13 @@ test("configures the runtime boundary from explicit entrypoints", () => {
     "error",
     { allowFiles: ["src/main.ts"] },
   ]);
+});
+
+test("keeps the syntax policy independent of the native Effect toolchain", () => {
+  const config = effect({ packageName: "nopeus" });
+  expect("options" in config).toBe(false);
+  expect("plugins" in config).toBe(false);
+  expect(Object.keys(config.rules).some((name) => name.startsWith("effecttsgo/"))).toBe(false);
 });
 
 test("allows typeof only inside explicit type guards", () => {

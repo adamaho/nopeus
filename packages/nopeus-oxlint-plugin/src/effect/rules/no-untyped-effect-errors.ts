@@ -85,7 +85,7 @@ export const noUntypedEffectErrorsRule = defineRule({
     docs: { description: "Reject untyped values and built-in errors in Effect.fail." },
     messages: {
       domainError:
-        "Fail with a tagged domain error (for example Schema.TaggedErrorClass), not a primitive or built-in Error.",
+        "Fail with a tagged domain error (for example Schema.TaggedError), not a primitive or built-in Error.",
     },
   },
   createOnce(context) {

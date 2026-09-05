@@ -162,3 +162,6 @@ jobs:
 
       - name: Build
         run: pnpm turbo run build
+
+      - name: Base-only published consumer
+        run: pnpm --filter=@adamaho/nopeus-oxlint-plugin run test:consumer
