@@ -10,8 +10,8 @@ import { preferEffectPlatformServicesRule } from "./effect/rules/prefer-effect-p
 import { preferEffectVoidRule } from "./effect/rules/prefer-effect-void.ts";
 import { requireEffectFnNameRule } from "./effect/rules/require-effect-fn-name.ts";
 import { requireFetchAbortSignalRule } from "./effect/rules/require-fetch-abort-signal.ts";
+import { requireServiceConstructorNamesRule } from "./effect/rules/require-service-constructor-names.ts";
 import { requireServiceKeyPrefixRule } from "./effect/rules/require-service-key-prefix.ts";
-import { requireServiceMakeLayerRule } from "./effect/rules/require-service-make-layer.ts";
 import { noConditionalEmptyObjectSpreadRule } from "./rules/no-conditional-empty-object-spread.ts";
 import { noKnownValueWideningRule } from "./rules/no-known-value-widening.ts";
 import { noModuleMockingRule } from "./rules/no-module-mocking.ts";
@@ -52,7 +52,7 @@ const nopeusPlugin = eslintCompatPlugin({
     "require-public-jsdoc": requirePublicJSDocRule,
     "require-effect-fn-name": requireEffectFnNameRule,
     "require-service-key-prefix": requireServiceKeyPrefixRule,
-    "require-service-make-layer": requireServiceMakeLayerRule,
+    "require-service-constructor-names": requireServiceConstructorNamesRule,
   },
 });
 

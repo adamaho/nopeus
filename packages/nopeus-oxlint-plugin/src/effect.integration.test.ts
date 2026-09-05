@@ -109,3 +109,62 @@ test("the syntax policy accepts v4 code and executes both added rules", () => {
     rmSync(directory, { recursive: true, force: true });
   }
 }, 120_000);
+
+test("constructor naming checks stay independent across files", () => {
+  const directory = mkdtempSync(join(packageRoot, ".constructor-names-"));
+  try {
+    writeFileSync(
+      join(directory, "oxlint.json"),
+      JSON.stringify({
+        jsPlugins: [{ name: "nopeus", specifier: join(packageRoot, "src/index.ts") }],
+        rules: { "nopeus/require-service-constructor-names": "error" },
+      }),
+    );
+    for (const name of ["InvalidA", "InvalidB"]) {
+      writeFileSync(
+        join(directory, name + ".ts"),
+        `import { Context, Layer } from "effect";
+         export class Service extends Context.Service<Service, {}>()("@fixture/${name}") {}
+         export const authLayer = () => Layer.succeed(Service, {});`,
+      );
+    }
+    writeFileSync(
+      join(directory, "factory.ts"),
+      `import { Context, Layer } from "effect";
+       export class Service extends Context.Service<Service, {}>()("@fixture/Auth") {}
+       export function layer(options: Options) { return Layer.succeed(Service, options); }`,
+    );
+    const result = spawnSync(
+      process.execPath,
+      [
+        oxlint,
+        "--config",
+        "oxlint.json",
+        "--no-ignore",
+        "--threads",
+        "1",
+        "--format",
+        "json",
+        "InvalidA.ts",
+        "factory.ts",
+        "InvalidB.ts",
+      ],
+      { cwd: directory, encoding: "utf8", timeout: 60_000 },
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.status, result.stdout + result.stderr).toBe(1);
+    const { diagnostics } = JSON.parse(result.stdout);
+    expect(diagnostics, result.stdout).toHaveLength(2);
+    for (const name of ["InvalidA", "InvalidB"]) {
+      expect(diagnostics).toContainEqual(
+        expect.objectContaining({
+          filename: expect.stringContaining(name + ".ts"),
+          code: expect.stringContaining("require-service-constructor-names"),
+          message: expect.stringContaining("Name this exported Layer"),
+        }),
+      );
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}, 60_000);
