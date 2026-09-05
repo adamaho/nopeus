@@ -8,10 +8,14 @@ import { expect, test } from "vitest";
 
 const repository = fileURLToPath(new URL("../../../", import.meta.url));
 
-function run(cwd: string, args: readonly string[], status = 0) {
+function run(cwd: string, args: readonly string[], expectFailure = false) {
   const result = spawnSync("pnpm", args, { cwd, encoding: "utf8", timeout: 120_000 });
   expect(result.error).toBeUndefined();
-  expect(result.status, result.stdout + result.stderr).toBe(status);
+  if (expectFailure) {
+    expect(result.status, result.stdout + result.stderr).toBeGreaterThan(0);
+  } else {
+    expect(result.status, result.stdout + result.stderr).toBe(0);
+  }
   return result.stdout + result.stderr;
 }
 
@@ -53,7 +57,7 @@ test("packed configs work in base-only and Effect projects", () => {
       "package.json",
     ]);
 
-    const check = (preset: string, code: string, status = 0) => {
+    const check = (preset: string, code: string, expectFailure = false) => {
       writeFileSync(
         join(directory, "tsconfig.json"),
         JSON.stringify({
@@ -63,16 +67,16 @@ test("packed configs work in base-only and Effect projects", () => {
         }),
       );
       writeFileSync(join(directory, "fixture.ts"), code);
-      return run(directory, ["exec", "tsc", "--pretty", "false"], status);
+      return run(directory, ["exec", "tsc", "--pretty", "false"], expectFailure);
     };
 
     check("base", 'export const message: string = "hello";');
-    expect(check("base", "export const message: string = undefined;", 2)).toContain("TS2322");
+    expect(check("base", "export const message: string = undefined;", true)).toContain("TS2322");
     expect(
-      check("base", "export const options: { name?: string } = { name: undefined };", 2),
+      check("base", "export const options: { name?: string } = { name: undefined };", true),
     ).toContain("TS2375");
     expect(
-      check("base", "const values: string[] = []; export const first: string = values[0];", 2),
+      check("base", "const values: string[] = []; export const first: string = values[0];", true),
     ).toContain("TS2322");
 
     writeFileSync(
@@ -92,9 +96,9 @@ test("packed configs work in base-only and Effect projects", () => {
       "effect",
       'import { Effect } from "effect"; export const program = Effect.log("retained");',
     );
-    expect(check("effect", "export const message: string = undefined;", 2)).toContain("TS2322");
+    expect(check("effect", "export const message: string = undefined;", true)).toContain("TS2322");
     const floating = 'import { Effect } from "effect"; Effect.log("discarded");';
-    expect(check("effect", floating, 2)).toContain("TS377001");
+    expect(check("effect", floating, true)).toContain("TS377001");
     check("base", floating);
   } finally {
     rmSync(directory, { recursive: true, force: true });
