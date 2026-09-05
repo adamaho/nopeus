@@ -4,6 +4,7 @@ import { isModuleCall, isModuleType, moduleBindings } from "./effect-call.ts";
 
 type Kind = "layer" | "make";
 type Factory = ESTree.Function | ESTree.ArrowFunctionExpression;
+type Identifier = Extract<ESTree.Node, { type: "Identifier" }>;
 
 const layerMethods = [
   "effect",
@@ -69,7 +70,7 @@ export const requireServiceConstructorNamesRule = defineRule({
     const returns = new Map<Factory, ESTree.Expression[]>();
     const exports: Array<{ name: string; node: ESTree.Node; value: ESTree.Node }> = [];
 
-    function variable(node: ESTree.Identifier): Variable | undefined {
+    function variable(node: Identifier): Variable | undefined {
       let scope = context.sourceCode.getScope(node);
       while (true) {
         const found = scope.set.get(node.name);
@@ -79,7 +80,7 @@ export const requireServiceConstructorNamesRule = defineRule({
       }
     }
 
-    function hasBinding(bindings: ReadonlySet<Variable>, node: ESTree.Identifier): boolean {
+    function hasBinding(bindings: ReadonlySet<Variable>, node: Identifier): boolean {
       const binding = variable(node);
       return binding !== undefined && bindings.has(binding);
     }
@@ -144,7 +145,6 @@ export const requireServiceConstructorNamesRule = defineRule({
         );
       }
       if (node.type === "Identifier") {
-        if (isModuleCall(context.sourceCode, node, layer, "empty")) return "layer";
         const binding = variable(node);
         if (binding === undefined || services.has(binding)) return null;
         if (constructors.has(binding)) return "make";
