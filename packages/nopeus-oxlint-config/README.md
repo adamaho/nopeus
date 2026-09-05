@@ -33,5 +33,5 @@ Node.js 24 or newer.
 The separate `@adamaho/nopeus-oxlint-plugin` package implements custom rules.
 Its `/base` preset adds general TypeScript rules without requiring any Effect
 packages. Its `/effect` preset adds Effect syntax checks, including the v4 import
-restrictions previously included in this base config. The Effect LSP is an
-independent opt-in. See the [plugin setup](../nopeus-oxlint-plugin/README.md).
+restrictions previously included in this base config. Use the Effect preset
+for Effect projects. See the [plugin setup](../nopeus-oxlint-plugin/README.md).
