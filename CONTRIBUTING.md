@@ -50,6 +50,11 @@ Useful focused commands:
 - `pnpm turbo run test:unit` runs package unit test tasks through Turbo
 - `pnpm tsc` runs package TypeScript tasks through Turbo
 
+## Tests
+
+Use Vitest for all automated tests, including package-install and build checks.
+Keep slow consumer tests in a separate Vitest configuration and package script.
+
 ## Workspace Layout
 
 Use the existing top-level workspace directories consistently:

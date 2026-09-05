@@ -11,3 +11,7 @@ AI tooling for faster, more effective software development.
 
 See the [plugin documentation](packages/nopeus-oxlint-plugin/README.md) for the
 base-only installation and the optional Effect integrations.
+
+Workspace builds use the [shared tsdown helper](tools/tsdown-config/README.md).
+The [downstream rollout checklist](docs/consumer-rollout.md) tracks adoption in
+Goho and monorepo after release.

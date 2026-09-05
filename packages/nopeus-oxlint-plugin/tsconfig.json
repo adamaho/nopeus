@@ -1,5 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": ["@nopeus/tool-tsconfig/service", "@nopeus/tool-tsconfig/effect"],
-  "include": ["src/**/*.ts", "vitest.config.ts", "vitest.setup.ts"]
+  "include": [
+    "src/**/*.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    "tsdown.config.ts",
+    "vitest.consumer.config.ts",
+    "test/**/*.test.ts"
+  ]
 }

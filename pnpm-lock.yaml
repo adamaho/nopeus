@@ -73,6 +73,9 @@ importers:
       '@nopeus/tool-tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
+      '@nopeus/tool-tsdown-config':
+        specifier: workspace:*
+        version: link:../../tools/tsdown-config
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.3
@@ -101,6 +104,9 @@ importers:
       '@nopeus/tool-tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
+      '@nopeus/tool-tsdown-config':
+        specifier: workspace:*
+        version: link:../../tools/tsdown-config
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.3
@@ -152,6 +158,27 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.11(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(tsx@4.23.12)(yaml@2.9.0))
+
+  tools/tsdown-config:
+    devDependencies:
+      '@nopeus/tool-tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.3
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.79.0
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.22.14(tsx@4.23.12)(typescript@7.0.2)
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
 
 packages:
 

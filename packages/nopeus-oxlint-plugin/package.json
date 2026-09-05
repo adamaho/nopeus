@@ -39,12 +39,13 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/base.ts src/effect.ts --dts --format esm --out-dir dist --sourcemap",
+    "build": "tsdown",
     "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
     "lint": "oxlint --config ../nopeus-oxlint-config/src/base.ts src",
     "prepack": "pnpm build",
     "test:unit": "vitest run",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "test:consumer": "vitest run --config vitest.consumer.config.ts"
   },
   "dependencies": {
     "@oxlint/plugins": "catalog:"
@@ -52,6 +53,7 @@
   "devDependencies": {
     "@effect/vitest": "catalog:",
     "@nopeus/tool-tsconfig": "workspace:*",
+    "@nopeus/tool-tsdown-config": "workspace:*",
     "@types/node": "catalog:",
     "effect": "catalog:",
     "oxlint": "catalog:",
