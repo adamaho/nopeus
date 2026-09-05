@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,10 +20,9 @@ function run(cwd: string, args: readonly string[], expectFailure = false) {
   return result.stdout + result.stderr;
 }
 
-function version(name: string): string {
-  return JSON.parse(
-    readFileSync(fileURLToPath(import.meta.resolve(name + "/package.json")), "utf8"),
-  ).version;
+function version(name: string, from = import.meta.url): string {
+  return JSON.parse(readFileSync(createRequire(from).resolve(name + "/package.json"), "utf8"))
+    .version;
 }
 
 test("packed configs work in base-only and Effect projects", () => {
@@ -38,8 +38,15 @@ test("packed configs work in base-only and Effect projects", () => {
       devDependencies: {
         "@adamaho/nopeus-tsconfig": "file:./nopeus-tsconfig.tgz",
         typescript: version("typescript"),
+        "@types/node": version("@types/node"),
+        vite: version("vite", import.meta.resolve("vitest/package.json")),
       },
     };
+    // Match the repository's build approvals for the fixture dependencies.
+    writeFileSync(
+      join(directory, "pnpm-workspace.yaml"),
+      "allowBuilds:\n  esbuild: true\n  msgpackr-extract: true\n",
+    );
     writeFileSync(join(directory, "package.json"), JSON.stringify(manifest));
     run(directory, ["install", "--no-frozen-lockfile"]);
 
@@ -54,15 +61,19 @@ test("packed configs work in base-only and Effect projects", () => {
       "README.md",
       "base.json",
       "effect.json",
+      "node.json",
       "package.json",
+      "vite.json",
     ]);
 
-    const check = (preset: string, code: string, expectFailure = false) => {
+    const check = (preset: string, code: string, expectFailure = false, environment = "node") => {
       writeFileSync(
         join(directory, "tsconfig.json"),
         JSON.stringify({
-          extends: "@adamaho/nopeus-tsconfig/" + preset,
-          compilerOptions: { module: "NodeNext", moduleResolution: "NodeNext" },
+          extends: [
+            "@adamaho/nopeus-tsconfig/" + preset,
+            "@adamaho/nopeus-tsconfig/" + environment,
+          ],
           files: ["fixture.ts"],
         }),
       );
@@ -70,20 +81,43 @@ test("packed configs work in base-only and Effect projects", () => {
       return run(directory, ["exec", "tsc", "--pretty", "false"], expectFailure);
     };
 
-    check("base", 'export const message: string = "hello";');
-    expect(check("base", "export const message: string = undefined;", true)).toContain("TS2322");
-    expect(
-      check("base", "export const options: { name?: string } = { name: undefined };", true),
-    ).toContain("TS2375");
-    expect(
-      check("base", "const values: string[] = []; export const first: string = values[0];", true),
-    ).toContain("TS2322");
-
-    // Match the repository's approval for the Effect compiler's native dependency.
-    writeFileSync(
-      join(directory, "pnpm-workspace.yaml"),
-      "allowBuilds:\n  msgpackr-extract: true\n",
+    writeFileSync(join(directory, "dependency.ts"), "export const value = 1;\n");
+    check("base", 'import { cwd } from "node:process"; export const directory = cwd();');
+    expect(check("base", "export const page = window.location;", true)).toContain("TS2304");
+    check("base", 'export { value } from "./dependency.js";');
+    expect(check("base", 'export { value } from "./dependency";', true)).toContain("TS2835");
+    check("base", 'export { value } from "./dependency";', false, "vite");
+    check(
+      "base",
+      'import logo from "./logo.svg"; document.title = import.meta.env.MODE; export { logo }; export const query = [...new URLSearchParams("q=test")];',
+      false,
+      "vite",
     );
+    check("base", "export const directory = process.cwd();", true, "vite");
+
+    for (const environment of ["node", "vite"]) {
+      check("base", 'export const message: string = "hello";', false, environment);
+      expect(
+        check("base", "export const message: string = undefined;", true, environment),
+      ).toContain("TS2322");
+      expect(
+        check(
+          "base",
+          "export const options: { name?: string } = { name: undefined };",
+          true,
+          environment,
+        ),
+      ).toContain("TS2375");
+      expect(
+        check(
+          "base",
+          "const values: string[] = []; export const first: string = values[0];",
+          true,
+          environment,
+        ),
+      ).toContain("TS2322");
+    }
+
     writeFileSync(
       join(directory, "package.json"),
       JSON.stringify({
@@ -97,14 +131,20 @@ test("packed configs work in base-only and Effect projects", () => {
     );
     run(directory, ["install", "--no-frozen-lockfile"]);
     run(directory, ["exec", "effect-tsgo", "patch"]);
-    check(
-      "effect",
-      'import { Effect } from "effect"; export const program = Effect.log("retained");',
-    );
-    expect(check("effect", "export const message: string = undefined;", true)).toContain("TS2322");
-    const floating = 'import { Effect } from "effect"; Effect.log("discarded");';
-    expect(check("effect", floating, true)).toContain("TS377001");
-    check("base", floating);
+    for (const environment of ["node", "vite"]) {
+      check(
+        "effect",
+        'import { Effect } from "effect"; export const program = Effect.log("retained");',
+        false,
+        environment,
+      );
+      expect(
+        check("effect", "export const message: string = undefined;", true, environment),
+      ).toContain("TS2322");
+      const floating = 'import { Effect } from "effect"; Effect.log("discarded");';
+      expect(check("effect", floating, true, environment)).toContain("TS377001");
+      check("base", floating, false, environment);
+    }
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

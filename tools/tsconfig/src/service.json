@@ -1,11 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./base.json",
+  "extends": ["./base.json", "@adamaho/nopeus-tsconfig/node"],
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "rewriteRelativeImportExtensions": false,
-    "types": ["node"],
     "incremental": true,
     "composite": true,
     "declaration": true,

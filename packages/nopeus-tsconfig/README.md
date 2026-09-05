@@ -7,9 +7,14 @@ Canonical TypeScript compiler policy for Nopeus projects.
 | `@adamaho/nopeus-tsconfig/base`   | Strict TypeScript defaults.                                   |
 | `@adamaho/nopeus-tsconfig/effect` | Base defaults plus all canonical Effect compiler diagnostics. |
 
-Both exports are plain JSON. The package has no dependencies, compiler patches,
-or installation scripts. Module resolution, JSX, paths, included files, and build
-output settings belong to the consuming project.
+Combine one policy with an environment: `/node` supplies NodeNext resolution,
+ES2022 libraries, and Node types; `/vite` supplies bundler resolution, ES2022 and
+browser libraries, and Vite client types. Environment configs do not extend a
+policy or change its strictness or Effect diagnostics.
+
+All exports are plain JSON. The package has no dependencies, compiler patches,
+or installation scripts. JSX, paths, included files, and build output settings
+belong to the consuming project.
 
 ## Install
 
@@ -23,15 +28,12 @@ Use the same authenticated GitHub Packages setup as the other Nopeus packages:
 pnpm add -D -E @adamaho/nopeus-tsconfig typescript@7.0.2
 ```
 
-For a project without Effect:
+For a Vite project without Effect, install `vite` as a development dependency
+and combine `/base` with `/vite`:
 
 ```json
 {
-  "extends": "@adamaho/nopeus-tsconfig/base",
-  "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler"
-  },
+  "extends": ["@adamaho/nopeus-tsconfig/base", "@adamaho/nopeus-tsconfig/vite"],
   "include": ["src/**/*.ts"]
 }
 ```
@@ -45,16 +47,11 @@ its build output can set its own emit options.
 ## Effect projects
 
 Use `/effect` to inherit the base policy and all eight canonical Effect
-diagnostics. Keep runtime-specific settings in the repository's shared config:
+diagnostics. For a Node project, combine it with `/node`:
 
 ```json
 {
-  "extends": "@adamaho/nopeus-tsconfig/effect",
-  "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "types": ["node"]
-  }
+  "extends": ["@adamaho/nopeus-tsconfig/effect", "@adamaho/nopeus-tsconfig/node"]
 }
 ```
 
@@ -80,7 +77,11 @@ scripts before typechecking. The JSON config supplies policy; the patched
 compiler executes Effect diagnostics. An unpatched compiler does not enforce
 them. Keep TypeScript and `@effect/tsgo` on compatible versions; the tested pair
 is TypeScript 7.0.2 with `@effect/tsgo` 0.41.0 and Effect 4.0.0-rc.112.
-Node projects also install `@types/node` for their local `types` setting.
+Install `@types/node` when using `/node`. Vite projects using Effect combine
+`/effect` with `/vite` and install `vite`. Neither environment preset installs
+these dependencies automatically. `/node` excludes browser globals; `/vite`
+excludes automatically included Node globals. React projects set their own JSX
+option and install the React types they need.
 
 | Diagnostic                | Required behavior                                               |
 | ------------------------- | --------------------------------------------------------------- |
@@ -104,7 +105,8 @@ Compiler patching and editor language-server selection are separate setup steps.
 
 ## Shared repository configs
 
-Keep existing `tools/tsconfig` wrappers for Node/Vite settings. Their base config
-can extend `/base`; their Effect service config can extend `/effect`. Packages
-continue extending the repository wrappers, so compiler-policy upgrades only
-require changing the shared package version and lockfile.
+Keep thin `tools/tsconfig` wrappers to select a policy and environment once per
+repository. Packages can continue extending those wrappers and owning their
+source paths and build settings. The environment presets leave output and
+project-reference settings untouched. Arrays such as `types` and `lib` replace
+inherited arrays; include every required entry when overriding them.

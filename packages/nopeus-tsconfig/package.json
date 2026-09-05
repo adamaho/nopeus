@@ -11,6 +11,8 @@
   "files": [
     "base.json",
     "effect.json",
+    "node.json",
+    "vite.json",
     "LICENSE",
     "README.md"
   ],
@@ -18,7 +20,9 @@
   "sideEffects": false,
   "exports": {
     "./base": "./base.json",
-    "./effect": "./effect.json"
+    "./effect": "./effect.json",
+    "./node": "./node.json",
+    "./vite": "./vite.json"
   },
   "publishConfig": {
     "access": "restricted",
