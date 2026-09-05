@@ -1,11 +1,13 @@
 ---
-"@adamaho/nopeus-oxlint-plugin": patch
+"@adamaho/nopeus-oxlint-plugin": minor
 ---
 
-Accept exported layer factories paired with exported service constructors in
-`require-service-make-layer`. Support direct and curried Layer constructors,
-explicit configuration arguments, and provisioning pipes without requiring
-configuration to move into a service module.
+Replace `require-service-make-layer` with `require-service-constructor-names`,
+always enabled in the canonical Effect preset. Public Layers use `layer` or
+`layerX`; public service constructors use `make` or `makeX`. Neither requires the
+other, constructors may remain private, and suffixes do not need to match.
 
-Keep constructor/service bindings and naming checks, and reset collected rule
-state between files so one module cannot satisfy or duplicate another's reports.
+Allow parameterized factories, inline construction, config wrappers, and Layer
+composition. Remove the old pairing rule entirely. Consumers that explicitly
+reference its name must remove that entry when upgrading; canonical preset
+consumers receive the replacement automatically.

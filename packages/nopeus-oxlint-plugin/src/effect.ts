@@ -71,7 +71,7 @@ export default function effect({ packageName, runtimeEntryPoints = [] }: NopeusE
         "error",
         { prefix: serviceKeyPrefixFromPackageName(packageName) },
       ],
-      "nopeus/require-service-make-layer": "error",
+      "nopeus/require-service-constructor-names": "error",
     },
   });
 }

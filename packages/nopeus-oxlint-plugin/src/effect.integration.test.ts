@@ -110,29 +110,29 @@ test("the syntax policy accepts v4 code and executes both added rules", () => {
   }
 }, 120_000);
 
-test("service construction checks stay independent across files", () => {
-  const directory = mkdtempSync(join(packageRoot, ".layer-factories-"));
+test("constructor naming checks stay independent across files", () => {
+  const directory = mkdtempSync(join(packageRoot, ".constructor-names-"));
   try {
     writeFileSync(
       join(directory, "oxlint.json"),
       JSON.stringify({
         jsPlugins: [{ name: "nopeus", specifier: join(packageRoot, "src/index.ts") }],
-        rules: { "nopeus/require-service-make-layer": "error" },
+        rules: { "nopeus/require-service-constructor-names": "error" },
       }),
     );
-    for (const name of ["MissingA", "MissingB"]) {
+    for (const name of ["InvalidA", "InvalidB"]) {
       writeFileSync(
         join(directory, name + ".ts"),
-        `import { Context } from "effect";
-         export class ${name} extends Context.Service<${name}, {}>()("@fixture/${name}") {}`,
+        `import { Context, Layer } from "effect";
+         export class Service extends Context.Service<Service, {}>()("@fixture/${name}") {}
+         export const authLayer = () => Layer.succeed(Service, {});`,
       );
     }
     writeFileSync(
       join(directory, "factory.ts"),
-      `import { Context, Effect, Layer } from "effect";
+      `import { Context, Layer } from "effect";
        export class Service extends Context.Service<Service, {}>()("@fixture/Auth") {}
-       export const make = (options: Options) => Effect.succeed(Service.of(options));
-       export function layer(options: Options) { return Layer.effect(Service, make(options)); }`,
+       export function layer(options: Options) { return Layer.succeed(Service, options); }`,
     );
     const result = spawnSync(
       process.execPath,
@@ -145,9 +145,9 @@ test("service construction checks stay independent across files", () => {
         "1",
         "--format",
         "json",
-        "MissingA.ts",
+        "InvalidA.ts",
         "factory.ts",
-        "MissingB.ts",
+        "InvalidB.ts",
       ],
       { cwd: directory, encoding: "utf8", timeout: 60_000 },
     );
@@ -155,11 +155,12 @@ test("service construction checks stay independent across files", () => {
     expect(result.status, result.stdout + result.stderr).toBe(1);
     const { diagnostics } = JSON.parse(result.stdout);
     expect(diagnostics, result.stdout).toHaveLength(2);
-    for (const name of ["MissingA", "MissingB"]) {
+    for (const name of ["InvalidA", "InvalidB"]) {
       expect(diagnostics).toContainEqual(
         expect.objectContaining({
           filename: expect.stringContaining(name + ".ts"),
-          message: expect.stringContaining("Export a module-level make constructor for " + name),
+          code: expect.stringContaining("require-service-constructor-names"),
+          message: expect.stringContaining("Name this exported Layer"),
         }),
       );
     }

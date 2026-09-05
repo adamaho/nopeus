@@ -83,6 +83,24 @@ function isModuleNamespace(
   );
 }
 
+/** Test whether a type name resolves to an imported Effect module type. */
+export function isModuleType(
+  sourceCode: SourceCode,
+  typeName: ESTree.TSTypeName,
+  bindings: ModuleBindings,
+  name: string,
+): boolean {
+  if (typeName.type === "Identifier") {
+    return isNamedModuleImport(sourceCode, typeName, bindings, name);
+  }
+  return (
+    typeName.type === "TSQualifiedName" &&
+    typeName.left.type === "Identifier" &&
+    isModuleNamespace(sourceCode, typeName.left, bindings) &&
+    typeName.right.name === name
+  );
+}
+
 /** Test whether a callee resolves to an imported Effect module function. */
 export function isModuleCall(
   sourceCode: SourceCode,

@@ -656,75 +656,77 @@ namespace imports from effect/Context, and direct Service imports. Static string
 literals wrapped with satisfies are accepted; variables and computed keys are
 rejected.
 
-### nopeus/require-service-make-layer
+### nopeus/require-service-constructor-names
 
-Requires every exported Context.Service class to have an exported module-level
-constructor and a matching exported Layer. The unsuffixed pair is `make` and
-`layer` (or `defaultLayer`); named implementations pair by suffix, such as
-`makeMemory` and `layerMemory`.
+Name exported Layers and Layer factories `layer` or `layerX`, and service
+constructors `make` or `makeX`. The suffix starts with an uppercase letter:
+`layerConfig`, `layerMemory`, and `makeServiceAccount` are valid;
+`authLayer`, `defaultLayer`, `createAuth`, and `make_client` are not.
+Use lowercase `layer` and `make`; uppercase `Layer` names the imported Effect
+module.
 
-Layers may also be synchronous factories that accept explicit configuration:
-
-```ts
-export const make = (options: AuthOptions) =>
-  Effect.tryPromise({
-    try: () => createAuthClient(options),
-    catch: (cause) => new AuthenticationError({ cause }),
-  });
-
-export function layer(options: AuthOptions) {
-  return Layer.effect(Service, make(options));
-}
-```
-
-Function declarations, arrow functions, and function expressions are supported.
-Named factories still pair by suffix, for example `makeServiceAccount` and
-`layerServiceAccount`. Both constructors must be exported. Configuration can
-remain with the caller; the rule does not require environment reads in services.
-
-The rule follows direct returned `Layer.effect`, `Layer.succeed`, and `Layer.sync`
-calls, including curried calls and `.pipe(...)` on the resulting layer.
-`Layer.sync(Service, () => make(options))` keeps synchronous construction lazy.
-Every explicit return in a recognized factory must use the matching service and
-constructor. Nested callbacks and shadowed bindings do not count. Indirect
-factories and arbitrary control flow are outside this syntax check; TypeScript
-checks the factory's return type.
+Neither export requires the other, and suffixes do not need to match. A service
+may expose only a Layer, only a constructor, or both. Constructors may remain
+private. Layer values, parameterized factories, inline construction, config
+wrappers, and composed layers are supported.
 
 Bad:
 
 ```ts
-export class Users extends Context.Service<Users, Interface>()("@goho/Users") {}
-
-export const layer = Layer.effect(
-  Users,
-  Effect.gen(function* () {
-    const database = yield* Database;
-    return Users.of({ find: (id) => database.findUser(id) });
-  }),
-);
+export const createAuth = (options: Options) => Service.of(options);
+export const authLayer = (options: Options) => Layer.succeed(Service, createAuth(options));
 ```
 
-Good:
+Good, with a reusable constructor:
 
 ```ts
-export interface Interface {
-  readonly find: (id: UserId) => Effect.Effect<User, UserNotFound>;
-}
-
-export class Users extends Context.Service<Users, Interface>()("@goho/Users") {}
-
-export const make = Effect.gen(function* () {
-  const database = yield* Database;
-  return Users.of({ find: (id) => database.findUser(id) });
-});
-
-export const layer = Layer.effect(Users, make);
+export const make = (options: Options) => Service.of(options);
+export const layer = (options: Options) => Layer.succeed(Service, make(options));
 ```
 
-The rule does not require the interface name `Interface`, a namespace
-self-reexport, or one particular file layout. Those are useful module
-conventions, but the enforceable architectural contract is that implementation
-construction is reusable independently from Layer composition.
+Good, with inline construction and no separate `make`:
+
+```ts
+export const layer = (options: Options) =>
+  Layer.effect(
+    Service,
+    Effect.gen(function* () {
+      const database = yield* Database;
+      return Service.of({ find: (id) => database.find(id, options) });
+    }),
+  );
+```
+
+Good, resolving configuration through the existing constructor:
+
+```ts
+export const make = (options: Options) => Effect.succeed(Service.of(options));
+export const layerConfig = (options: Config.Wrap<Options>) =>
+  Layer.effect(Service, Config.unwrap(options).pipe(Effect.flatMap(make)));
+```
+
+Good, composing existing Layers without creating another service:
+
+```ts
+export const layer = (options: Options) =>
+  Layer.merge(Auth.layer(options.auth), Database.layer(options.database));
+```
+
+This syntax rule recognizes imported Effect Layer constructors/composition,
+local service `.of` construction, constructors passed to `Layer.effect`,
+`Layer.succeed`, or `Layer.sync`, and explicit Layer/service return types.
+It follows local aliases and returned expressions, including Effect generators
+and functions. Local export aliases are checked by their public name; recognized
+constructors must use named exports rather than a default export.
+
+Private helpers and unrelated functions are not subject to this naming rule.
+Opaque imported factories, cross-file re-exports, and arbitrary type inference
+are outside the syntax check. An explicit `Layer.Layer<...>` return annotation
+makes an otherwise opaque Layer factory recognizable. The rule does not verify
+construction behavior or require particular files, interfaces, or export pairs.
+
+This replaces `require-service-make-layer`; the old rule is removed, not retained
+as an optional policy. The naming rule is always enabled in the Effect preset.
 
 ## Exceptions
 

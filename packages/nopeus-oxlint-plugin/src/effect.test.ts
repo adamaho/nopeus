@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 
 import effect, { serviceKeyPrefixFromPackageName } from "./effect.ts";
+import plugin from "./index.ts";
 
 const canonicalRules = [
   "eslint/no-restricted-imports",
@@ -27,7 +28,7 @@ const canonicalRules = [
   "nopeus/require-effect-fn-name",
   "nopeus/require-public-jsdoc",
   "nopeus/require-service-key-prefix",
-  "nopeus/require-service-make-layer",
+  "nopeus/require-service-constructor-names",
 ].sort();
 
 test("derives a service-key prefix from an unscoped package name", () => {
@@ -86,4 +87,12 @@ test("rejects a package name without a project segment", () => {
   expect(() => serviceKeyPrefixFromPackageName("@adamaho/")).toThrowError(
     new TypeError("packageName must contain a project name"),
   );
+});
+
+test("the Effect preset enables every shipped plugin rule", () => {
+  const config = effect({ packageName: "nopeus" });
+  for (const name of Object.keys(plugin.rules)) {
+    expect(config.rules).toHaveProperty("nopeus/" + name);
+  }
+  expect(plugin.rules).not.toHaveProperty("require-service-make-layer");
 });
