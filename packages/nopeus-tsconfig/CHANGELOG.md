@@ -1,5 +1,12 @@
 # @adamaho/nopeus-tsconfig
 
+## 0.2.0
+
+### Minor Changes
+
+- 28a0d4f: Add dependency-free Node and Vite environment configs that compose with the base
+  or Effect compiler policy. Runtime types are installed by the consuming project.
+
 ## 0.1.0
 
 ### Minor Changes
