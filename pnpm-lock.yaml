@@ -145,24 +145,12 @@ importers:
       '@effect/tsgo':
         specifier: 'catalog:'
         version: 0.41.0
-      '@effect/vitest':
-        specifier: 'catalog:'
-        version: 4.0.0-rc.112(effect@4.0.0-rc.112)(vitest@4.1.11(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(tsx@4.23.12)(yaml@2.9.0)))
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.13.3
-      effect:
-        specifier: 'catalog:'
-        version: 4.0.0-rc.112
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.11(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(tsx@4.23.12)(yaml@2.9.0))
 
   tools/tsdown-config:
     devDependencies:

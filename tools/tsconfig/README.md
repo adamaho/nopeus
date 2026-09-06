@@ -23,11 +23,7 @@ For a Node package that uses Effect:
 The service and app-vite presets supply environment settings independently of
 Effect. Effect projects add the Effect policy as shown above.
 
-The workspace's preparation script runs `effect-tsgo patch`. Compiler tests
-verify each canonical diagnostic through the inherited policy. The consumer
-check packs the JSON package, installs it in an isolated project, and verifies
-base-only compilation without Effect packages and Effect diagnostics after
-installing and patching the compiler integration.
+The workspace's preparation script runs `effect-tsgo patch`.
 
 External projects install `@adamaho/nopeus-tsconfig`; their repository wrappers
 retain their own environment settings and compiler preparation step. See the

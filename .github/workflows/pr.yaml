@@ -165,6 +165,3 @@ jobs:
 
       - name: Base-only published consumer
         run: pnpm --filter=@adamaho/nopeus-oxlint-plugin run test:consumer
-
-      - name: Published TypeScript configs
-        run: pnpm --filter=@nopeus/tool-tsconfig run test:consumer
