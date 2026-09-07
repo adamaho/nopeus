@@ -69,6 +69,46 @@ the `@adamaho` scope and the `nopeus-` name prefix. For example,
 `packages/nopeus-oxlint-plugin/package.json` uses the published name
 `@adamaho/nopeus-oxlint-plugin`.
 
+## Source and Test Layout
+
+Use lowercase kebab-case for ordinary source and test filenames. Use `test/`
+(singular) alongside `src/` in each package or program, and name executable
+tests `*.test.ts` (or the corresponding JavaScript/TSX extension). Module tests
+should mirror the source path; a test for `src/users/service.ts` belongs at
+`test/users/service.test.ts`. Mirroring is guidance, not a requirement to create
+a test for every source file.
+
+| Location                                  | Purpose                                                  |
+| ----------------------------------------- | -------------------------------------------------------- |
+| `src/users/service.ts`                    | Feature implementation                                   |
+| `test/users/service.test.ts`              | Focused feature behavior                                 |
+| `test/integration/users-database.test.ts` | Behavior across real dependencies                        |
+| `test/e2e/server.test.ts`                 | Requests against a running program                       |
+| `test/package/installation.test.ts`       | Installation and loading of a distributable package      |
+| `test/helpers/users-test-layer.ts`        | Test dependencies shared by multiple tests               |
+| `test/fixtures/`                          | Static inputs and intentionally invalid fixture projects |
+
+Create only the directories a project needs. Programs such as an Effect web
+server usually use feature tests and, when needed, integration or end-to-end
+tests. Package installation tests are for distributable libraries and tools.
+Keep helpers local until multiple tests need them. Effect tests provide test
+Layers through the same service contracts used in production.
+
+Tests may import their own package's source, including internals when needed.
+Production files under `src/` must not import tests, helpers, or fixtures.
+Across packages, use the package name and its public exports, including public
+subpath exports, instead of relative paths into another package. TypeScript
+aliases must not bypass that boundary.
+
+Lint both `src/` and `test/`, and typecheck test helpers as well as test files.
+Keep production build entrypoints scoped to `src/`. Deliberately invalid fixture
+files need an explicit, narrow lint/typecheck exclusion; ordinary tests retain
+the project's lint policy. Do not exclude the entire `test/` directory.
+
+The Oxlint plugin runs module tests with `test:unit`, CLI integration tests with
+`test:integration`, and isolated package installation tests with `test:package`.
+Their discovery patterns are disjoint; fixture/helper files are not test suites.
+
 ## Dependency Management
 
 Prefer centralizing shared dependency versions in `pnpm-workspace.yaml` using

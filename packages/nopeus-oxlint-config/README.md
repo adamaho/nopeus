@@ -1,5 +1,14 @@
 # @adamaho/nopeus-oxlint-config
 
+Ordinary source and test filenames use kebab-case through the built-in
+`unicorn/filename-case` rule: `user-service.ts`, `user-service.test.ts`, and
+`effect.integration.test.ts`. `index.ts` and compound extensions such as `.d.ts`
+retain Oxlint's built-in handling. Framework-mandated filenames should have a
+narrow, documented override in the consuming project's config.
+
+Package/test ownership is enforced separately by the custom plugin's `/base`
+and `/effect` presets.
+
 Shared configuration selecting built-in Oxlint rules for TypeScript codebases.
 This package has no Effect runtime or LSP dependency.
 

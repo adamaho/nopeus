@@ -16,6 +16,7 @@ catalog:
   "@oxlint/plugins": 1.79.0
   "@types/node": 24.13.3
   effect: 4.0.0-rc.112
+  oxc-resolver: 11.24.2
   oxfmt: 0.64.0
   oxlint: 1.79.0
   rimraf: 6.1.3

@@ -41,14 +41,16 @@
   "scripts": {
     "build": "tsdown",
     "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
-    "lint": "oxlint --config ../nopeus-oxlint-config/src/base.ts src",
+    "lint": "oxlint --config oxlint.config.ts src test",
     "prepack": "pnpm build",
     "test:unit": "vitest run",
     "tsc": "tsc --noEmit",
-    "test:consumer": "vitest run --config vitest.consumer.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:package": "vitest run --config vitest.package.config.ts"
   },
   "dependencies": {
-    "@oxlint/plugins": "catalog:"
+    "@oxlint/plugins": "catalog:",
+    "oxc-resolver": "catalog:"
   },
   "devDependencies": {
     "@effect/vitest": "catalog:",
