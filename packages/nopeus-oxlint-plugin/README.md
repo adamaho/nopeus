@@ -66,59 +66,6 @@ The root package name defines the owned Effect service namespace. Both goho and
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
 
-### Constrained Linux environments
-
-Oxlint's JavaScript-plugin raw transfer currently reserves roughly 4 GiB of
-virtual address space per worker before running any custom rule. On Linux with
-no swap, a low commit limit, or a restrictive address-space limit, that can
-panic in oxc's fixed-size allocator even though resident memory remains small.
-This is [upstream oxc issue #20331](https://github.com/oxc-project/oxc/issues/20331):
-the reservation happens whenever `jsPlugins` is nonempty, so splitting or lazily
-loading Nopeus rules cannot avoid it. `--threads 1` still needs one reservation,
-and no released Oxlint version provides a serialized-transfer switch.
-
-Use Oxlint for native rules and ESLint for the same Nopeus custom policy when
-the environment cannot make that reservation:
-
-```ts
-// oxlint.config.ts
-import builtins from "@adamaho/nopeus-oxlint-config";
-import { defineConfig } from "oxlint";
-
-export default defineConfig({ extends: [builtins] });
-```
-
-```js
-// eslint.config.mjs
-import parser from "@typescript-eslint/parser";
-import { eslintEffect } from "@adamaho/nopeus-oxlint-plugin/eslint";
-
-export default eslintEffect({
-  packageName: "@adamaho/goho",
-  parser,
-  runtimeEntryPoints: ["src/main.ts"],
-});
-```
-
-```bash
-pnpm add --save-dev eslint @typescript-eslint/parser
-pnpm exec oxlint && pnpm exec eslint .
-```
-
-The ESLint entry point reuses the same rule implementations and maps Oxlint's
-`eslint/no-restricted-imports` name to ESLint's core `no-restricted-imports`.
-It accepts a parser instead of forcing one on consumers. TypeScript 7 has no
-JavaScript API, so `@typescript-eslint/parser` requires Microsoft's documented
-side-by-side TypeScript 6 compatibility package until TypeScript 7.1 tooling is
-available. The Nopeus repository uses `typescript: npm:@typescript/typescript6`
-only for ESLint while package typechecks continue to use TypeScript 7.
-
-The existing `/base` and `/effect` Oxlint presets remain supported and unchanged
-for environments that can reserve the raw-transfer arena. Oxlint CLI integration
-and package-installation tests still exercise those entry points and therefore
-retain the upstream allocator limitation; the default repository lint no longer
-does.
-
 ## Rules
 
 ### nopeus/no-export-assignment

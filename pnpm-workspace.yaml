@@ -24,12 +24,6 @@ catalog:
   tsdown: 0.22.14
   typescript: 7.0.2
   vitest: 4.1.11
-  "@typescript-eslint/parser": 8.69.0
-  eslint: 10.10.0
-
-catalogs:
-  eslint:
-    typescript: npm:@typescript/typescript6@6.0.2
 
 catalogMode: strict
 engineStrict: true

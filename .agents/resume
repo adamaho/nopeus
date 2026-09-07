@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Oxlint's JavaScript-plugin raw transfer reserves a multi-GiB virtual buffer
+# without using that much physical RAM. Small no-swap orbs reject it with the
+# default heuristic overcommit policy. Kernel settings may reset when a
+# snapshot is restored, so repair this on each wake.
+if [[ "$(cat /proc/sys/vm/overcommit_memory)" != 1 ]]; then
+  sudo -n sysctl -w vm.overcommit_memory=1
+fi
+
 # Check the restored pinned tools without reinstalling dependencies on every wake.
 export PNPM_HOME="$HOME/.local/share/pnpm"
 export PATH="$PNPM_HOME/bin:$PATH"

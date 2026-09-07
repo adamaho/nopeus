@@ -18,8 +18,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./effect": "./src/effect.ts",
-    "./base": "./src/base.ts",
-    "./eslint": "./src/eslint.ts"
+    "./base": "./src/base.ts"
   },
   "publishConfig": {
     "exports": {
@@ -34,10 +33,6 @@
       "./base": {
         "types": "./dist/base.d.mts",
         "import": "./dist/base.mjs"
-      },
-      "./eslint": {
-        "types": "./dist/eslint.d.mts",
-        "import": "./dist/eslint.mjs"
       }
     },
     "access": "restricted",
@@ -70,16 +65,7 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "eslint": ">=10.10.0 <11",
     "oxlint": ">=1.79.0 <2"
-  },
-  "peerDependenciesMeta": {
-    "eslint": {
-      "optional": true
-    },
-    "oxlint": {
-      "optional": true
-    }
   },
   "engines": {
     "node": "^22.18.0 || >=24.0.0"
