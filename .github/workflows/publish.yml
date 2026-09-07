@@ -36,6 +36,7 @@ jobs:
           scope: "@adamaho"
 
       - name: Version or publish packages
+        id: changesets
         uses: changesets/action@v1
         with:
           publish: pnpm changeset:publish
@@ -45,3 +46,61 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}
           NODE_AUTH_TOKEN: ${{ github.token }}
           NPM_TOKEN: ${{ github.token }}
+
+      - name: Open consumer update pull requests
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}
+          NODE_AUTH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          config_version="$(node -p 'require("./packages/nopeus-oxlint-config/package.json").version')"
+          plugin_version="$(node -p 'require("./packages/nopeus-oxlint-plugin/package.json").version')"
+          tsconfig_version="$(node -p 'require("./packages/nopeus-tsconfig/package.json").version')"
+          checkout_root="$RUNNER_TEMP/nopeus-consumers"
+          branch="automation/update-nopeus"
+
+          rm -rf "$checkout_root"
+          mkdir -p "$checkout_root"
+          gh auth setup-git
+
+          for repository in goho monorepo; do
+            directory="$checkout_root/$repository"
+            gh repo clone "adamaho/$repository" "$directory" -- --branch dev --single-branch
+            git -C "$directory" switch -c "$branch"
+            node .github/scripts/update-nopeus-consumer.mjs \
+              "$directory/pnpm-workspace.yaml" \
+              "$config_version" \
+              "$plugin_version" \
+              "$tsconfig_version"
+            pnpm --dir "$directory" install --lockfile-only
+
+            if git -C "$directory" diff --quiet; then
+              echo "$repository already uses the released Nopeus versions"
+              continue
+            fi
+
+            git -C "$directory" config user.name "adamaho-bot"
+            git -C "$directory" config user.email "adamaho-bot@users.noreply.github.com"
+            git -C "$directory" add pnpm-workspace.yaml pnpm-lock.yaml
+            git -C "$directory" commit -m "chore(nopeus): update released packages"
+            remote_sha="$(git -C "$directory" ls-remote --heads origin "refs/heads/$branch" | cut -f1)"
+            if [[ -n "$remote_sha" ]]; then
+              git -C "$directory" push \
+                --force-with-lease="refs/heads/$branch:$remote_sha" \
+                origin "HEAD:refs/heads/$branch"
+            else
+              git -C "$directory" push --set-upstream origin "$branch"
+            fi
+
+            if [[ -z "$(gh pr list --repo "adamaho/$repository" --head "$branch" --base dev --state open --json url --jq '.[0].url')" ]]; then
+              gh pr create \
+                --repo "adamaho/$repository" \
+                --base dev \
+                --head "$branch" \
+                --title "chore(nopeus): update released packages" \
+                --body "Pins the exact @adamaho/nopeus package versions published from adamaho/nopeus."
+            fi
+          done
