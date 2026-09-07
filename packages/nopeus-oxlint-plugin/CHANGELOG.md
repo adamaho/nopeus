@@ -1,5 +1,31 @@
 # @adamaho/nopeus-oxlint-plugin
 
+## 0.4.0
+
+### Minor Changes
+
+- 55b5db9: Enforce kebab-case source filenames and add canonical package/test boundaries.
+  The base and Effect presets require named tests under each package's sibling
+  test directory, prevent production imports of test code, and require public
+  entrypoints for cross-package imports. TypeScript aliases and workspace symlinks
+  are resolved through the new oxc-resolver dependency.
+
+  Previously accepted filenames, test locations, and internal imports may now
+  report errors. Move tests from src to test, rename spec files to test files,
+  and replace cross-package filesystem imports with public package imports.
+
+- 29cd132: Fix package ownership for public exports inside directories whose package.json
+  only declares a module type. These directories no longer incorrectly create
+  separate package boundaries; real nested packages remain isolated.
+
+  Require ESM source and tests. The built-in config now rejects require calls,
+  TypeScript import-equals, module.exports, and exports assignments. The plugin's
+  base and Effect presets also reject TypeScript export assignments with the new
+  no-export-assignment rule.
+
+  Replace CommonJS syntax with ESM import/export syntax when upgrading both
+  packages. ESM imports of dependencies implemented in CommonJS remain allowed.
+
 ## 0.3.0
 
 ### Minor Changes
