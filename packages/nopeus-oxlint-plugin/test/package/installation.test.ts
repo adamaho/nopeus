@@ -64,7 +64,8 @@ test("published base presets install and lint without Effect packages", () => {
 
     writeFileSync(
       join(directory, "invalid.ts"),
-      "debugger;\n/** @internal */\nexport const value = 1 as number;\n",
+      "debugger;\nconst value = 1 as number;\n" +
+        'require("node:fs"); module.exports = {}; export = value;\n',
     );
     const rejected = spawnSync(
       "pnpm",
@@ -82,6 +83,9 @@ test("published base presets install and lint without Effect packages", () => {
     );
     expect(codes).toContain("eslint(no-debugger)");
     expect(codes).toContain("nopeus(no-type-assertions)");
+    expect(codes).toContain("typescript(no-require-imports)");
+    expect(codes).toContain("import(no-commonjs)");
+    expect(codes).toContain("nopeus(no-export-assignment)");
 
     writeFileSync(join(directory, "Misplaced.test.ts"), "export {};\n");
     const structure = spawnSync(

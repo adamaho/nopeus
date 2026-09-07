@@ -4,6 +4,7 @@ import effect, { serviceKeyPrefixFromPackageName } from "../src/effect.ts";
 import plugin from "../src/index.ts";
 
 const canonicalRules = [
+  "nopeus/no-export-assignment",
   "nopeus/no-cross-package-internals",
   "nopeus/no-test-imports",
   "nopeus/require-test-location",
