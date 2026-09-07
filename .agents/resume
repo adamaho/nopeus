@@ -12,6 +12,7 @@ fi
 # Check the restored pinned tools without reinstalling dependencies on every wake.
 export PNPM_HOME="$HOME/.local/share/pnpm"
 export PATH="$PNPM_HOME/bin:$PATH"
+export PNPM_CONFIG_NPMRC_AUTH_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.npmrc"
 node_version="$(node --version)"
 pnpm_version="$(pnpm --version)"
 echo "Nopeus ready: Node $node_version, pnpm $pnpm_version"

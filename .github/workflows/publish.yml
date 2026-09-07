@@ -28,13 +28,6 @@ jobs:
       - name: Setup pnpm and install
         uses: ./.github/actions/setup-pnpm
 
-      - name: Configure GitHub Packages
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: package.json
-          registry-url: https://npm.pkg.github.com
-          scope: "@adamaho"
-
       - name: Version or publish packages
         id: changesets
         uses: changesets/action@v1

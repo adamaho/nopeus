@@ -19,6 +19,9 @@ read-only machine-user token for shared unattended access. GitHub Packages does
 not accept Amp OIDC, and orb setup does not inherit normal GitHub credentials.
 The committed `.npmrc` contains only the registry route and the literal
 `${NODE_AUTH_TOKEN}` reference, never the secret value.
+Orb setup persistently sets `PNPM_CONFIG_NPMRC_AUTH_FILE` to that repository
+file so setup and later `pnpm add` or `pnpm update` commands use the same
+runtime secret without creating another npmrc.
 
 ```bash
 export NODE_AUTH_TOKEN=...

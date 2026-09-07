@@ -4,27 +4,17 @@ description: Setup Node.js, pnpm, and install dependencies.
 runs:
   using: composite
   steps:
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: package.json
-
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v6
-      with:
-        package_json_file: package.json
-        run_install: false
-
-    - name: Setup pnpm cache and registry
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: package.json
-        cache: pnpm
-        registry-url: https://npm.pkg.github.com
-        scope: "@adamaho"
-
-    - name: Install dependencies
+    - name: Configure pnpm authentication
       shell: bash
+      run: echo "PNPM_CONFIG_NPMRC_AUTH_FILE=$GITHUB_WORKSPACE/.npmrc" >> "$GITHUB_ENV"
+
+    - name: Setup pnpm, Node.js, cache, and dependencies
+      uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
       env:
         NODE_AUTH_TOKEN: ${{ github.token }}
-      run: pnpm install --frozen-lockfile
+      with:
+        version: 12.3.4
+        runtime: node@24.15.0
+        cache: true
+        cache-dependency-path: pnpm-lock.yaml
+        require-lockfile: true

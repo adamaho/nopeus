@@ -9,6 +9,7 @@ readonly node_version="24.15.0"
 readonly pnpm_version="12.3.4"
 export PNPM_HOME="$HOME/.local/share/pnpm"
 export PATH="$PNPM_HOME/bin:$PATH"
+export PNPM_CONFIG_NPMRC_AUTH_FILE="$repo_root/.npmrc"
 
 echo "Preparing Node $node_version and pnpm $pnpm_version"
 if ! docker compose version >/dev/null 2>&1; then
@@ -38,6 +39,7 @@ fi
 mkdir -p "$HOME/.config/amp"
 cat > "$HOME/.config/amp/nopeus-env.bash" <<EOF
 export PNPM_HOME="$PNPM_HOME"
+export PNPM_CONFIG_NPMRC_AUTH_FILE="$repo_root/.npmrc"
 case ":\$PATH:" in
   *":\$PNPM_HOME/bin:"*) ;;
   *) export PATH="\$PNPM_HOME/bin:\$PATH" ;;
