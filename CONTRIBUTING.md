@@ -7,18 +7,24 @@ and easy to review.
 
 Install these before working in the repo:
 
-- [Nix](https://nixos.org/download/)
+- [Node.js 24.15.0](https://nodejs.org/en/download)
+- [pnpm 12.3.4](https://pnpm.io/installation)
 - [Docker](https://docs.docker.com/get-docker/)
 
 ## Development Setup
 
-Enter the Nix development shell before running project commands:
+Set `NODE_AUTH_TOKEN` to a GitHub classic PAT with `read:packages` access to
+private `@adamaho` packages. Use a personal token per developer; reserve a
+read-only machine-user token for shared unattended access. GitHub Packages does
+not accept Amp OIDC, and orb setup does not inherit normal GitHub credentials.
+The committed `.npmrc` contains only the registry route and the literal
+`${NODE_AUTH_TOKEN}` reference, never the secret value.
 
 ```bash
-nix develop
+export NODE_AUTH_TOKEN=...
 ```
 
-Install dependencies:
+Then install dependencies from the lockfile:
 
 ```bash
 pnpm install
@@ -115,8 +121,34 @@ Prefer centralizing shared dependency versions in `pnpm-workspace.yaml` using
 the catalog. This keeps package manifests small and makes upgrades easier to
 review.
 
-Use exact versions. The root `.npmrc` sets `save-exact=true` and
-`engine-strict=true`.
+Use exact versions. `pnpm-workspace.yaml` enables `saveExact` and
+`engineStrict`.
+
+The workspace enforces a one-day (`1440` minute) minimum release age for direct
+and transitive third-party dependencies. Resolution fails when no old-enough
+version satisfies the requested range or when a third-party registry omits
+publish timestamps. The `@adamaho/*` scope is excluded so a newly published
+private first-party package can be consumed immediately. Keep exceptions scoped
+to that organization; use a reviewed, version-specific
+`minimumReleaseAgeExclude` entry if an urgent third-party release cannot wait.
+
+`trustLockfile` remains disabled, so `pnpm install --frozen-lockfile` verifies
+the committed lockfile against the release-age policy while preventing lockfile
+changes. The policy cannot protect the official pnpm/Node bootstrap itself,
+which uses exact versions before workspace configuration is available.
+
+GitHub Actions uses its job-scoped `github.token` instead of a PAT and declares
+`packages: read`. Consumer repositories must also have Read access under each
+private package's **Manage Actions access** settings; workflow permissions alone
+do not grant package access.
+
+After Changesets publishes a release, the publish workflow updates all three
+Nopeus catalog entries and lockfile resolutions on dedicated branches in Goho
+and adamaho/monorepo, then opens or refreshes exact-version pull requests against
+their `dev` branches. `ADAMAHO_BOT_PAT` needs cross-repository write access for
+those branches and pull requests. The resulting consumer PR workflows use their
+own `github.token` for package installation and still require the package access
+described above.
 
 ## Changesets
 
@@ -181,17 +213,17 @@ fix(nopeus-oxlint-plugin): recognize aliased imports
 
 ## Coding Agents
 
-Start coding agents from inside the Nix shell so their commands use the same
-toolchain as local development:
+Before starting a coding agent, verify that its shell resolves the pinned
+toolchain:
 
 ```bash
-nix develop
-opencode
+node --version
+pnpm --version
 ```
 
-If an agent was not started inside `nix develop`, run verification commands
-through Nix explicitly:
+The versions must be Node `v24.15.0` and pnpm `12.3.4`. Run verification
+directly:
 
 ```bash
-nix develop --command pnpm check
+pnpm check
 ```

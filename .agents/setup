@@ -3,41 +3,61 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
+SECONDS=0
 
-# Match CI without requiring a Nix shell: the flake supplies tools, not extra
-# build environment variables. The orb already provides bootstrap Node/npm.
-node_version="$(node -p 'require("./package.json").engines.node.replace(/^\^/, "")')"
-pnpm_version="$(node -p 'require("./package.json").packageManager.split("@")[1]')"
-toolchain="$HOME/.local/share/nopeus-toolchain"
+readonly node_version="24.15.0"
+readonly pnpm_version="12.3.4"
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$PNPM_HOME/bin:$PATH"
 
 echo "Preparing Node $node_version and pnpm $pnpm_version"
-if [[ ! -x "$toolchain/bin/node" || "$("$toolchain/bin/node" --version)" != "v$node_version" ]]; then
-  time npm install --global --prefix "$toolchain" --no-audit --no-fund "node@$node_version"
-fi
-export PATH="$toolchain/bin:$PATH"
-if [[ ! -x "$toolchain/bin/pnpm" || "$("$toolchain/bin/pnpm" --version)" != "$pnpm_version" ]]; then
-  time npm install --global --prefix "$toolchain" --no-audit --no-fund "pnpm@$pnpm_version"
+if ! docker compose version >/dev/null 2>&1; then
+  echo "Installing the Docker Compose plugin..."
+  sudo apt-get update
+  sudo apt-get install -y docker-compose-plugin
 fi
 
-# Amp and supervised services enter fresh login shells. Scope activation to this
-# repository and its packages, and avoid adding the path more than once.
-profile_marker="# Nopeus orb toolchain"
-if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile" 2>/dev/null; then
-  cat >> "$HOME/.bash_profile" <<EOF
+installed_pnpm_version=""
+if [[ -x "$PNPM_HOME/bin/pnpm" ]]; then
+  installed_pnpm_version="$(
+    cd "$HOME"
+    "$PNPM_HOME/bin/pnpm" --version 2>/dev/null || true
+  )"
+fi
 
-$profile_marker
-case "\$PWD/" in
-  "$repo_root/"*)
-    case ":\$PATH:" in
-      *":$toolchain/bin:"*) ;;
-      *) export PATH="$toolchain/bin:\$PATH" ;;
-    esac
-    ;;
+if [[ "$installed_pnpm_version" != "$pnpm_version" ]]; then
+  curl --fail --location --retry 3 https://get.pnpm.io/install.sh |
+    PNPM_VERSION="$pnpm_version" ENV="$HOME/.bashrc" SHELL=/bin/bash sh -
+fi
+
+if [[ ! -x "$PNPM_HOME/bin/node" ]] ||
+  [[ "$("$PNPM_HOME/bin/node" --version)" != "v$node_version" ]]; then
+  "$PNPM_HOME/bin/pnpm" runtime set node "$node_version" --global
+fi
+
+mkdir -p "$HOME/.config/amp"
+cat > "$HOME/.config/amp/nopeus-env.bash" <<EOF
+export PNPM_HOME="$PNPM_HOME"
+case ":\$PATH:" in
+  *":\$PNPM_HOME/bin:"*) ;;
+  *) export PATH="\$PNPM_HOME/bin:\$PATH" ;;
 esac
 EOF
-fi
+
+marker="# Nopeus orb Node.js and pnpm environment"
+touch "$HOME/.bash_profile"
+sed -i \
+  -e '\|^# Nopeus orb development environment$|d' \
+  -e '\|^# Nopeus orb Node.js and pnpm environment$|d' \
+  -e '\|^source "\$HOME/.config/amp/nopeus-env.bash"$|d' \
+  "$HOME/.bash_profile"
+printf '\n%s\n%s\n' \
+  "$marker" \
+  'source "$HOME/.config/amp/nopeus-env.bash"' \
+  >> "$HOME/.bash_profile"
 
 echo "Installing workspace dependencies from the lockfile"
-time pnpm install --frozen-lockfile
+: "${NODE_AUTH_TOKEN:?Configure the Amp NODE_AUTH_TOKEN secret}"
+time "$PNPM_HOME/bin/pnpm" install --frozen-lockfile
 "$repo_root/.agents/resume"
-echo "Orb setup complete: Node $(node --version), pnpm $(pnpm --version)"
+echo "Orb setup complete in ${SECONDS}s: Node $(node --version), pnpm $(pnpm --version)"
