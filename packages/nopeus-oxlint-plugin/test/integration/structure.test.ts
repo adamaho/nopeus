@@ -81,7 +81,7 @@ test("structure checks use package ownership from both repository and package cw
 test("the syntax policy rejects CommonJS in source and tests", () => {
   const workspace = testWorkspace();
   try {
-    const config = join(packageRoot, "oxlint.config.ts");
+    const config = join(packageRoot, "oxlint.integration.config.ts");
     for (const [code, rule] of [
       ['require("node:fs");', "no-require-imports"],
       ['if (flag) { require("node:fs"); }', "no-require-imports"],

@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 concurrency:
   group: pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -23,7 +24,7 @@ concurrency:
 jobs:
   lint:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +41,7 @@ jobs:
         uses: ./.github/actions/setup-pnpm
 
       - name: Lint
-        run: pnpm turbo run lint
+        run: pnpm lint
 
   fmt:
     name: fmt

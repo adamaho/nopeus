@@ -5,10 +5,10 @@
   "scripts": {
     "changeset": "changeset",
     "changeset:status": "changeset status",
-    "check": "pnpm fmt:check && turbo run lint test:unit tsc",
+    "check": "pnpm fmt:check && pnpm lint && turbo run test:unit tsc",
     "clean": "turbo run clean && rimraf node_modules",
     "dev": "turbo run dev --ui=tui",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint && eslint --config eslint.config.mjs packages/nopeus-oxlint-plugin/src packages/nopeus-oxlint-plugin/test",
     "changeset:publish": "changeset publish",
     "fmt": "oxfmt --config ./tools/oxfmt-config/src/base.json .",
     "fmt:check": "oxfmt --check --config ./tools/oxfmt-config/src/base.json .",
@@ -18,9 +18,12 @@
   "devDependencies": {
     "@changesets/cli": "catalog:",
     "@nopeus/tool-oxfmt-config": "workspace:*",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint": "catalog:",
     "oxfmt": "catalog:",
     "rimraf": "catalog:",
-    "turbo": "catalog:"
+    "turbo": "catalog:",
+    "typescript": "catalog:eslint"
   },
   "engines": {
     "node": "^24.15.0",

@@ -35,7 +35,10 @@ test("published base presets install and lint without Effect packages", () => {
         devDependencies: {
           "@adamaho/nopeus-oxlint-config": "file:./nopeus-oxlint-config.tgz",
           "@adamaho/nopeus-oxlint-plugin": "file:./nopeus-oxlint-plugin.tgz",
+          "@typescript-eslint/parser": "8.69.0",
+          eslint: "10.10.0",
           oxlint: "1.79.0",
+          typescript: "npm:@typescript/typescript6@6.0.2",
         },
       }),
     );
@@ -125,6 +128,26 @@ test("published base presets install and lint without Effect packages", () => {
     );
     expect(effectCodes).toContain("eslint(no-restricted-imports)");
     expect(effectCodes).toContain("nopeus(no-module-level-mutable-state)");
+
+    writeFileSync(
+      join(directory, "eslint.config.mjs"),
+      `
+      import parser from "@typescript-eslint/parser";
+      import { eslintBase } from "@adamaho/nopeus-oxlint-plugin/eslint";
+      export default eslintBase({ parser });
+    `,
+    );
+    const eslintOnly = spawnSync("pnpm", ["exec", "eslint", "--format", "json", "invalid.ts"], {
+      cwd: directory,
+      encoding: "utf8",
+      timeout: 60_000,
+    });
+    expect(eslintOnly.error).toBeUndefined();
+    expect(eslintOnly.status, eslintOnly.stdout + eslintOnly.stderr).toBe(1);
+    const eslintCodes = JSON.parse(eslintOnly.stdout)[0].messages.map(
+      (diagnostic: { ruleId: string }) => diagnostic.ruleId,
+    );
+    expect(eslintCodes).toContain("nopeus/no-type-assertions");
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

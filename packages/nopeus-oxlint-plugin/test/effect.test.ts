@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 
 import effect, { serviceKeyPrefixFromPackageName } from "../src/effect.ts";
+import { eslintEffect } from "../src/eslint.ts";
 import plugin from "../src/index.ts";
 
 const canonicalRules = [
@@ -99,4 +100,17 @@ test("the Effect preset enables every shipped plugin rule", () => {
     expect(config.rules).toHaveProperty("nopeus/" + name);
   }
   expect(plugin.rules).not.toHaveProperty("require-service-make-layer");
+});
+
+test("the ESLint Effect preset preserves the canonical policy without a JS plugin", () => {
+  const [config] = eslintEffect({ packageName: "nopeus", parser: {} });
+
+  expect(config?.plugins).toEqual({ nopeus: plugin });
+  expect(config?.rules).not.toHaveProperty("eslint/no-restricted-imports");
+  expect(config?.rules).toHaveProperty("no-restricted-imports");
+  expect(Object.keys(config?.rules ?? {}).sort()).toEqual(
+    canonicalRules.map((name) =>
+      name === "eslint/no-restricted-imports" ? "no-restricted-imports" : name,
+    ),
+  );
 });

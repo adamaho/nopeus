@@ -4,5 +4,6 @@ import builtins from "../nopeus-oxlint-config/src/base.ts";
 
 export default defineConfig({
   extends: [builtins],
-  ignorePatterns: ["test/fixtures/**"],
+  jsPlugins: [{ name: "nopeus", specifier: "./src/index.ts" }],
+  rules: { "nopeus/no-export-assignment": "error" },
 });
