@@ -30,26 +30,6 @@ Start local infrastructure when a package needs shared runtime services:
 pnpm --filter=@monorepo/infra-local run infra:up
 ```
 
-### Amp Orbs
-
-`.agents/setup` installs Node at the minimum version in `engines.node`, pnpm
-at the exact `packageManager` version, and frozen-lockfile workspace dependencies.
-Like CI, orbs use these tools directly rather than entering Nix; the current
-flake adds no extra build environment. A repository-scoped login-shell hook
-makes the toolchain available to Amp and supervised services.
-
-Amp snapshots the installed tools, dependencies, and package-manager cache.
-An exact snapshot skips setup; a stale snapshot reruns the idempotent setup
-against the updated checkout. `.agents/resume` checks the restored tools and
-enables Linux virtual-memory overcommit for Oxlint's 6 GiB virtual buffer on
-small orbs; it never installs dependencies. To refresh dependencies manually,
-run `.agents/setup` from the repository.
-
-Current packages require no runtime secrets or backing services, so setup does
-not start Docker or PostgreSQL. The optional local infrastructure above is not
-needed for `pnpm check` or builds. If a future program needs a long-running
-service, declare it in `.amp/services.yaml` rather than starting it during setup.
-
 ## Verification
 
 Run the full local verification command before opening a PR or committing a
