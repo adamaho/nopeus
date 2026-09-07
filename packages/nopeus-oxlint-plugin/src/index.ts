@@ -13,22 +13,28 @@ import { requireFetchAbortSignalRule } from "./effect/rules/require-fetch-abort-
 import { requireServiceConstructorNamesRule } from "./effect/rules/require-service-constructor-names.ts";
 import { requireServiceKeyPrefixRule } from "./effect/rules/require-service-key-prefix.ts";
 import { noConditionalEmptyObjectSpreadRule } from "./rules/no-conditional-empty-object-spread.ts";
+import { noCrossPackageInternalsRule } from "./rules/no-cross-package-internals.ts";
 import { noKnownValueWideningRule } from "./rules/no-known-value-widening.ts";
 import { noModuleMockingRule } from "./rules/no-module-mocking.ts";
 import { noObjectParametersRule } from "./rules/no-object-parameters.ts";
 import { noReflectApplyRule } from "./rules/no-reflect-apply.ts";
 import { noReflectGetRule } from "./rules/no-reflect-get.ts";
 import { noRuntimeTypeofRule } from "./rules/no-runtime-typeof.ts";
+import { noTestImportsRule } from "./rules/no-test-imports.ts";
 import { noTypeAssertionsRule } from "./rules/no-type-assertions.ts";
 import { noUnknownReturnsRule } from "./rules/no-unknown-returns.ts";
 import { noUnknownTypeAliasesRule } from "./rules/no-unknown-type-aliases.ts";
 import { noUnsafeDictionaryTypeRule } from "./rules/no-unsafe-dictionary-type.ts";
 import { requirePublicJSDocRule } from "./rules/require-public-jsdoc.ts";
+import { requireTestLocationRule } from "./rules/require-test-location.ts";
 
 /** Strict Oxlint rules for preserving type evidence and explicit Effect architecture. */
 const nopeusPlugin = eslintCompatPlugin({
   meta: { name: "nopeus" },
   rules: {
+    "no-cross-package-internals": noCrossPackageInternalsRule,
+    "no-test-imports": noTestImportsRule,
+    "require-test-location": requireTestLocationRule,
     "no-effect-runners-in-library": noEffectRunnersInLibraryRule,
     "no-fallible-effect-promise": noFallibleEffectPromiseRule,
     "no-inline-live-layer": noInlineLiveLayerRule,

@@ -3,10 +3,10 @@
   "extends": ["@nopeus/tool-tsconfig/service", "@nopeus/tool-tsconfig/effect"],
   "include": [
     "src/**/*.ts",
-    "vitest.config.ts",
+    "test/**/*.ts",
+    "*.config.ts",
     "vitest.setup.ts",
-    "tsdown.config.ts",
-    "vitest.consumer.config.ts",
-    "test/**/*.test.ts"
-  ]
+    "../nopeus-oxlint-config/src/base.ts"
+  ],
+  "exclude": ["test/fixtures/**"]
 }

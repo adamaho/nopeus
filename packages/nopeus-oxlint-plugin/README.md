@@ -68,6 +68,86 @@ Node.js 24 or newer.
 
 ## Rules
 
+### nopeus/require-test-location
+
+Test files belong under the nearest package's `test/` directory, alongside
+`src/`, and use `.test` rather than `.spec` before their source extension.
+The same policy applies to libraries and executable programs, regardless of
+whether Oxlint runs from the repository root or a package directory.
+
+Bad: `src/users/service.test.ts`, `tests/users.test.ts`, `test/users.spec.ts`.
+
+Good: `test/users/service.test.ts`, `test/integration/users.test.ts`,
+`test/e2e/server.test.ts`, `test/package/installation.test.ts`.
+
+Module tests should mirror source paths, but the rule does not require a test
+for each source file or prescribe feature folders. It recognizes `.test` and
+`.spec` filenames with JS, JSX, TS, TSX, MJS, CJS, MTS, and CTS extensions;
+it does not infer tests from arbitrary function calls. Files without a package
+owner are skipped. Test helpers need no `.test` suffix.
+
+### nopeus/no-test-imports
+
+Files under a package's `src/` cannot import its `test/` resources, another
+package's test resources, or legacy `tests/`, `__tests__`, and test/spec files.
+This includes type-only imports, re-exports, literal dynamic imports, and
+unshadowed `require` calls. Tests and root-level runner configs may use helpers.
+
+Bad, in `src/users/service.ts`:
+
+```ts
+import { usersLayer } from "../../test/helpers/users-test-layer.ts";
+```
+
+Good, in `test/users/service.test.ts`:
+
+```ts
+import { make } from "../../src/users/service.ts";
+import { usersLayer } from "../helpers/users-test-layer.ts";
+```
+
+Keep helpers under `test/helpers/` and inputs under `test/fixtures/` when they
+need to be shared. Create those directories only when needed.
+
+### nopeus/no-cross-package-internals
+
+Cross-package imports must use the destination package's own name and public
+entrypoints. Relative/absolute filesystem imports and TypeScript aliases cannot
+reach into another package, even when the destination file is itself exported.
+Tests retain access to their own package's private implementation.
+
+Bad:
+
+```ts
+import { authenticate } from "../../auth/src/internal/authenticate.ts";
+```
+
+Good:
+
+```ts
+import { authenticate } from "@example/auth";
+import { session } from "@example/auth/session";
+```
+
+Resolution uses `oxc-resolver`, including package export maps, conditional and
+wildcard exports, symlinked workspaces, and automatically discovered tsconfig
+paths. A cross-package alias is accepted only when it spells the destination's
+public package entrypoint and resolves to the same file as that entrypoint.
+Legacy packages without export maps may be imported through their root name;
+deep imports require an explicit export map.
+
+The import rules inspect static imports/re-exports (including type-only forms),
+TypeScript import types/import-equals, literal dynamic imports, and unshadowed
+`require`. Computed module names, custom bundler-only aliases, and otherwise
+unresolved bare imports remain outside this check; the compiler still owns
+resolution errors. Resolution currently uses `types`, `import`, `node`, and
+`default` conditions. It does not model arbitrary bundler custom conditions.
+
+All three structure rules are errors in both `/base` and `/effect`. Include
+both `src` and `test` in the consuming project's lint command. Narrowly exclude
+deliberately invalid fixture projects, not ordinary test code. The built-in
+config package supplies filename casing separately.
+
 ### nopeus/no-module-level-mutable-state
 
 Rejects module-level `let`/`var` and direct construction of writable global
