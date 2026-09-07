@@ -4,6 +4,7 @@ import { defineConfig } from "oxlint";
 export default defineConfig({
   jsPlugins: [{ name: "nopeus", specifier: "@adamaho/nopeus-oxlint-plugin" }],
   rules: {
+    "nopeus/no-export-assignment": "error",
     "nopeus/no-cross-package-internals": "error",
     "nopeus/no-test-imports": "error",
     "nopeus/require-test-location": "error",

@@ -68,6 +68,14 @@ Node.js 24 or newer.
 
 ## Rules
 
+### nopeus/no-export-assignment
+
+Rejects TypeScript's CommonJS `export = value` syntax; use named ESM exports or
+`export default` instead. Enabled in both `/base` and `/effect`. The built-in
+config supplies `typescript/no-require-imports` and `import/no-commonjs` for
+CommonJS imports and JavaScript exports. The policy requires ESM source, not
+ESM-only dependencies.
+
 ### nopeus/require-test-location
 
 Test files belong under the nearest package's `test/` directory, alongside
@@ -136,12 +144,18 @@ public package entrypoint and resolves to the same file as that entrypoint.
 Legacy packages without export maps may be imported through their root name;
 deep imports require an explicit export map.
 
+Manifests containing only `{"type":"module"}` or `{"type":"commonjs"}`
+select a module format, not a separate package owner. Public exports into these
+directories remain valid; other manifests still establish package boundaries.
+
 The import rules inspect static imports/re-exports (including type-only forms),
 TypeScript import types/import-equals, literal dynamic imports, and unshadowed
 `require`. Computed module names, custom bundler-only aliases, and otherwise
 unresolved bare imports remain outside this check; the compiler still owns
 resolution errors. Resolution currently uses `types`, `import`, `node`, and
 `default` conditions. It does not model arbitrary bundler custom conditions.
+CommonJS syntax is rejected separately by the syntax policy; these boundary
+checks do not attempt to resolve `require`-specific export conditions.
 
 All three structure rules are errors in both `/base` and `/effect`. Include
 both `src` and `test` in the consuming project's lint command. Narrowly exclude

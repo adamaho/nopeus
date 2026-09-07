@@ -16,6 +16,8 @@ export function testWorkspace() {
   write("packages/legacy/src/index.ts", "export const value = 1;");
   write("packages/legacy/src/internal.ts", "export const value = 1;");
   write("packages/a/package.json", JSON.stringify({ name: "@fixture/a", type: "module" }));
+  write("packages/a/test/package.json", '{"type":"module"}');
+  write("packages/b/src/package.json", '{"type":"module"}');
   write(
     "packages/b/package.json",
     JSON.stringify({

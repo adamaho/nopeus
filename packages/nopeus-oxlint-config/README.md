@@ -6,6 +6,12 @@ Ordinary source and test filenames use kebab-case through the built-in
 retain Oxlint's built-in handling. Framework-mandated filenames should have a
 narrow, documented override in the consuming project's config.
 
+Use ESM imports and exports. `typescript/no-require-imports` rejects `require()`
+(including conditional calls) and `import x = require(...)`;
+`import/no-commonjs` rejects `module.exports` and `exports.*`. The custom plugin
+also rejects TypeScript's `export =` syntax. ESM imports of dependencies that
+internally use CommonJS remain allowed.
+
 Package/test ownership is enforced separately by the custom plugin's `/base`
 and `/effect` presets.
 

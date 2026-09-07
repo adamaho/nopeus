@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 
-/** A package boundary is the nearest package.json, independent of lint cwd. */
+/** A package boundary ignores manifests that only select a module format. */
 export interface PackageOwner {
   readonly root: string;
   readonly name: string | null;
@@ -21,11 +21,20 @@ export function packageOwner(filename: string): PackageOwner | null {
     const manifest = join(directory, "package.json");
     if (existsSync(manifest)) {
       const value = JSON.parse(readFileSync(manifest, "utf8"));
-      return {
-        root: directory,
-        name: typeof value?.name === "string" ? value.name : null,
-        hasExports: value !== null && Object.hasOwn(value, "exports"),
-      };
+      // Distribution folders often use { "type": "module" } (or commonjs)
+      // without defining a new package or public API.
+      if (
+        !(
+          (value?.type === "module" || value?.type === "commonjs") &&
+          Object.keys(value).length === 1
+        )
+      ) {
+        return {
+          root: directory,
+          name: typeof value?.name === "string" ? value.name : null,
+          hasExports: value !== null && Object.hasOwn(value, "exports"),
+        };
+      }
     }
     const parent = dirname(directory);
     if (parent === directory) return null;

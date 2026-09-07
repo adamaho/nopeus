@@ -14,6 +14,7 @@ import { requireServiceConstructorNamesRule } from "./effect/rules/require-servi
 import { requireServiceKeyPrefixRule } from "./effect/rules/require-service-key-prefix.ts";
 import { noConditionalEmptyObjectSpreadRule } from "./rules/no-conditional-empty-object-spread.ts";
 import { noCrossPackageInternalsRule } from "./rules/no-cross-package-internals.ts";
+import { noExportAssignmentRule } from "./rules/no-export-assignment.ts";
 import { noKnownValueWideningRule } from "./rules/no-known-value-widening.ts";
 import { noModuleMockingRule } from "./rules/no-module-mocking.ts";
 import { noObjectParametersRule } from "./rules/no-object-parameters.ts";
@@ -32,6 +33,7 @@ import { requireTestLocationRule } from "./rules/require-test-location.ts";
 const nopeusPlugin = eslintCompatPlugin({
   meta: { name: "nopeus" },
   rules: {
+    "no-export-assignment": noExportAssignmentRule,
     "no-cross-package-internals": noCrossPackageInternalsRule,
     "no-test-imports": noTestImportsRule,
     "require-test-location": requireTestLocationRule,

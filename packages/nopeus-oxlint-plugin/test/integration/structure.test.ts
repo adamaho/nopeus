@@ -77,3 +77,34 @@ test("structure checks use package ownership from both repository and package cw
     workspace.cleanup();
   }
 }, 120_000);
+
+test("the syntax policy rejects CommonJS in source and tests", () => {
+  const workspace = testWorkspace();
+  try {
+    const config = join(packageRoot, "oxlint.config.ts");
+    for (const [code, rule] of [
+      ['require("node:fs");', "no-require-imports"],
+      ['if (flag) { require("node:fs"); }', "no-require-imports"],
+      ['import fs = require("node:fs");', "no-require-imports"],
+      ["module.exports = {};", "no-commonjs"],
+      ["exports.value = 1;", "no-commonjs"],
+      ["const value = 1; export = value;", "no-export-assignment"],
+    ] as const) {
+      for (const path of ["packages/a/src/common.cts", "packages/a/test/common.test.ts"]) {
+        const filename = workspace.write(path, code);
+        const result = spawnSync(
+          process.execPath,
+          [oxlint, "--config", config, "--format", "json", "--threads", "1", filename],
+          { cwd: workspace.root, encoding: "utf8", timeout: 60_000 },
+        );
+        expect(result.error).toBeUndefined();
+        expect(result.status, code + "\n" + result.stdout + result.stderr).toBe(1);
+        expect(JSON.parse(result.stdout).diagnostics).toContainEqual(
+          expect.objectContaining({ code: expect.stringContaining(rule) }),
+        );
+      }
+    }
+  } finally {
+    workspace.cleanup();
+  }
+}, 120_000);
