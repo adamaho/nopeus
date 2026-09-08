@@ -23,6 +23,7 @@
           nixpkgsForSystem =
             if system == "x86_64-darwin" then nixpkgs-darwin-x64 else nixpkgs;
           pkgs = import nixpkgsForSystem { inherit system; };
+          pnpm12 = pkgs.callPackage ./nix/pnpm.nix { };
         in
         {
           default = pkgs.mkShell {
@@ -31,7 +32,7 @@
               docker-compose
               git
               nodejs_24
-              pnpm_11
+              pnpm12
             ];
           };
         });
