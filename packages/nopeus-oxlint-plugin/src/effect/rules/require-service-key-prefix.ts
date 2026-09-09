@@ -1,26 +1,6 @@
 import { defineRule, type ESTree } from "@oxlint/plugins";
 
-function importedName(specifier: ESTree.ImportSpecifier): string {
-  return specifier.imported.type === "Identifier"
-    ? specifier.imported.name
-    : specifier.imported.value;
-}
-
-function isServiceFactory(
-  callee: ESTree.CallExpression["callee"],
-  contextNamespaces: ReadonlySet<string>,
-  serviceBindings: ReadonlySet<string>,
-): boolean {
-  if (callee.type === "Identifier") return serviceBindings.has(callee.name);
-  return (
-    callee.type === "MemberExpression" &&
-    !callee.computed &&
-    callee.object.type === "Identifier" &&
-    contextNamespaces.has(callee.object.name) &&
-    callee.property.type === "Identifier" &&
-    callee.property.name === "Service"
-  );
-}
+import { isModuleCall, moduleBindings } from "./effect-call.ts";
 
 function staticString(
   argument: ESTree.CallExpression["arguments"][number] | undefined,
@@ -44,7 +24,8 @@ export const requireServiceKeyPrefixRule = defineRule({
   meta: {
     type: "problem",
     docs: {
-      description: "Require Context.Service keys to use a configured static prefix.",
+      description:
+        "Require Context.Service and Context.Reference keys to use a configured static prefix.",
     },
     schema: [
       {
@@ -58,14 +39,13 @@ export const requireServiceKeyPrefixRule = defineRule({
     ],
     defaultOptions: [{ prefix: "@" }],
     messages: {
-      staticKey: "Give this Context.Service a static string key inside the repository namespace.",
-      wrongPrefix: 'Service key "{{key}}" must begin with the owned prefix "{{prefix}}".',
+      staticKey:
+        "Give this Context service/reference a static string key inside the repository namespace.",
+      wrongPrefix:
+        'Service key "{{key}}" must begin with the owned prefix "{{prefix}}" and include a name.',
     },
   },
   createOnce(context) {
-    const contextNamespaces = new Set<string>();
-    const serviceBindings = new Set<string>();
-
     const checkKey = (
       node: ESTree.CallExpression,
       keyArgument: ESTree.CallExpression["arguments"][number] | undefined,
@@ -85,7 +65,7 @@ export const requireServiceKeyPrefixRule = defineRule({
           ? option.prefix
           : "@";
 
-      if (key.startsWith(prefix)) return;
+      if (key.startsWith(prefix) && key.length > prefix.length) return;
       context.report({
         node: keyArgument ?? node,
         messageId: "wrongPrefix",
@@ -94,38 +74,33 @@ export const requireServiceKeyPrefixRule = defineRule({
     };
 
     return {
-      ImportDeclaration(node) {
-        if (node.source.value === "effect") {
-          for (const specifier of node.specifiers) {
-            if (specifier.type === "ImportSpecifier" && importedName(specifier) === "Context") {
-              contextNamespaces.add(specifier.local.name);
-            }
-          }
+      CallExpression(node) {
+        const matches = (callee: ESTree.CallExpression["callee"], name: string) =>
+          isModuleCall(
+            context.sourceCode,
+            callee,
+            moduleBindings("effect/Context", "Context"),
+            name,
+          );
+        if (matches(node.callee, "Reference")) {
+          checkKey(node, node.arguments[0]);
           return;
         }
-
-        if (node.source.value !== "effect/Context") return;
-        for (const specifier of node.specifiers) {
-          if (specifier.type === "ImportNamespaceSpecifier") {
-            contextNamespaces.add(specifier.local.name);
-            continue;
-          }
-          if (specifier.type === "ImportSpecifier" && importedName(specifier) === "Service") {
-            serviceBindings.add(specifier.local.name);
-          }
-        }
-      },
-      CallExpression(node) {
         if (
           node.callee.type === "CallExpression" &&
-          isServiceFactory(node.callee.callee, contextNamespaces, serviceBindings)
+          matches(node.callee.callee, "Service") &&
+          node.callee.arguments.length === 0
         ) {
           checkKey(node, node.arguments[0]);
           return;
         }
-
-        if (!isServiceFactory(node.callee, contextNamespaces, serviceBindings)) return;
-        if (node.parent.type === "CallExpression" && node.parent.callee === node) return;
+        if (!matches(node.callee, "Service")) return;
+        if (
+          node.arguments.length === 0 &&
+          node.parent.type === "CallExpression" &&
+          node.parent.callee === node
+        )
+          return;
         checkKey(node, node.arguments[0]);
       },
     };

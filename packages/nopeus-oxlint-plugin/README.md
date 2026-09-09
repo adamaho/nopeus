@@ -61,7 +61,7 @@ export default defineConfig({
 ```
 
 The root package name defines the owned Effect service namespace. Both goho and
-@adamaho/goho require Effect runtime identifiers beginning with @goho/.
+@adamaho/goho require trace names and service keys beginning with @goho/.
 
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
@@ -649,7 +649,7 @@ Good:
 ```ts
 import * as Effect from "effect/Effect";
 
-const loadUser = Effect.fn("@goho/loadUser")(function* (id: UserId) {
+const loadUser = Effect.fn("@goho/Users.loadUser")(function* (id: UserId) {
   return yield* Users.findById(id);
 });
 ```
@@ -659,57 +659,61 @@ in library implementations and hot paths.
 
 ### nopeus/require-effect-namespace
 
-Requires static runtime identifiers under the prefix derived from the root package
-name: both `goho` and `@adamaho/goho` use `@goho/`. The prefix must be followed by a
-nonempty name. The Effect preset configures this rule automatically.
+Enforces readable trace names in `@project/Domain.operation` form. The repository
+prefix comes from the root package name: both `goho` and `@adamaho/goho` use
+`@goho/`. Domain segments use PascalCase; the final operation uses camelCase.
+Nested domains are allowed, for example `@goho/Database.Migrations.run`.
 
-| APIs                                                                                                            | Checked identifier                                                     |
-| --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `Context.Service`, `Context.Reference`                                                                          | Service/reference key, including curried services                      |
-| `Effect.fn`                                                                                                     | Operation name; `require-effect-fn-name` also checks its owning symbol |
-| `Effect.makeSpan`, `makeSpanScoped`, `useSpan`; `Layer.span`                                                    | Span name                                                              |
-| `Effect.withSpan`, `withSpanScoped`, `withLogSpan`; `Layer`, `Stream`, `Channel`, `RequestResolver` `.withSpan` | Span name in data-first and data-last calls                            |
-| `Schema.Class`, `Schema.Error`                                                                                  | Class identifier                                                       |
-| `Schema.TaggedClass`, `Schema.TaggedError`                                                                      | Both the optional explicit identifier and the tag                      |
-| `Schema.TaggedStruct`; `Data.TaggedClass`, `Data.TaggedError`; `Request.TaggedClass`, `Request.tagged`          | Tag                                                                    |
-| `Metric.counter`, `gauge`, `frequency`, `histogram`, `summary`, `summaryWithTimestamp`, `timer`                 | Metric name                                                            |
+| APIs                                                                                                            | Checked name                                                             |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `Effect.fn`                                                                                                     | Traced operation; `require-effect-fn-name` also checks the owning symbol |
+| `Effect.makeSpan`, `makeSpanScoped`, `useSpan`; `Layer.span`                                                    | Span name                                                                |
+| `Effect.withSpan`, `withSpanScoped`, `withLogSpan`; `Layer`, `Stream`, `Channel`, `RequestResolver` `.withSpan` | Span name in data-first and data-last calls                              |
 
 ```ts
 import { Context, Effect, Schema } from "effect";
 
 class Users extends Context.Service<Users, Users.Service>()("@goho/Users") {}
-class ReadFailed extends Schema.TaggedError<ReadFailed>()("@goho/ReadFailed", {}) {}
+class ReadFailed extends Schema.TaggedError<ReadFailed>()("ReadFailed", {}) {}
+const Outcome = Schema.TaggedStruct("Processed", {});
 const load = Effect.fn("@goho/Users.load")(function* () {
   /* ... */
 });
 ```
 
+A trace name must be static and include both a domain and an operation.
+`@goho/load`, `@goho/Users`, whitespace, empty segments, and dynamic interpolation
+are rejected. `Effect.fn` names must end in the owning function or property name:
+`load` can use `@goho/Users.load`, but cannot use `@goho/Users.save`.
+Choose domains that identify the work, such as `Receipts.process` or
+`GoogleDrive.listFiles`; avoid repeating the repository name inside the domain.
+Lint checks structure and owner matching; choosing a meaningful domain still
+requires review. `Effect.fnUntraced` remains available for internal helpers.
+
 The rule resolves imports from `effect` and direct `effect/Module` paths, including
 aliases and `import * as E from "effect"`. Shadowed local bindings are ignored.
 String literals and templates without interpolation are accepted, including
-`satisfies` and type assertion wrappers. Variables and interpolated templates are
-rejected even if their value might have the right prefix. Import bindings are
-resolved directly; re-exports and locally assigned aliases are not followed.
+`satisfies` and type assertion wrappers. Re-exports and locally assigned aliases
+are not followed. Unstable subpackages are outside the supported API catalogue.
 
-This is an explicit catalogue of identifier APIs in the pinned Effect v4 version.
-It does not interpret every string passed to Effect as a namespace: log messages,
-configuration keys, schema literals, metric attributes, and ordinary domain values
-remain unchanged. Unstable subpackages and arbitrary schema annotation objects
-are outside this rule's catalogue.
+Schema identifiers, data/error/request tags, metric names, ordinary values, and
+log messages are not trace names and are not checked by this rule. In particular,
+a trace-policy upgrade must not require changing serialized `_tag` values.
+Existing API schemas and matching code can keep their established tags.
 
-When upgrading, prefix existing function names, keys and tags. Keep `Effect.fn`
-names ending in the owning symbol (for example `@goho/load` or `@goho/Users.load`).
-Update `catchTag`, match cases and serialized-data readers together with tag
-changes; existing stored tags are not migrated by lint. Metric and span renames
-also require corresponding dashboard/query updates. No automatic fix is offered
-because identifiers can be persisted or referenced elsewhere.
+When upgrading from 0.5.0, keep or restore your original data/error tags and metric
+names. Add domain/operation structure to trace names that previously had only a
+prefix. Trace renames may require updating trace queries. No automatic fix is
+provided because lint cannot choose meaningful operation names.
 
 ### nopeus/require-service-key-prefix
 
-The original service-only rule remains available for manually configured users.
-The Effect preset now uses `require-effect-namespace` instead; replace the old rule
-entry with the new name and retain the same `{ prefix: "@project/" }` option.
-Avoid enabling both rules, which would duplicate service diagnostics.
+Separately enforces static, nonempty repository-prefixed identity keys for
+`Context.Service` and `Context.Reference`, including curried service declarations.
+Both this rule and the trace rule are enabled by the Effect preset using the same
+repository prefix. Service keys need no `.operation` suffix: `@goho/Users` is valid.
+Import aliases and namespace imports are resolved by scope, so local bindings with
+the same name are ignored.
 
 ### nopeus/require-service-constructor-names
 

@@ -32,6 +32,7 @@ const canonicalRules = [
   "nopeus/require-effect-fn-name",
   "nopeus/require-public-jsdoc",
   "nopeus/require-effect-namespace",
+  "nopeus/require-service-key-prefix",
   "nopeus/require-service-constructor-names",
 ].sort();
 
@@ -96,7 +97,6 @@ test("rejects a package name without a project segment", () => {
 test("the Effect preset enables every canonical plugin rule", () => {
   const config = effect({ packageName: "nopeus" });
   for (const name of Object.keys(plugin.rules)) {
-    if (name === "require-service-key-prefix") continue;
     expect(config.rules).toHaveProperty("nopeus/" + name);
   }
   expect(plugin.rules).not.toHaveProperty("require-service-make-layer");
