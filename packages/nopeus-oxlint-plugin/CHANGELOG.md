@@ -1,5 +1,11 @@
 # @adamaho/nopeus-oxlint-plugin
 
+## 0.6.0
+
+### Minor Changes
+
+- a92195d: Limit require-effect-namespace to traced functions and explicit span names, requiring @project/Domain.operation with PascalCase domain segments and a camelCase operation. Restore the separate service-key prefix rule in the Effect preset and extend it to Context.Reference with scope-aware import resolution. Stop enforcing trace prefixes on schema identifiers, data/error/request tags, and metrics so adopting the trace policy does not change serialization contracts.
+
 ## 0.5.0
 
 ### Minor Changes
