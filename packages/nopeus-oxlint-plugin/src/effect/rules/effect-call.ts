@@ -83,6 +83,30 @@ function isModuleNamespace(
   );
 }
 
+function isBarrelModule(
+  sourceCode: SourceCode,
+  expression: ESTree.MemberExpression,
+  bindings: ModuleBindings,
+): boolean {
+  if (
+    expression.object.type !== "Identifier" ||
+    expression.computed ||
+    expression.property.type !== "Identifier" ||
+    expression.property.name !== bindings.barrelName
+  )
+    return false;
+  const variable = resolveVariable(sourceCode, expression.object);
+  return (
+    variable?.defs.some(
+      (definition) =>
+        definition.type === "ImportBinding" &&
+        definition.parent?.type === "ImportDeclaration" &&
+        definition.parent.source.value === "effect" &&
+        definition.node.type === "ImportNamespaceSpecifier",
+    ) === true
+  );
+}
+
 /** Test whether a type name resolves to an imported Effect module type. */
 export function isModuleType(
   sourceCode: SourceCode,
@@ -114,8 +138,10 @@ export function isModuleCall(
   return (
     callee.type === "MemberExpression" &&
     !callee.computed &&
-    callee.object.type === "Identifier" &&
-    isModuleNamespace(sourceCode, callee.object, bindings) &&
+    ((callee.object.type === "Identifier" &&
+      isModuleNamespace(sourceCode, callee.object, bindings)) ||
+      (callee.object.type === "MemberExpression" &&
+        isBarrelModule(sourceCode, callee.object, bindings))) &&
     callee.property.type === "Identifier" &&
     callee.property.name === name
   );

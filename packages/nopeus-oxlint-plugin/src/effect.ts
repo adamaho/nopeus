@@ -9,7 +9,7 @@ export interface NopeusEffectOptions {
   readonly runtimeEntryPoints?: readonly string[];
 }
 
-/** Convert a root package name into its owned Effect service-key prefix. */
+/** Convert a root package name into its owned Effect identifier prefix. */
 export function serviceKeyPrefixFromPackageName(packageName: string): string {
   const projectName = packageName.split("/").at(-1);
   if (projectName === undefined || projectName.length === 0) {
@@ -67,7 +67,7 @@ export default function effect({ packageName, runtimeEntryPoints = [] }: NopeusE
       "nopeus/prefer-effect-platform-services": "error",
       "nopeus/prefer-effect-void": "error",
       "nopeus/require-effect-fn-name": "error",
-      "nopeus/require-service-key-prefix": [
+      "nopeus/require-effect-namespace": [
         "error",
         { prefix: serviceKeyPrefixFromPackageName(packageName) },
       ],

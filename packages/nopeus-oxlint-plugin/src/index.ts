@@ -9,6 +9,7 @@ import { noUntypedEffectErrorsRule } from "./effect/rules/no-untyped-effect-erro
 import { preferEffectPlatformServicesRule } from "./effect/rules/prefer-effect-platform-services.ts";
 import { preferEffectVoidRule } from "./effect/rules/prefer-effect-void.ts";
 import { requireEffectFnNameRule } from "./effect/rules/require-effect-fn-name.ts";
+import { requireEffectNamespaceRule } from "./effect/rules/require-effect-namespace.ts";
 import { requireFetchAbortSignalRule } from "./effect/rules/require-fetch-abort-signal.ts";
 import { requireServiceConstructorNamesRule } from "./effect/rules/require-service-constructor-names.ts";
 import { requireServiceKeyPrefixRule } from "./effect/rules/require-service-key-prefix.ts";
@@ -59,6 +60,7 @@ const nopeusPlugin = eslintCompatPlugin({
     "prefer-effect-void": preferEffectVoidRule,
     "require-public-jsdoc": requirePublicJSDocRule,
     "require-effect-fn-name": requireEffectFnNameRule,
+    "require-effect-namespace": requireEffectNamespaceRule,
     "require-service-key-prefix": requireServiceKeyPrefixRule,
     "require-service-constructor-names": requireServiceConstructorNamesRule,
   },

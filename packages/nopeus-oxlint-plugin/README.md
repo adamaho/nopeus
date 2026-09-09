@@ -61,7 +61,7 @@ export default defineConfig({
 ```
 
 The root package name defines the owned Effect service namespace. Both goho and
-@adamaho/goho require service keys beginning with @goho/.
+@adamaho/goho require Effect runtime identifiers beginning with @goho/.
 
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
@@ -649,7 +649,7 @@ Good:
 ```ts
 import * as Effect from "effect/Effect";
 
-const loadUser = Effect.fn("loadUser")(function* (id: UserId) {
+const loadUser = Effect.fn("@goho/loadUser")(function* (id: UserId) {
   return yield* Users.findById(id);
 });
 ```
@@ -657,32 +657,59 @@ const loadUser = Effect.fn("loadUser")(function* (id: UserId) {
 Effect.fnUntraced remains valid when tracing would not add value, particularly
 in library implementations and hot paths.
 
-### nopeus/require-service-key-prefix
+### nopeus/require-effect-namespace
 
-Requires every Context.Service key to be a static string inside the namespace
-owned by the consuming repository. The prefix is derived from the root package
-name passed to the canonical config.
+Requires static runtime identifiers under the prefix derived from the root package
+name: both `goho` and `@adamaho/goho` use `@goho/`. The prefix must be followed by a
+nonempty name. The Effect preset configures this rule automatically.
 
-Bad in a repository named goho:
+| APIs                                                                                                            | Checked identifier                                                     |
+| --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `Context.Service`, `Context.Reference`                                                                          | Service/reference key, including curried services                      |
+| `Effect.fn`                                                                                                     | Operation name; `require-effect-fn-name` also checks its owning symbol |
+| `Effect.makeSpan`, `makeSpanScoped`, `useSpan`; `Layer.span`                                                    | Span name                                                              |
+| `Effect.withSpan`, `withSpanScoped`, `withLogSpan`; `Layer`, `Stream`, `Channel`, `RequestResolver` `.withSpan` | Span name in data-first and data-last calls                            |
+| `Schema.Class`, `Schema.Error`                                                                                  | Class identifier                                                       |
+| `Schema.TaggedClass`, `Schema.TaggedError`                                                                      | Both the optional explicit identifier and the tag                      |
+| `Schema.TaggedStruct`; `Data.TaggedClass`, `Data.TaggedError`; `Request.TaggedClass`, `Request.tagged`          | Tag                                                                    |
+| `Metric.counter`, `gauge`, `frequency`, `histogram`, `summary`, `summaryWithTimestamp`, `timer`                 | Metric name                                                            |
 
 ```ts
-import { Context } from "effect";
-
-class Users extends Context.Service<Users, Users.Service>()("@other/Users") {}
-```
-
-Good:
-
-```ts
-import { Context } from "effect";
+import { Context, Effect, Schema } from "effect";
 
 class Users extends Context.Service<Users, Users.Service>()("@goho/Users") {}
+class ReadFailed extends Schema.TaggedError<ReadFailed>()("@goho/ReadFailed", {}) {}
+const load = Effect.fn("@goho/Users.load")(function* () {
+  /* ... */
+});
 ```
 
-The rule checks both curried and direct Context.Service forms, the effect barrel,
-namespace imports from effect/Context, and direct Service imports. Static string
-literals wrapped with satisfies are accepted; variables and computed keys are
-rejected.
+The rule resolves imports from `effect` and direct `effect/Module` paths, including
+aliases and `import * as E from "effect"`. Shadowed local bindings are ignored.
+String literals and templates without interpolation are accepted, including
+`satisfies` and type assertion wrappers. Variables and interpolated templates are
+rejected even if their value might have the right prefix. Import bindings are
+resolved directly; re-exports and locally assigned aliases are not followed.
+
+This is an explicit catalogue of identifier APIs in the pinned Effect v4 version.
+It does not interpret every string passed to Effect as a namespace: log messages,
+configuration keys, schema literals, metric attributes, and ordinary domain values
+remain unchanged. Unstable subpackages and arbitrary schema annotation objects
+are outside this rule's catalogue.
+
+When upgrading, prefix existing function names, keys and tags. Keep `Effect.fn`
+names ending in the owning symbol (for example `@goho/load` or `@goho/Users.load`).
+Update `catchTag`, match cases and serialized-data readers together with tag
+changes; existing stored tags are not migrated by lint. Metric and span renames
+also require corresponding dashboard/query updates. No automatic fix is offered
+because identifiers can be persisted or referenced elsewhere.
+
+### nopeus/require-service-key-prefix
+
+The original service-only rule remains available for manually configured users.
+The Effect preset now uses `require-effect-namespace` instead; replace the old rule
+entry with the new name and retain the same `{ prefix: "@project/" }` option.
+Avoid enabling both rules, which would duplicate service diagnostics.
 
 ### nopeus/require-service-constructor-names
 

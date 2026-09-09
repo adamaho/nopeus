@@ -16,9 +16,10 @@ import { Context, Effect, Layer, Schema } from "effect";
 import { it } from "@effect/vitest";
 import { expect } from "vitest";
 
+const load = Effect.fn("@fixture/load")(() => Effect.void);
 const User = Schema.Struct({ id: Schema.String });
 type User = typeof User.Type;
-class ReadFailed extends Schema.TaggedError<ReadFailed>()("ReadFailed", { cause: Schema.Unknown }) {}
+class ReadFailed extends Schema.TaggedError<ReadFailed>()("@fixture/ReadFailed", { cause: Schema.Unknown }) {}
 interface UsersApi { readonly load: (id: string) => Effect.Effect<User, ReadFailed> }
 class Database extends Context.Service<Database, UsersApi>()("@fixture/Database") {}
 
@@ -46,6 +47,19 @@ it.effect("decodes a user", () => Effect.gen(function* () {
 `;
 
 const invalid = [
+  [
+    "require-effect-namespace",
+    'import { Effect } from "effect"; const load = Effect.fn("load")(() => Effect.void);',
+  ],
+  [
+    "require-effect-namespace",
+    'import { Schema } from "effect"; class Failure extends Schema.TaggedError<Failure>()("Failure", {}) {}',
+  ],
+  [
+    "require-effect-namespace",
+    'import { Context } from "effect"; const Ref = Context.Reference("Ref", { defaultValue: () => 0 });',
+  ],
+
   ["no-module-level-mutable-state", "export const cache = new Map<string, string>();"],
   [
     "require-fetch-abort-signal",
