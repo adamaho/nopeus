@@ -31,7 +31,7 @@ const canonicalRules = [
   "nopeus/prefer-effect-void",
   "nopeus/require-effect-fn-name",
   "nopeus/require-public-jsdoc",
-  "nopeus/require-service-key-prefix",
+  "nopeus/require-effect-namespace",
   "nopeus/require-service-constructor-names",
 ].sort();
 
@@ -43,7 +43,7 @@ test("derives a service-key prefix from the project part of a scoped package nam
   expect(serviceKeyPrefixFromPackageName("@adamaho/goho")).toBe("@goho/");
 });
 
-test("enables every shipped rule without overrides", () => {
+test("enables every canonical rule without overrides", () => {
   const config = effect({ packageName: "nopeus" });
 
   expect(Object.keys(config.rules ?? {}).sort()).toEqual(canonicalRules);
@@ -53,10 +53,10 @@ test("enables every shipped rule without overrides", () => {
   }
 });
 
-test("configures the service-key rule from the package name", () => {
+test("configures the namespace rule from the package name", () => {
   const config = effect({ packageName: "nopeus" });
 
-  expect(config.rules?.["nopeus/require-service-key-prefix"]).toEqual([
+  expect(config.rules?.["nopeus/require-effect-namespace"]).toEqual([
     "error",
     { prefix: "@nopeus/" },
   ]);
@@ -93,9 +93,10 @@ test("rejects a package name without a project segment", () => {
   );
 });
 
-test("the Effect preset enables every shipped plugin rule", () => {
+test("the Effect preset enables every canonical plugin rule", () => {
   const config = effect({ packageName: "nopeus" });
   for (const name of Object.keys(plugin.rules)) {
+    if (name === "require-service-key-prefix") continue;
     expect(config.rules).toHaveProperty("nopeus/" + name);
   }
   expect(plugin.rules).not.toHaveProperty("require-service-make-layer");
