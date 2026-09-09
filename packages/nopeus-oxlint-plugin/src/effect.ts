@@ -67,6 +67,10 @@ export default function effect({ packageName, runtimeEntryPoints = [] }: NopeusE
       "nopeus/prefer-effect-platform-services": "error",
       "nopeus/prefer-effect-void": "error",
       "nopeus/require-effect-fn-name": "error",
+      "nopeus/require-service-key-prefix": [
+        "error",
+        { prefix: serviceKeyPrefixFromPackageName(packageName) },
+      ],
       "nopeus/require-effect-namespace": [
         "error",
         { prefix: serviceKeyPrefixFromPackageName(packageName) },

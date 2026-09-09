@@ -21,28 +21,13 @@ function staticString(
   return null;
 }
 
-// Each entry identifies a runtime name, never an arbitrary string parameter.
+// Only APIs that name spans belong here. Data tags and metric names have separate contracts.
 const directNames = [
-  ["Context", "Reference"],
   ["Effect", "fn"],
   ["Effect", "makeSpan"],
   ["Effect", "makeSpanScoped"],
   ["Effect", "useSpan"],
   ["Layer", "span"],
-  ["Schema", "Class"],
-  ["Schema", "Error"],
-  ["Schema", "TaggedStruct"],
-  ["Data", "TaggedClass"],
-  ["Data", "TaggedError"],
-  ["Request", "tagged"],
-  ["Request", "TaggedClass"],
-  ["Metric", "timer"],
-  ["Metric", "counter"],
-  ["Metric", "gauge"],
-  ["Metric", "frequency"],
-  ["Metric", "histogram"],
-  ["Metric", "summary"],
-  ["Metric", "summaryWithTimestamp"],
 ] as const;
 const dualNames = [
   ["Effect", "withSpan"],
@@ -54,11 +39,11 @@ const dualNames = [
   ["Layer", "withSpan"],
 ] as const;
 
-/** Require application-owned Effect runtime identifiers to share one namespace. */
+/** Require readable, repository-owned names for traced Effect operations. */
 export const requireEffectNamespaceRule = defineRule({
   meta: {
     type: "problem",
-    docs: { description: "Require static, repository-prefixed Effect runtime identifiers." },
+    docs: { description: "Require static Effect trace names in @project/Domain.operation form." },
     schema: [
       {
         type: "object",
@@ -69,9 +54,12 @@ export const requireEffectNamespaceRule = defineRule({
     ],
     defaultOptions: [{ prefix: "@" }],
     messages: {
-      staticKey: "Give {{api}} a static string identifier inside the repository namespace.",
+      invalidFormat:
+        '{{api}} trace name "{{key}}" must use "{{prefix}}Domain.operation" with PascalCase domain segments and a camelCase operation.',
+
+      staticKey: "Give {{api}} a static trace name inside the repository namespace.",
       wrongPrefix:
-        '{{api}} identifier "{{key}}" must begin with the owned prefix "{{prefix}}" and include a name.',
+        '{{api}} trace name "{{key}}" must begin with the owned prefix "{{prefix}}" and include a name.',
     },
   },
   createOnce(context) {
@@ -90,7 +78,15 @@ export const requireEffectNamespaceRule = defineRule({
         typeof option.prefix === "string"
           ? option.prefix
           : "@";
-      if (key.startsWith(prefix) && key.length > prefix.length) return;
+      if (key.startsWith(prefix) && key.length > prefix.length) {
+        if (/^(?:[A-Z][A-Za-z0-9]*\.)+[a-z][A-Za-z0-9]*$/u.test(key.slice(prefix.length))) return;
+        context.report({
+          node: argument ?? node,
+          messageId: "invalidFormat",
+          data: { api, key, prefix },
+        });
+        return;
+      }
       context.report({
         node: argument ?? node,
         messageId: "wrongPrefix",
@@ -106,34 +102,6 @@ export const requireEffectNamespaceRule = defineRule({
             moduleBindings("effect/" + module, module),
             name,
           );
-        if (matches(node.callee, "Context", "Service")) {
-          if (
-            node.arguments.length > 0 ||
-            node.parent.type !== "CallExpression" ||
-            node.parent.callee !== node
-          )
-            check(node, 0, "Context.Service");
-          return;
-        }
-        for (const name of ["TaggedClass", "TaggedError"]) {
-          if (matches(node.callee, "Schema", name)) {
-            // An omitted identifier defaults to the second-stage tag, which is checked below.
-            if (node.arguments.length > 0) check(node, 0, "Schema." + name);
-            return;
-          }
-        }
-        if (node.callee.type === "CallExpression") {
-          if (
-            matches(node.callee.callee, "Context", "Service") &&
-            node.callee.arguments.length === 0
-          ) {
-            check(node, 0, "Context.Service");
-          }
-          for (const name of ["TaggedClass", "TaggedError"]) {
-            if (matches(node.callee.callee, "Schema", name)) check(node, 0, "Schema." + name);
-          }
-          return;
-        }
         for (const [module, name] of directNames) {
           if (matches(node.callee, module, name)) {
             check(node, 0, module + "." + name);
