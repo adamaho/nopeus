@@ -1,5 +1,13 @@
 # @adamaho/nopeus-oxlint-config
 
+## 0.4.0
+
+### Minor Changes
+
+- 9d8f4a8: Enable `import/no-relative-parent-imports` in the shared default config. Source
+  and tests must replace parent-directory imports with package-local Node aliases
+  declared in `package.json` `imports`; same-directory `./` imports remain allowed.
+
 ## 0.3.0
 
 ### Minor Changes
