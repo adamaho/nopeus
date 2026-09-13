@@ -1,8 +1,8 @@
 import { RuleTester } from "oxlint/plugins-dev";
 import { afterAll } from "vitest";
 
-import { requireTestLocationRule } from "../../src/rules/require-test-location.ts";
-import { testWorkspace } from "../helpers/workspace.ts";
+import { requireTestLocationRule } from "#src/rules/require-test-location.ts";
+import { testWorkspace } from "#test/helpers/workspace.ts";
 
 const workspace = testWorkspace();
 afterAll(workspace.cleanup);

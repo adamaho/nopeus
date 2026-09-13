@@ -31,6 +31,7 @@ test("published base presets install and lint without Effect packages", () => {
       JSON.stringify({
         private: true,
         type: "module",
+        imports: { "#local": "./local.ts" },
         packageManager: root.packageManager,
         devDependencies: {
           "@adamaho/nopeus-oxlint-config": "file:./nopeus-oxlint-config.tgz",
@@ -56,16 +57,17 @@ test("published base presets install and lint without Effect packages", () => {
     `,
     );
     // Effect-specific import and state policies must not leak into the base preset.
+    writeFileSync(join(directory, "local.ts"), "export const value = 1;\n");
     writeFileSync(
       join(directory, "valid.ts"),
-      'import "@effect/platform";\n/** @internal */\nexport const cache = new Map();\n',
+      'import "@effect/platform"; import "#local"; import "./local.ts";\n/** @internal */\nexport const cache = new Map();\n',
     );
     run(directory, "pnpm", ["exec", "oxlint", "--config", "oxlint.config.ts", "valid.ts"]);
 
     writeFileSync(
       join(directory, "invalid.ts"),
       "debugger;\nconst value = 1 as number;\n" +
-        'require("node:fs"); module.exports = {}; export = value;\n',
+        'require("node:fs"); module.exports = {}; export = value;\nimport "../local.ts";\n',
     );
     const rejected = spawnSync(
       "pnpm",
@@ -85,6 +87,7 @@ test("published base presets install and lint without Effect packages", () => {
     expect(codes).toContain("nopeus(no-type-assertions)");
     expect(codes).toContain("typescript(no-require-imports)");
     expect(codes).toContain("import(no-commonjs)");
+    expect(codes).toContain("import(no-relative-parent-imports)");
     expect(codes).toContain("nopeus(no-export-assignment)");
 
     writeFileSync(join(directory, "Misplaced.test.ts"), "export {};\n");

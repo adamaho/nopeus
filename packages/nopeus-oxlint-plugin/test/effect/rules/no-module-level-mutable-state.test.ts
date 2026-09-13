@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noModuleLevelMutableStateRule } from "../../../src/effect/rules/no-module-level-mutable-state.ts";
+import { noModuleLevelMutableStateRule } from "#src/effect/rules/no-module-level-mutable-state.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const collection = { messageId: "mutableCollection" };

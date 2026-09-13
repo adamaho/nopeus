@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noExportAssignmentRule } from "../../src/rules/no-export-assignment.ts";
+import { noExportAssignmentRule } from "#src/rules/no-export-assignment.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noTypeAssertionsRule } from "../../src/rules/no-type-assertions.ts";
+import { noTypeAssertionsRule } from "#src/rules/no-type-assertions.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const error = { messageId: "typeAssertion" };

@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { preferEffectPlatformServicesRule } from "../../../src/effect/rules/prefer-effect-platform-services.ts";
+import { preferEffectPlatformServicesRule } from "#src/effect/rules/prefer-effect-platform-services.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

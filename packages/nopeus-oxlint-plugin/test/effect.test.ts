@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 
-import effect, { serviceKeyPrefixFromPackageName } from "../src/effect.ts";
-import plugin from "../src/index.ts";
+import effect, { serviceKeyPrefixFromPackageName } from "#src/effect.ts";
+import plugin from "#src/index.ts";
 
 const canonicalRules = [
   "nopeus/no-export-assignment",

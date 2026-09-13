@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { requireFetchAbortSignalRule } from "../../../src/effect/rules/require-fetch-abort-signal.ts";
+import { requireFetchAbortSignalRule } from "#src/effect/rules/require-fetch-abort-signal.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const prelude = 'import { Effect } from "effect";';

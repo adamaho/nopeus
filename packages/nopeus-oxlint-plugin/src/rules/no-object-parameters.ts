@@ -1,6 +1,6 @@
 import { defineRule, type ESTree, type SourceCode } from "@oxlint/plugins";
 
-import { lexicalTypeParameterNames } from "../shared/lexical-type-parameters.ts";
+import { lexicalTypeParameterNames } from "#src/shared/lexical-type-parameters.ts";
 
 type Parameter = ESTree.ParamPattern;
 type ParameterOwner =

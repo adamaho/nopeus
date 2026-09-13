@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noUnscopedForkRule } from "../../../src/effect/rules/no-unscoped-fork.ts";
+import { noUnscopedForkRule } from "#src/effect/rules/no-unscoped-fork.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

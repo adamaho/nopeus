@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noUntypedEffectErrorsRule } from "../../../src/effect/rules/no-untyped-effect-errors.ts";
+import { noUntypedEffectErrorsRule } from "#src/effect/rules/no-untyped-effect-errors.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

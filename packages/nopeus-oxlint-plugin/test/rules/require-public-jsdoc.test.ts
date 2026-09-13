@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { requirePublicJSDocRule } from "../../src/rules/require-public-jsdoc.ts";
+import { requirePublicJSDocRule } from "#src/rules/require-public-jsdoc.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const invalid = { messageId: "invalidJSDoc" };

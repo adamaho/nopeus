@@ -96,6 +96,9 @@ Layers through the same service contracts used in production.
 
 Tests may import their own package's source, including internals when needed.
 Production files under `src/` must not import tests, helpers, or fixtures.
+Within a package, use Node aliases declared in its `package.json` `imports`
+field, such as `#src/users/service.ts`, instead of parent-directory (`../`)
+imports. Same-directory `./` imports remain allowed.
 Across packages, use the package name and its public exports, including public
 subpath exports, instead of relative paths into another package. TypeScript
 aliases must not bypass that boundary.

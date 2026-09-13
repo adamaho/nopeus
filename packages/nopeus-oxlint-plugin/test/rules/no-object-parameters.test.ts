@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noObjectParametersRule } from "../../src/rules/no-object-parameters.ts";
+import { noObjectParametersRule } from "#src/rules/no-object-parameters.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const error = { messageId: "objectParameter" };

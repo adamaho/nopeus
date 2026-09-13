@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { requireEffectFnNameRule } from "../../../src/effect/rules/require-effect-fn-name.ts";
+import { requireEffectFnNameRule } from "#src/effect/rules/require-effect-fn-name.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const error = { messageId: "missingName" };

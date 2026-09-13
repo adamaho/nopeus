@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noEffectRunnersInLibraryRule } from "../../../src/effect/rules/no-effect-runners-in-library.ts";
+import { noEffectRunnersInLibraryRule } from "#src/effect/rules/no-effect-runners-in-library.ts";
 
 const tester = new RuleTester({
   cwd: "/repo",
