@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { requireServiceConstructorNamesRule } from "../../../src/effect/rules/require-service-constructor-names.ts";
+import { requireServiceConstructorNamesRule } from "#src/effect/rules/require-service-constructor-names.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const imports = 'import { Context, Effect, Layer, Config } from "effect";';

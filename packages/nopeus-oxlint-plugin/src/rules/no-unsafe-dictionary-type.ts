@@ -5,7 +5,7 @@ import {
   classifyUnsafeDictionaryValue,
   createTypeEnvironment,
   type TypeEnvironment,
-} from "../shared/dictionary-types.ts";
+} from "#src/shared/dictionary-types.ts";
 
 const typeNodeKinds: ReadonlySet<string> = new Set([
   "JSDocNonNullableType",

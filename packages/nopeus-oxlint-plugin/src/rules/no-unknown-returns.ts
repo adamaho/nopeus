@@ -1,6 +1,6 @@
 import { defineRule, type ESTree } from "@oxlint/plugins";
 
-import { lexicalTypeParameterNames } from "../shared/lexical-type-parameters.ts";
+import { lexicalTypeParameterNames } from "#src/shared/lexical-type-parameters.ts";
 
 type FunctionWithReturnType =
   | ESTree.ArrowFunctionExpression

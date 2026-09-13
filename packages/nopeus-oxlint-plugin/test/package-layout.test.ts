@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 
-import { packageOwner } from "../src/shared/package-layout.ts";
+import { packageOwner } from "#src/shared/package-layout.ts";
+
 import { testWorkspace } from "./helpers/workspace.ts";
 
 test("module-format manifests do not replace real package boundaries", () => {

@@ -12,7 +12,7 @@ import {
   isKnownEvidenceExpression,
   type TypeEnvironment,
   type WideningTarget,
-} from "../shared/dictionary-types.ts";
+} from "#src/shared/dictionary-types.ts";
 
 type FunctionExpression = ESTree.ArrowFunctionExpression | ESTree.Function;
 

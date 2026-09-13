@@ -1,8 +1,8 @@
 import { RuleTester } from "oxlint/plugins-dev";
 import { afterAll } from "vitest";
 
-import { noCrossPackageInternalsRule } from "../../src/rules/no-cross-package-internals.ts";
-import { testWorkspace } from "../helpers/workspace.ts";
+import { noCrossPackageInternalsRule } from "#src/rules/no-cross-package-internals.ts";
+import { testWorkspace } from "#test/helpers/workspace.ts";
 
 const workspace = testWorkspace();
 afterAll(workspace.cleanup);

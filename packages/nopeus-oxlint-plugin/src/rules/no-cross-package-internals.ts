@@ -1,8 +1,8 @@
 import { defineRule } from "@oxlint/plugins";
 
-import { importResolution } from "../shared/import-resolution.ts";
-import { importSources } from "../shared/import-sources.ts";
-import { packageOwner, physicalPath } from "../shared/package-layout.ts";
+import { importResolution } from "#src/shared/import-resolution.ts";
+import { importSources } from "#src/shared/import-sources.ts";
+import { packageOwner, physicalPath } from "#src/shared/package-layout.ts";
 
 /** Require imports across package boundaries to use the target's public API. */
 export const noCrossPackageInternalsRule = defineRule({

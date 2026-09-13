@@ -1,6 +1,5 @@
+import builtins from "@adamaho/nopeus-oxlint-config";
 import { defineConfig } from "oxlint";
-
-import builtins from "../nopeus-oxlint-config/src/base.ts";
 
 export default defineConfig({
   extends: [builtins],

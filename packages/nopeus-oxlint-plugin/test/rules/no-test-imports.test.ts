@@ -1,8 +1,8 @@
 import { RuleTester } from "oxlint/plugins-dev";
 import { afterAll } from "vitest";
 
-import { noTestImportsRule } from "../../src/rules/no-test-imports.ts";
-import { testWorkspace } from "../helpers/workspace.ts";
+import { noTestImportsRule } from "#src/rules/no-test-imports.ts";
+import { testWorkspace } from "#test/helpers/workspace.ts";
 
 const workspace = testWorkspace();
 afterAll(workspace.cleanup);

@@ -15,6 +15,25 @@ internally use CommonJS remain allowed.
 Package/test ownership is enforced separately by the custom plugin's `/base`
 and `/effect` presets.
 
+Use package-local Node import aliases for imports that would climb to a parent
+directory. `import/no-relative-parent-imports` rejects `../` and `../../` imports
+in source and tests. Same-directory `./` imports remain allowed.
+
+Define aliases in each package's `package.json`, preserving file extensions:
+
+```json
+{
+  "imports": {
+    "#src/*": "./src/*",
+    "#test/*": "./test/*"
+  }
+}
+```
+
+For example, use `#src/receipts/repository.ts` instead of
+`../../src/receipts/repository.ts`. Across packages, use the target package's
+name and public exports.
+
 Shared configuration selecting built-in Oxlint rules for TypeScript codebases.
 This package has no Effect runtime or LSP dependency.
 

@@ -1,6 +1,6 @@
 import { defineRule } from "@oxlint/plugins";
 
-import { isTestFile, packageOwner, packagePath } from "../shared/package-layout.ts";
+import { isTestFile, packageOwner, packagePath } from "#src/shared/package-layout.ts";
 
 /** Place named test files under the owning package's sibling test directory. */
 export const requireTestLocationRule = defineRule({

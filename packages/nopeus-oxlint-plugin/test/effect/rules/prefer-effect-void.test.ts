@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { preferEffectVoidRule } from "../../../src/effect/rules/prefer-effect-void.ts";
+import { preferEffectVoidRule } from "#src/effect/rules/prefer-effect-void.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

@@ -1,8 +1,8 @@
 import { defineRule } from "@oxlint/plugins";
 
-import { importResolution } from "../shared/import-resolution.ts";
-import { importSources } from "../shared/import-sources.ts";
-import { isTestPath, packageOwner, packagePath, physicalPath } from "../shared/package-layout.ts";
+import { importResolution } from "#src/shared/import-resolution.ts";
+import { importSources } from "#src/shared/import-sources.ts";
+import { isTestPath, packageOwner, packagePath, physicalPath } from "#src/shared/package-layout.ts";
 
 /** Keep test dependencies out of a package's production source tree. */
 export const noTestImportsRule = defineRule({

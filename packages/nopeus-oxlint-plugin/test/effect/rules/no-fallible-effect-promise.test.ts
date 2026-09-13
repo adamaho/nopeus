@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noFallibleEffectPromiseRule } from "../../../src/effect/rules/no-fallible-effect-promise.ts";
+import { noFallibleEffectPromiseRule } from "#src/effect/rules/no-fallible-effect-promise.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

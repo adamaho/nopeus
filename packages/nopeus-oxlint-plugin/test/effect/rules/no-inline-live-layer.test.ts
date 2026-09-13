@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noInlineLiveLayerRule } from "../../../src/effect/rules/no-inline-live-layer.ts";
+import { noInlineLiveLayerRule } from "#src/effect/rules/no-inline-live-layer.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

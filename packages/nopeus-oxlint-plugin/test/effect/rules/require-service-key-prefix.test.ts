@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { requireServiceKeyPrefixRule } from "../../../src/effect/rules/require-service-key-prefix.ts";
+import { requireServiceKeyPrefixRule } from "#src/effect/rules/require-service-key-prefix.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const options = [{ prefix: "@app/" }];

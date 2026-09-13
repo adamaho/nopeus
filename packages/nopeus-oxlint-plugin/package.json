@@ -15,6 +15,10 @@
   ],
   "type": "module",
   "sideEffects": false,
+  "imports": {
+    "#src/*": "./src/*",
+    "#test/*": "./test/*"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./effect": "./src/effect.ts",
@@ -53,6 +57,7 @@
     "oxc-resolver": "catalog:"
   },
   "devDependencies": {
+    "@adamaho/nopeus-oxlint-config": "workspace:*",
     "@effect/vitest": "catalog:",
     "@nopeus/tool-tsconfig": "workspace:*",
     "@nopeus/tool-tsdown-config": "workspace:*",
