@@ -1,5 +1,11 @@
 # @adamaho/nopeus-oxlint-plugin
 
+## 0.7.0
+
+### Minor Changes
+
+- a71031f: Extend `prefer-effect-platform-services` with symbol-aware diagnostics for Node APIs that have Effect v4 replacements.
+
 ## 0.6.0
 
 ### Minor Changes
