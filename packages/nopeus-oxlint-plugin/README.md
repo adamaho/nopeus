@@ -582,32 +582,61 @@ yield * new UserNotFound({ id });
 
 ### nopeus/prefer-effect-platform-services
 
-Rejects direct Node filesystem, path, and child-process imports. Effect
-platform services preserve typed failures and make platform behavior replaceable
-with Layers in tests. Type-only imports remain allowed because they perform no
-platform I/O.
+Rejects direct Node platform APIs only when Effect v4 provides a semantic replacement. Diagnostics
+name both the Effect API and the Node provider (or the runtime-provided service) needed to use it.
+Both `node:x` and bare `x` specifiers are recognized.
 
-Bad:
+| Node import                 | Checked value(s)                                                                                                                                                                          | Effect replacement                                                      | Provider                                                       |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `fs`, `fs/promises`         | Every value import (existing behavior)                                                                                                                                                    | `FileSystem.FileSystem`                                                 | `NodeFileSystem.layer` or `NodeServices.layer`                 |
+| `path`                      | Every value import (existing behavior)                                                                                                                                                    | `Path.Path`                                                             | `NodePath.layer` or `NodeServices.layer`                       |
+| `child_process`             | Every value import (existing behavior)                                                                                                                                                    | `ChildProcess` commands and `ChildProcessSpawner.ChildProcessSpawner`   | `NodeChildProcessSpawner.layer` or `NodeServices.layer`        |
+| `crypto`                    | `randomUUID`                                                                                                                                                                              | `Crypto.Crypto.randomUUIDv4`                                            | `NodeCrypto.layer` or `NodeServices.layer`                     |
+| `crypto`                    | `randomUUIDv7`                                                                                                                                                                            | `Crypto.Crypto.randomUUIDv7`                                            | `NodeCrypto.layer` or `NodeServices.layer`                     |
+| `crypto`                    | `randomBytes`                                                                                                                                                                             | `Crypto.Crypto.randomBytes`                                             | `NodeCrypto.layer` or `NodeServices.layer`                     |
+| `crypto`                    | `randomInt`                                                                                                                                                                               | `Crypto.Crypto.randomIntBetween`                                        | `NodeCrypto.layer` or `NodeServices.layer`                     |
+| `crypto`                    | `createHash`, `hash`, `subtle.digest`, `webcrypto.subtle.digest`                                                                                                                          | `Crypto.Crypto.digest`                                                  | `NodeCrypto.layer` or `NodeServices.layer`                     |
+| `url`                       | `fileURLToPath`                                                                                                                                                                           | `Path.Path.fromFileUrl`                                                 | `NodePath.layer` or `NodeServices.layer`                       |
+| `url`                       | `pathToFileURL`                                                                                                                                                                           | `Path.Path.toFileUrl`                                                   | `NodePath.layer` or `NodeServices.layer`                       |
+| `console`                   | `assert`, `clear`, `count`, `countReset`, `debug`, `dir`, `dirxml`, `error`, `group`, `groupCollapsed`, `groupEnd`, `info`, `log`, `table`, `time`, `timeEnd`, `timeLog`, `trace`, `warn` | The matching method on `Console.Console`                                | The runtime-provided `Console.Console` service                 |
+| `process`                   | `argv`, `stdin`, `stdout`, `stderr`                                                                                                                                                       | `Stdio.Stdio`                                                           | `NodeStdio.layer` or `NodeServices.layer`                      |
+| `process`                   | `hrtime`                                                                                                                                                                                  | `Clock.Clock.monotonicTimeNanos`                                        | The runtime-provided `Clock.Clock` service                     |
+| `timers`, `timers/promises` | `setTimeout`                                                                                                                                                                              | `Effect.sleep`                                                          | The runtime-provided `Clock.Clock` service                     |
+| `timers`, `timers/promises` | `setInterval`                                                                                                                                                                             | `Effect.repeat` or `Stream.fromEffectSchedule`                          | The runtime-provided `Clock.Clock` service                     |
+| `perf_hooks`                | `performance.now`                                                                                                                                                                         | `Clock.Clock.monotonicTimeNanos`                                        | The runtime-provided `Clock.Clock` service                     |
+| `http`, `https`             | `get`, `request`                                                                                                                                                                          | `HttpClient.get` / `HttpClient.execute` through `HttpClient.HttpClient` | `NodeHttpClient.layerUndici` or `NodeHttpClient.layerNodeHttp` |
+| `http`, `https`             | Direct `createServer` use                                                                                                                                                                 | `HttpServer.HttpServer` for server behavior                             | `NodeHttpServer.layer` or `NodeHttpServer.layerConfig`         |
+| `net`                       | `connect`, `createConnection`                                                                                                                                                             | `Socket.Socket`                                                         | `NodeSocket.makeNet` or `NodeSocket.layerNet`                  |
+| `net`                       | `createServer`                                                                                                                                                                            | `SocketServer.SocketServer`                                             | `NodeSocketServer.layer`                                       |
+
+Named and aliased imports are checked at the imported symbol. Namespace and default imports are
+checked when a mapped member is accessed, including computed string properties. Type-only imports
+remain allowed because they perform no platform I/O.
+
+`node:http` and `node:https` still require a Node server factory at the application boundary. Passing
+`createServer` directly, or calling it inside the lazy factory, as the first argument of
+`NodeHttpServer.layer` or `NodeHttpServer.layerConfig` is allowed. Using it to implement server
+behavior directly is reported.
+
+The audit intentionally leaves Node streams, `EventEmitter`, `Buffer`, OS metadata, `util`, TLS,
+DNS, datagrams, HTTP/2, readline/TTY primitives, compression, and worker threads unrestricted.
+Effect exposes adapters or higher-level abstractions for some of these, but not a semantic
+replacement for every use of the imported Node value. The same is true for the remaining process,
+crypto, console, timer, URL, HTTP, and net exports. In particular, `Worker` remains necessary when
+constructing `NodeWorker.layer`, and Node streams remain necessary at `NodeStream` interop
+boundaries.
+
+No autofix is offered. These migrations introduce service requirements, Layers, scoped resources,
+or effectful control flow and need application-specific placement.
 
 ```ts
-import { readFile } from "node:fs/promises";
+import { Crypto, Effect } from "effect";
 
-const text = await readFile(path, "utf8");
-```
-
-Good:
-
-```ts
-import { Effect, FileSystem } from "effect";
-
-const text = Effect.gen(function* () {
-  const fs = yield* FileSystem.FileSystem;
-  return yield* fs.readFileString(path);
+const id = Effect.gen(function* () {
+  const crypto = yield* Crypto.Crypto;
+  return yield* crypto.randomUUIDv4;
 });
 ```
-
-Use Effect Path for path operations and `effect/unstable/process`
-ChildProcess for process execution.
 
 ### nopeus/prefer-effect-void
 
