@@ -1,5 +1,11 @@
 # @adamaho/nopeus-tsconfig
 
+## 0.3.0
+
+### Minor Changes
+
+- 84a837a: Report `lazyEffect`, `preferSucceedSomeOrNone`, and `unnecessaryTypeofType` as errors in the shared Effect TypeScript policy.
+
 ## 0.2.0
 
 ### Minor Changes
