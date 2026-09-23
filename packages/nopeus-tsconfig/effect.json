@@ -15,7 +15,10 @@
           "promiseInEffectSuccess": "error",
           "schemaSyncInEffect": "error",
           "leakingRequirements": "error",
-          "floatingEffectInVitest": "error"
+          "floatingEffectInVitest": "error",
+          "lazyEffect": "error",
+          "preferSucceedSomeOrNone": "error",
+          "unnecessaryTypeofType": "error"
         }
       }
     ]

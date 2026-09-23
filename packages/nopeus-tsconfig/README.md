@@ -46,7 +46,7 @@ its build output can set its own emit options.
 
 ## Effect projects
 
-Use `/effect` to inherit the base policy and all eight canonical Effect
+Use `/effect` to inherit the base policy and eleven canonical Effect
 diagnostics. For a Node project, combine it with `/node`:
 
 ```json
@@ -93,6 +93,9 @@ option and install the React types they need.
 | `schemaSyncInEffect`      | Use Effect-returning schema decoders inside Effect workflows.   |
 | `leakingRequirements`     | Capture implementation dependencies when constructing services. |
 | `floatingEffectInVitest`  | Execute Effects through the Effect-aware test API.              |
+| `lazyEffect`              | Avoid zero-argument functions that return Effects.              |
+| `preferSucceedSomeOrNone` | Use the dedicated constructors for optional success values.     |
+| `unnecessaryTypeofType`   | Use named types instead of redundant schema type queries.       |
 
 These diagnostics are errors and cause a failing `tsc` exit code. Other upstream
 diagnostics retain their defaults. A child config's `compilerOptions.plugins`
