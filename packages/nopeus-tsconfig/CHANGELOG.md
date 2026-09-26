@@ -1,5 +1,11 @@
 # @adamaho/nopeus-tsconfig
 
+## 0.3.1
+
+### Patch Changes
+
+- b3d3d4e: Document commands for checking installed Oxlint and TypeScript configs.
+
 ## 0.3.0
 
 ### Minor Changes

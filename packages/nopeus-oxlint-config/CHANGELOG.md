@@ -1,5 +1,11 @@
 # @adamaho/nopeus-oxlint-config
 
+## 0.4.1
+
+### Patch Changes
+
+- b3d3d4e: Document commands for checking installed Oxlint and TypeScript configs.
+
 ## 0.4.0
 
 ### Minor Changes
