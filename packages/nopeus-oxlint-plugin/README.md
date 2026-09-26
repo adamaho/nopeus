@@ -6,8 +6,7 @@ Both apply to production and test code.
 
 ## Usage
 
-Install Nopeus and its Oxlint peer from the public npm registry. Remove any
-old `@adamaho` GitHub Packages registry override before installing:
+Install Nopeus and its Oxlint peer:
 
 ```bash
 pnpm add --save-dev @adamaho/nopeus-oxlint-plugin oxlint

@@ -18,7 +18,7 @@ belong to the consuming project.
 
 ## Install
 
-Install from the public npm registry without a registry override or authentication:
+Install the package and TypeScript:
 
 ```bash
 pnpm add -D -E @adamaho/nopeus-tsconfig typescript@7.0.2

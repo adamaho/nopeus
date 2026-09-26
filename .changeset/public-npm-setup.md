@@ -4,4 +4,4 @@
 "@adamaho/nopeus-tsconfig": patch
 ---
 
-Clarify public npm installation and how to verify each package configuration.
+Document commands for checking installed Oxlint and TypeScript configs.

@@ -39,9 +39,7 @@ This package has no Effect runtime or LSP dependency.
 
 ## Usage
 
-Install the config and its Oxlint peer from the public npm registry. If your
-project previously used GitHub Packages for `@adamaho`, remove that scope
-registry override first:
+Install the config and its Oxlint peer:
 
 ```bash
 pnpm add --save-dev @adamaho/nopeus-oxlint-config oxlint
