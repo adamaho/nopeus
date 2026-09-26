@@ -18,7 +18,7 @@ belong to the consuming project.
 
 ## Install
 
-Install from the public npm registry without a registry override or authentication:
+Install the package and TypeScript:
 
 ```bash
 pnpm add -D -E @adamaho/nopeus-tsconfig typescript@7.0.2
@@ -33,6 +33,9 @@ and combine `/base` with `/vite`:
   "include": ["src/**/*.ts"]
 }
 ```
+
+After adding the config, run `pnpm exec tsc --showConfig` to inspect the
+resolved options and `pnpm exec tsc --noEmit` to typecheck the project.
 
 The base policy enables strict checking, exact optional properties, checked index
 access, unused-local checks, explicit overrides, isolated modules, verbatim

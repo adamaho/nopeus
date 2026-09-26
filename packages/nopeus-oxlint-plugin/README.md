@@ -28,6 +28,12 @@ import { defineConfig } from "oxlint";
 export default defineConfig({ extends: [base] });
 ```
 
+To check that the installed preset loads in your project, run:
+
+```bash
+pnpm exec oxlint --config oxlint.config.ts src
+```
+
 This enables the general rules for type assertions, type widening, dictionaries,
 parameters, reflection, module mocking, conditional spreads, and public JSDoc.
 It does not enable Effect service, runtime, state-lifetime, or v4 migration rules.
