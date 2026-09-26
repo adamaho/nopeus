@@ -39,7 +39,9 @@ This package has no Effect runtime or LSP dependency.
 
 ## Usage
 
-Install the config and its Oxlint peer:
+Install the config and its Oxlint peer from the public npm registry. If your
+project previously used GitHub Packages for `@adamaho`, remove that scope
+registry override first:
 
 ```bash
 pnpm add --save-dev @adamaho/nopeus-oxlint-config oxlint
@@ -57,7 +59,12 @@ export default defineConfig({
 ```
 
 Oxlint does not resolve package imports from `.oxlintrc.json`; use a TypeScript
-config when consuming this package.
+config when consuming this package. To check that the installed config loads,
+run:
+
+```bash
+pnpm exec oxlint --config oxlint.config.ts src
+```
 
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.

@@ -34,6 +34,9 @@ and combine `/base` with `/vite`:
 }
 ```
 
+After adding the config, run `pnpm exec tsc --showConfig` to inspect the
+resolved options and `pnpm exec tsc --noEmit` to typecheck the project.
+
 The base policy enables strict checking, exact optional properties, checked index
 access, unused-local checks, explicit overrides, isolated modules, verbatim
 module syntax, and TypeScript import extensions. It targets ES2022, checks

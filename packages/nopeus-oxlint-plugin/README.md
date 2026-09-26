@@ -6,7 +6,8 @@ Both apply to production and test code.
 
 ## Usage
 
-Install Nopeus and its Oxlint peer:
+Install Nopeus and its Oxlint peer from the public npm registry. Remove any
+old `@adamaho` GitHub Packages registry override before installing:
 
 ```bash
 pnpm add --save-dev @adamaho/nopeus-oxlint-plugin oxlint
@@ -26,6 +27,12 @@ import base from "@adamaho/nopeus-oxlint-plugin/base";
 import { defineConfig } from "oxlint";
 
 export default defineConfig({ extends: [base] });
+```
+
+To check that the installed preset loads in your project, run:
+
+```bash
+pnpm exec oxlint --config oxlint.config.ts src
 ```
 
 This enables the general rules for type assertions, type widening, dictionaries,
