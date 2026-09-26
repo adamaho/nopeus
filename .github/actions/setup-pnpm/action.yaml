@@ -1,6 +1,12 @@
 name: setup-pnpm
 description: Setup Node.js, pnpm, and install dependencies.
 
+inputs:
+  cache:
+    description: Cache pnpm dependencies.
+    required: false
+    default: "true"
+
 runs:
   using: composite
   steps:
@@ -16,6 +22,7 @@ runs:
         run_install: false
 
     - name: Setup pnpm cache
+      if: inputs.cache == 'true'
       uses: actions/setup-node@v4
       with:
         node-version-file: package.json
