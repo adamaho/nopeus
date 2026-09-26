@@ -1,0 +1,70 @@
+name: bootstrap-npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type publish to create the three public npm packages
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    name: bootstrap
+    if: github.ref == 'refs/heads/dev' && inputs.confirm == 'publish'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm and install
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Check packages
+        run: |
+          pnpm check
+          pnpm --filter=@adamaho/nopeus-oxlint-plugin run test:package
+
+      - name: Confirm bootstrap versions
+        run: |
+          for entry in nopeus-oxlint-config:0.4.0 nopeus-oxlint-plugin:0.7.0 nopeus-tsconfig:0.3.0; do
+            package=${entry%%:*}
+            expected=${entry##*:}
+            actual=$(node -p "require('./packages/$package/package.json').version")
+            if [[ "$actual" != "$expected" ]]; then
+              echo "Unexpected bootstrap version for @adamaho/$package: $actual" >&2
+              exit 1
+            fi
+          done
+
+      - name: Configure npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          registry-url: https://registry.npmjs.org
+          scope: "@adamaho"
+
+      - name: Publish initial package versions
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+        run: |
+          if [[ -z "$NODE_AUTH_TOKEN" ]]; then
+            echo "NPM_BOOTSTRAP_TOKEN is required" >&2
+            exit 1
+          fi
+          pnpm exec changeset publish --no-git-tag
+
+      - name: Verify public versions
+        run: |
+          for package in nopeus-oxlint-config nopeus-oxlint-plugin nopeus-tsconfig; do
+            expected=$(node -p "require('./packages/$package/package.json').version")
+            actual=$(npm view "@adamaho/$package" version --registry=https://registry.npmjs.org)
+            if [[ "$actual" != "$expected" ]]; then
+              echo "Version mismatch for @adamaho/$package: expected $expected, got $actual" >&2
+              exit 1
+            fi
+          done

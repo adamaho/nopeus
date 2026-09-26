@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write
-  packages: write
   pull-requests: write
 
 concurrency:
@@ -18,6 +17,7 @@ concurrency:
 jobs:
   release:
     name: release
+    if: vars.NPM_RELEASES_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,11 +28,11 @@ jobs:
       - name: Setup pnpm and install
         uses: ./.github/actions/setup-pnpm
 
-      - name: Configure GitHub Packages
+      - name: Configure npm registry
         uses: actions/setup-node@v4
         with:
           node-version-file: package.json
-          registry-url: https://npm.pkg.github.com
+          registry-url: https://registry.npmjs.org
           scope: "@adamaho"
 
       - name: Version or publish packages
@@ -43,5 +43,3 @@ jobs:
           title: "chore(nopeus): version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.ADAMAHO_BOT_PAT }}
-          NODE_AUTH_TOKEN: ${{ github.token }}
-          NPM_TOKEN: ${{ github.token }}

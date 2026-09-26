@@ -18,11 +18,7 @@ belong to the consuming project.
 
 ## Install
 
-Use the same authenticated GitHub Packages setup as the other Nopeus packages:
-
-```ini
-@adamaho:registry=https://npm.pkg.github.com
-```
+Install from the public npm registry without a registry override or authentication:
 
 ```bash
 pnpm add -D -E @adamaho/nopeus-tsconfig typescript@7.0.2
