@@ -31,6 +31,8 @@ const canonicalRules = [
   "nopeus/prefer-effect-void",
   "nopeus/require-effect-fn-name",
   "nopeus/require-public-jsdoc",
+  "nopeus/require-schema-group-spacing",
+  "nopeus/require-service-method-spacing",
   "nopeus/require-effect-namespace",
   "nopeus/require-service-key-prefix",
   "nopeus/require-service-constructor-names",

@@ -17,7 +17,9 @@ import { it } from "@effect/vitest";
 import { expect } from "vitest";
 
 const load = Effect.fn("@fixture/Users.load")(() => Effect.void);
+
 const Outcome = Schema.TaggedStruct("Processed", {});
+
 const User = Schema.Struct({ id: Schema.String });
 type User = typeof User.Type;
 class ReadFailed extends Schema.TaggedError<ReadFailed>()("ReadFailed", { cause: Schema.Unknown }) {}
@@ -94,7 +96,11 @@ test("the syntax policy accepts v4 code and executes both added rules", () => {
       join(directory, "oxlint.config.ts"),
       `
       import effect from "../src/effect.ts";
-      export default effect({ packageName: "fixture" });
+      const policy = effect({ packageName: "fixture" });
+      export default {
+        ...policy,
+        jsPlugins: [{ name: "nopeus", specifier: "../src/index.ts" }],
+      };
     `,
     );
     writeFileSync(join(directory, "test/valid.test.ts"), valid);

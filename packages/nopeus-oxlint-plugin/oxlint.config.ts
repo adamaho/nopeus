@@ -9,6 +9,7 @@ export default defineConfig({
     "nopeus/no-cross-package-internals": "error",
     "nopeus/no-test-imports": "error",
     "nopeus/require-test-location": "error",
+    "nopeus/require-schema-group-spacing": "error",
   },
   ignorePatterns: ["test/fixtures/**"],
 });

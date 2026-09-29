@@ -12,6 +12,9 @@ Use ESM imports and exports. `typescript/no-require-imports` rejects `require()`
 also rejects TypeScript's `export =` syntax. ESM imports of dependencies that
 internally use CommonJS remain allowed.
 
+The built-in `import/newline-after-import` rule requires a blank line after the
+last import before other code.
+
 Package/test ownership is enforced separately by the custom plugin's `/base`
 and `/effect` presets.
 

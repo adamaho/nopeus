@@ -28,6 +28,8 @@ import { noUnknownReturnsRule } from "./rules/no-unknown-returns.ts";
 import { noUnknownTypeAliasesRule } from "./rules/no-unknown-type-aliases.ts";
 import { noUnsafeDictionaryTypeRule } from "./rules/no-unsafe-dictionary-type.ts";
 import { requirePublicJSDocRule } from "./rules/require-public-jsdoc.ts";
+import { requireSchemaGroupSpacingRule } from "./rules/require-schema-group-spacing.ts";
+import { requireServiceMethodSpacingRule } from "./rules/require-service-method-spacing.ts";
 import { requireTestLocationRule } from "./rules/require-test-location.ts";
 
 /** Strict Oxlint rules for preserving type evidence and explicit Effect architecture. */
@@ -59,6 +61,8 @@ const nopeusPlugin = eslintCompatPlugin({
     "prefer-effect-platform-services": preferEffectPlatformServicesRule,
     "prefer-effect-void": preferEffectVoidRule,
     "require-public-jsdoc": requirePublicJSDocRule,
+    "require-schema-group-spacing": requireSchemaGroupSpacingRule,
+    "require-service-method-spacing": requireServiceMethodSpacingRule,
     "require-effect-fn-name": requireEffectFnNameRule,
     "require-effect-namespace": requireEffectNamespaceRule,
     "require-service-key-prefix": requireServiceKeyPrefixRule,

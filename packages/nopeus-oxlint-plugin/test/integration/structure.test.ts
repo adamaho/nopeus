@@ -30,8 +30,8 @@ test("the shared default policy rejects parent imports and accepts package-local
       for (const path of ["src/nested/policy.ts", "test/nested/policy.test.ts"]) {
         for (const [code, rejected] of [
           ['import "../local.ts";', true],
-          ['import { value } from "../../src/local.ts"; export { value };', true],
-          ['import type { Value } from "../../src/local.ts"; export type { Value };', true],
+          ['import { value } from "../../src/local.ts";\n\nexport { value };', true],
+          ['import type { Value } from "../../src/local.ts";\n\nexport type { Value };', true],
           ['export { value } from "../../src/local.ts";', true],
           ['export * from "../../src/local.ts";', true],
           ['void import("../../src/local.ts");', true],

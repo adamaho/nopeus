@@ -1,6 +1,7 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
 import { requireEffectNamespaceRule } from "#src/effect/rules/require-effect-namespace.ts";
+
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 const options = [{ prefix: "@app/" }];
 // Independent catalogue exercises each API through every supported import form.
