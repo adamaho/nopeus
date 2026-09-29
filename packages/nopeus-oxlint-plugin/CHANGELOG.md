@@ -1,5 +1,11 @@
 # @adamaho/nopeus-oxlint-plugin
 
+## 0.8.0
+
+### Minor Changes
+
+- 1025da2: Require blank lines around multiline declarations in Effect service factories that return `Service.of(...)`, and separate top-level schema declarations while keeping decoder helpers with their schema.
+
 ## 0.7.1
 
 ### Patch Changes

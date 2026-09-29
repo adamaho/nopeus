@@ -1,5 +1,11 @@
 # @adamaho/nopeus-oxlint-config
 
+## 0.5.0
+
+### Minor Changes
+
+- 1025da2: Require a blank line after imports with Oxlint's `import/newline-after-import` rule.
+
 ## 0.4.1
 
 ### Patch Changes
