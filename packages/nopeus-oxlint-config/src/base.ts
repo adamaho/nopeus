@@ -5,6 +5,7 @@ export default defineConfig({
   rules: {
     // Let the TypeScript rule own all require forms without duplicate reports.
     "import/no-commonjs": ["error", { allowRequire: true }],
+    "import/newline-after-import": "error",
     "import/no-relative-parent-imports": "error",
     "typescript/no-require-imports": "error",
     "unicorn/filename-case": ["error", { case: "kebabCase" }],

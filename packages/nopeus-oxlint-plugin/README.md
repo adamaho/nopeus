@@ -236,6 +236,65 @@ outside this narrow rule. Prebuilt Request/options objects, combined signals,
 and indirect signal aliases require an explicit local exception or forwarding
 the callback parameter directly at the adapter boundary.
 
+### nopeus/require-schema-group-spacing
+
+Separate each new top-level `Schema.*` declaration from the preceding
+statement with a blank line. Decoder helpers such as
+`Schema.decodeUnknownEffect(...)` can stay immediately after the schema they
+use, so each schema and its decoders read as one group. Enabled in both `/base`
+and `/effect`.
+
+Bad:
+
+```ts
+const Row = Schema.Struct({ id: Schema.String });
+const decodeRow = Schema.decodeUnknownEffect(Row);
+const OtherRow = Schema.Struct({ id: Schema.Number });
+```
+
+Good:
+
+```ts
+const Row = Schema.Struct({ id: Schema.String });
+const decodeRow = Schema.decodeUnknownEffect(Row);
+
+const OtherRow = Schema.Struct({ id: Schema.Number });
+```
+
+### nopeus/require-service-method-spacing
+
+In a block that returns `Service.of(...)`, separate adjacent declarations with
+a blank line when either declaration spans multiple lines. Also separate a
+multiline declaration from the final `return Service.of(...)`. This keeps long
+Effect service methods visually distinct while allowing compact one-line values
+to stay together. Enabled by the `/effect` preset.
+
+Bad:
+
+```ts
+const get = Effect.fn("Service.get")(function* () {
+  return yield* repo.get();
+});
+const list = Effect.fn("Service.list")(function* () {
+  return yield* repo.list();
+});
+return Service.of({ get, list });
+```
+
+Good:
+
+```ts
+const get = Effect.fn("Service.get")(function* () {
+  return yield* repo.get();
+});
+
+const list = Effect.fn("Service.list")(function* () {
+  return yield* repo.list();
+});
+
+return Service.of({ get, list });
+```
+
 ### nopeus/no-type-assertions
 
 Rejects every non-const TypeScript assertion. A comment cannot prove a runtime
