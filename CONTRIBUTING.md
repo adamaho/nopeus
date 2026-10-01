@@ -40,14 +40,14 @@ pnpm check
 ```
 
 This runs the repository format check first, then lets Turbo run package-level
-lint and TypeScript tasks in parallel where packages define them.
+lint, Vitest, and TypeScript tasks in parallel where packages define them.
 
 Useful focused commands:
 
 - `pnpm fmt` formats the repository
 - `pnpm fmt:check` checks formatting without writing changes
 - `pnpm lint` runs package lint tasks through Turbo
-- `pnpm turbo run test:unit` runs package unit test tasks through Turbo
+- `pnpm turbo run test:unit` runs all package Vitest suites through Turbo
 - `pnpm tsc` runs package TypeScript tasks through Turbo
 
 ## Workspace Layout
@@ -108,9 +108,10 @@ Keep production build entrypoints scoped to `src/`. Deliberately invalid fixture
 files need an explicit, narrow lint/typecheck exclusion; ordinary tests retain
 the project's lint policy. Do not exclude the entire `test/` directory.
 
-The Oxlint plugin runs module tests with `test:unit`, CLI integration tests with
-`test:integration`, and isolated package installation tests with `test:package`.
-Their discovery patterns are disjoint; fixture/helper files are not test suites.
+All Vitest suites use the package's `test:unit` script, including module tests,
+CLI integration tests, and isolated package installation tests. Run them across
+packages with `pnpm turbo run test:unit`. CI runs this command in the dedicated
+test job; the build job only runs builds. Fixture/helper files are not test suites.
 
 ## Dependency Management
 

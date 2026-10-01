@@ -62,11 +62,6 @@
       "dependsOn": ["transit"],
       "outputs": []
     },
-    "test:integration": {
-      "cache": false,
-      "dependsOn": ["transit", "db:create"],
-      "outputs": []
-    },
     "test:component": {
       "dependsOn": ["transit"],
       "outputs": []

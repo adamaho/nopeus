@@ -39,7 +39,7 @@
     "lint": "oxlint --config oxlint.config.ts src test",
     "prepack": "pnpm build",
     "tsc": "tsc --noEmit",
-    "test:package": "vitest run"
+    "test:unit": "vitest run"
   },
   "devDependencies": {
     "@adamaho/nopeus-oxlint-config": "workspace:*",
