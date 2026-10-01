@@ -1,6 +1,6 @@
 {
   "name": "@adamaho/nopeus-oxfmt-config",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Shared base Oxfmt configuration with import sorting for TypeScript projects.",
   "license": "MIT",
   "repository": {
