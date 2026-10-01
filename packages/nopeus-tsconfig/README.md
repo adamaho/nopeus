@@ -57,7 +57,7 @@ diagnostics. For a Node project, combine it with `/node`:
 Install the compiler integration in the workspace that owns TypeScript:
 
 ```bash
-pnpm add -D -E @effect/tsgo@0.41.0
+pnpm add -D -E @effect/tsgo@0.47.1
 ```
 
 Retain the project's existing preparation commands and add the compiler patch:
@@ -75,7 +75,7 @@ Run `pnpm install` after adding the preparation step. CI must run installation
 scripts before typechecking. The JSON config supplies policy; the patched
 compiler executes Effect diagnostics. An unpatched compiler does not enforce
 them. Keep TypeScript and `@effect/tsgo` on compatible versions; the tested pair
-is TypeScript 7.0.2 with `@effect/tsgo` 0.41.0 and Effect 4.0.0-rc.112.
+is TypeScript 7.0.2 with `@effect/tsgo` 0.47.1 and Effect 4.0.0-rc.118.
 Install `@types/node` when using `/node`. Vite projects using Effect combine
 `/effect` with `/vite` and install `vite`. Neither environment preset installs
 these dependencies automatically. `/node` excludes browser globals; `/vite`
