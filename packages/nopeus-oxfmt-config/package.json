@@ -1,0 +1,62 @@
+{
+  "name": "@adamaho/nopeus-oxfmt-config",
+  "version": "0.0.0",
+  "description": "Shared base Oxfmt configuration with import sorting for TypeScript projects.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamaho/nopeus.git",
+    "directory": "packages/nopeus-oxfmt-config"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/base.ts",
+    "./base": "./src/base.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/base.d.mts",
+        "import": "./dist/base.mjs"
+      },
+      "./base": {
+        "types": "./dist/base.d.mts",
+        "import": "./dist/base.mjs"
+      }
+    },
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
+    "lint": "oxlint --config oxlint.config.ts src test",
+    "prepack": "pnpm build",
+    "tsc": "tsc --noEmit",
+    "test:package": "vitest run"
+  },
+  "devDependencies": {
+    "@adamaho/nopeus-oxlint-config": "workspace:*",
+    "@nopeus/tool-tsconfig": "workspace:*",
+    "@nopeus/tool-tsdown-config": "workspace:*",
+    "@types/node": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "rimraf": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "oxfmt": "^0.71.0"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.0.0"
+  }
+}

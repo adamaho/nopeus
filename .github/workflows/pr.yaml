@@ -165,3 +165,6 @@ jobs:
 
       - name: Package installation tests
         run: pnpm --filter=@adamaho/nopeus-oxlint-plugin run test:package
+
+      - name: Oxfmt config installation tests
+        run: pnpm --filter=@adamaho/nopeus-oxfmt-config run test:package

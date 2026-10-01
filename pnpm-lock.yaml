@@ -236,12 +236,12 @@ importers:
 
   .:
     devDependencies:
+      '@adamaho/nopeus-oxfmt-config':
+        specifier: workspace:*
+        version: link:packages/nopeus-oxfmt-config
       '@changesets/cli':
         specifier: 'catalog:'
         version: 3.0.3
-      '@nopeus/tool-oxfmt-config':
-        specifier: workspace:*
-        version: link:tools/oxfmt-config
       oxfmt:
         specifier: 'catalog:'
         version: 0.71.0
@@ -253,6 +253,39 @@ importers:
         version: 2.11.5
 
   infra/local: {}
+
+  packages/nopeus-oxfmt-config:
+    devDependencies:
+      '@adamaho/nopeus-oxlint-config':
+        specifier: workspace:*
+        version: link:../nopeus-oxlint-config
+      '@nopeus/tool-tsconfig':
+        specifier: workspace:*
+        version: link:../../tools/tsconfig
+      '@nopeus/tool-tsdown-config':
+        specifier: workspace:*
+        version: link:../../tools/tsdown-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.0
+      oxfmt:
+        specifier: 'catalog:'
+        version: 0.71.0
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.86.0
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.23.0(oxc-resolver@11.24.2)(typescript@7.0.2)
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.3(@types/node@24.19.0)(vite@8.2.2(@types/node@24.19.0)(yaml@2.9.0))
 
   packages/nopeus-oxlint-config:
     devDependencies:
@@ -322,12 +355,6 @@ importers:
         version: 5.0.3(@types/node@24.19.0)(vite@8.2.2(@types/node@24.19.0)(yaml@2.9.0))
 
   packages/nopeus-tsconfig: {}
-
-  tools/oxfmt-config:
-    devDependencies:
-      rimraf:
-        specifier: 'catalog:'
-        version: 6.1.3
 
   tools/tsconfig:
     devDependencies:
