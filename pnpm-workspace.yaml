@@ -11,11 +11,11 @@ allowBuilds:
 
 catalog:
   "@changesets/cli": 3.0.3
-  "@effect/tsgo": 0.47.1
-  "@effect/vitest": 4.0.0-rc.118
+  "@effect/tsgo": 0.47.2
+  "@effect/vitest": 4.0.0
   "@oxlint/plugins": 1.86.0
   "@types/node": 24.19.0
-  effect: 4.0.0-rc.118
+  effect: 4.0.0
   oxc-resolver: 11.24.2
   oxfmt: 0.71.0
   oxlint: 1.86.0
@@ -31,4 +31,7 @@ saveExact: true
 engineStrict: true
 
 minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - effect
+  - "@effect/*"
 minimumReleaseAgeStrict: true

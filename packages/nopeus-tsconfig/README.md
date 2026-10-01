@@ -57,7 +57,7 @@ diagnostics. For a Node project, combine it with `/node`:
 Install the compiler integration in the workspace that owns TypeScript:
 
 ```bash
-pnpm add -D -E @effect/tsgo@0.47.1
+pnpm add -D -E @effect/tsgo@0.47.2
 ```
 
 Retain the project's existing preparation commands and add the compiler patch:
@@ -75,7 +75,7 @@ Run `pnpm install` after adding the preparation step. CI must run installation
 scripts before typechecking. The JSON config supplies policy; the patched
 compiler executes Effect diagnostics. An unpatched compiler does not enforce
 them. Keep TypeScript and `@effect/tsgo` on compatible versions; the tested pair
-is TypeScript 7.0.2 with `@effect/tsgo` 0.47.1 and Effect 4.0.0-rc.118.
+is TypeScript 7.0.2 with `@effect/tsgo` 0.47.2 and Effect 4.0.0.
 Install `@types/node` when using `/node`. Vite projects using Effect combine
 `/effect` with `/vite` and install `vite`. Neither environment preset installs
 these dependencies automatically. `/node` excludes browser globals; `/vite`
@@ -96,10 +96,11 @@ option and install the React types they need.
 | `preferSucceedSomeOrNone` | Use the dedicated constructors for optional success values.     |
 | `unnecessaryTypeofType`   | Use named types instead of redundant schema type queries.       |
 
-These diagnostics are errors and cause a failing `tsc` exit code. Other upstream
-diagnostics retain their defaults. A child config's `compilerOptions.plugins`
-replaces the inherited array, so preserve the Effect entry if adding another
-compiler plugin.
+These diagnostics are errors and cause a failing `tsc` exit code. The
+`unstableApiUsage` diagnostic is disabled so projects can intentionally use
+unstable Effect APIs. Other upstream diagnostics retain their defaults. A child
+config's `compilerOptions.plugins` replaces the inherited array, so preserve
+the Effect entry if adding another compiler plugin.
 
 For editor support, run `pnpm exec effect-tsgo setup` and follow the
 [official editor instructions](https://github.com/Effect-TS/tsgo#installation).
