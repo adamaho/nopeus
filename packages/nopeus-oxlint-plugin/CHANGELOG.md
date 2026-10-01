@@ -1,5 +1,11 @@
 # @adamaho/nopeus-oxlint-plugin
 
+## 0.9.0
+
+### Minor Changes
+
+- 122c8ba: Combine Schema grouping and service method spacing into `require-effect-construction-spacing`, and add Layer construction spacing with safe autofixes. Remove the `require-schema-group-spacing` and `require-service-method-spacing` rule IDs.
+
 ## 0.8.0
 
 ### Minor Changes

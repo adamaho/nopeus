@@ -1,5 +1,11 @@
 # @adamaho/nopeus-tsconfig
 
+## 0.3.2
+
+### Patch Changes
+
+- 122c8ba: Disable the Effect `unstableApiUsage` diagnostic in the shared Effect preset so projects can intentionally use unstable APIs.
+
 ## 0.3.1
 
 ### Patch Changes
