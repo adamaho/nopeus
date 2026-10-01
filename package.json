@@ -10,14 +10,14 @@
     "dev": "turbo run dev --ui=tui",
     "lint": "turbo run lint",
     "changeset:publish": "changeset publish",
-    "fmt": "oxfmt --config ./tools/oxfmt-config/src/base.json .",
-    "fmt:check": "oxfmt --check --config ./tools/oxfmt-config/src/base.json .",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt --check .",
     "tsc": "turbo run tsc",
     "version-packages": "changeset version"
   },
   "devDependencies": {
+    "@adamaho/nopeus-oxfmt-config": "workspace:*",
     "@changesets/cli": "catalog:",
-    "@nopeus/tool-oxfmt-config": "workspace:*",
     "oxfmt": "catalog:",
     "rimraf": "catalog:",
     "turbo": "catalog:"

@@ -1,12 +1,12 @@
 {
-  "name": "@adamaho/nopeus-oxlint-plugin",
-  "version": "0.9.0",
-  "description": "The canonical strict Oxlint policy for AI-assisted TypeScript codebases.",
+  "name": "@adamaho/nopeus-oxfmt-config",
+  "version": "0.0.0",
+  "description": "Shared base Oxfmt configuration with import sorting for TypeScript projects.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adamaho/nopeus.git",
-    "directory": "packages/nopeus-oxlint-plugin"
+    "directory": "packages/nopeus-oxfmt-config"
   },
   "files": [
     "dist",
@@ -15,24 +15,15 @@
   ],
   "type": "module",
   "sideEffects": false,
-  "imports": {
-    "#src/*": "./src/*",
-    "#test/*": "./test/*"
-  },
   "exports": {
-    ".": "./src/index.ts",
-    "./effect": "./src/effect.ts",
+    ".": "./src/base.ts",
     "./base": "./src/base.ts"
   },
   "publishConfig": {
     "exports": {
       ".": {
-        "types": "./dist/index.d.mts",
-        "import": "./dist/index.mjs"
-      },
-      "./effect": {
-        "types": "./dist/effect.d.mts",
-        "import": "./dist/effect.mjs"
+        "types": "./dist/base.d.mts",
+        "import": "./dist/base.mjs"
       },
       "./base": {
         "types": "./dist/base.d.mts",
@@ -47,20 +38,15 @@
     "clean": "rimraf node_modules dist build .turbo coverage tsconfig.tsbuildinfo",
     "lint": "oxlint --config oxlint.config.ts src test",
     "prepack": "pnpm build",
-    "test:unit": "vitest run",
-    "tsc": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@oxlint/plugins": "catalog:",
-    "oxc-resolver": "catalog:"
+    "tsc": "tsc --noEmit",
+    "test:unit": "vitest run"
   },
   "devDependencies": {
     "@adamaho/nopeus-oxlint-config": "workspace:*",
-    "@effect/vitest": "catalog:",
     "@nopeus/tool-tsconfig": "workspace:*",
     "@nopeus/tool-tsdown-config": "workspace:*",
     "@types/node": "catalog:",
-    "effect": "catalog:",
+    "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "rimraf": "catalog:",
     "tsdown": "catalog:",
@@ -68,7 +54,7 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "oxlint": ">=1.79.0 <2"
+    "oxfmt": "^0.71.0"
   },
   "engines": {
     "node": "^22.18.0 || >=24.0.0"
