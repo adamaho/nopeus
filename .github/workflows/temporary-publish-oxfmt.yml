@@ -1,0 +1,54 @@
+# Remove this workflow and revoke NPM_BOOTSTRAP_TOKEN after the first release.
+name: temporary publish oxfmt config
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish oxfmt config 0.1.0
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm and install
+        uses: ./.github/actions/setup-pnpm
+        with:
+          cache: "false"
+
+      - name: Verify and pack the initial release
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import pkg from "./packages/nopeus-oxfmt-config/package.json" with { type: "json" };
+          assert.equal(pkg.name, "@adamaho/nopeus-oxfmt-config");
+          assert.equal(pkg.version, "0.1.0");
+          NODE
+          pnpm --filter=@adamaho/nopeus-oxfmt-config pack --out "$RUNNER_TEMP/nopeus-oxfmt-config.tgz"
+
+      - name: Configure npm authentication
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish the initial release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::Set the NPM_BOOTSTRAP_TOKEN repository secret before running this workflow."
+            exit 1
+          fi
+          npm publish "$RUNNER_TEMP/nopeus-oxfmt-config.tgz" --access public --ignore-scripts --registry https://registry.npmjs.org
