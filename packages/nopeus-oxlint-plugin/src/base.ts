@@ -20,6 +20,6 @@ export default defineConfig({
     "nopeus/no-unknown-type-aliases": "error",
     "nopeus/no-unsafe-dictionary-type": "error",
     "nopeus/require-public-jsdoc": "error",
-    "nopeus/require-schema-group-spacing": "error",
+    "nopeus/require-effect-construction-spacing": "error",
   },
 });

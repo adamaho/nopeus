@@ -18,7 +18,8 @@
           "floatingEffectInVitest": "error",
           "lazyEffect": "error",
           "preferSucceedSomeOrNone": "error",
-          "unnecessaryTypeofType": "error"
+          "unnecessaryTypeofType": "error",
+          "unstableApiUsage": "off"
         }
       }
     ]
