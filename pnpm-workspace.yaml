@@ -32,3 +32,6 @@ engineStrict: true
 
 minimumReleaseAge: 1440
 minimumReleaseAgeStrict: true
+
+minimumReleaseAgeExclude:
+  - "@adamaho/*"
