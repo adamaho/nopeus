@@ -33,7 +33,7 @@ The workspace package is marked `private: true` to prevent npm publication.
 For local development, Winston accepts the package directory directly:
 
 ```sh
-node scripts/install-skills.mjs --source ../nopeus/packages/nopeus-skills
+./scripts/install-skills.sh --source ../nopeus/packages/nopeus-skills
 ```
 
 Run this command from the Winston repository. It installs a snapshot; rerun it
