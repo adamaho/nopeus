@@ -1,0 +1,11 @@
+{
+  "name": "@adamaho/nopeus-skills",
+  "private": true,
+  "description": "Shared agent skills for refining, implementing, and reviewing software.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamaho/nopeus.git",
+    "directory": "packages/nopeus-skills"
+  }
+}
