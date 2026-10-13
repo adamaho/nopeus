@@ -8,15 +8,6 @@
       "tree": "d2bec0241d82f55260ab775ccc964d1497ad23d7",
       "license": "MIT",
       "licenseFile": "skills/effect/LICENSE"
-    },
-    "gh-stack": {
-      "repository": "https://github.com/github/gh-stack",
-      "revision": "68ce60c76096c1aecdc19a8af6fa7e89d31ebc2b",
-      "path": "skills/gh-stack",
-      "tree": "c95c8b5b4dd850f3fef007b304428f5684f2fb87",
-      "license": "MIT",
-      "licenseFile": "skills/gh-stack/LICENSE",
-      "localChanges": "Preserve installer-added GitHub provenance metadata and YAML formatting from the Winston copy; instructions are unchanged."
     }
   }
 }

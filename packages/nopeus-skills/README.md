@@ -7,13 +7,18 @@ The canonical collection of Adam's shared agent skills, packaged as
 
 - `adhd`: clear, concise communication on any topic.
 - `refine`: explore software ideas and resolve decisions with the human.
-- `pid` and `pid-ui-sensors`: implementation and UI validation loops.
 - `create-pr` and `create-ticket`: concise pull requests and product tickets.
 - `effect`: Effect guidance from Kit Langton.
-- `gh-stack`: stacked pull request guidance from GitHub.
 
 Install the whole collection so references between skills, such as
 `refine` → `adhd`, remain available. Skill names stay unchanged across harnesses.
+
+## Disabled skills
+
+`pid` and `pid-ui-sensors` are retained under `disabled/` for future work.
+Their entrypoints are named `SKILL.md.disabled` so skill discovery does not load
+them. They are excluded from the npm package and Winston's installed skills.
+To re-enable one, move it back under `skills/` and restore its `SKILL.md` filename.
 
 ## Installation
 
