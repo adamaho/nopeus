@@ -61,7 +61,6 @@ NOPEUS_SKILLS_SOURCE="$PWD/packages/nopeus-skills" \
 The override affects only Nopeus's own skills; third-party sources remain
 unchanged. Normal installations continue to use the `dev` branch.
 
-
 ## Updates
 
 Rerun the shared installer to apply the current selection, including newly
