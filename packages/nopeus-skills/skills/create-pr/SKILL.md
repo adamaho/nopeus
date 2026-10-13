@@ -9,6 +9,9 @@ description: >-
 
 # Create PR
 
+Read and apply [adhd](../adhd/SKILL.md) when writing PR titles, descriptions,
+and messages to the user. Follow the PR-specific format below.
+
 Write a concise title and a short bullet list of the actual changes in the PR.
 
 ## Description style

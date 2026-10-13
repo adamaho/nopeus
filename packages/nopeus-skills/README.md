@@ -1,54 +1,80 @@
 # Nopeus skills
 
-The canonical collection of Adam's shared agent skills, organized as the workspace package
+The canonical collection of shared agent skills, organized as the workspace package
 `@adamaho/nopeus-skills`. It is public on GitHub and is not published to npm. Each skill uses the portable `SKILL.md` format.
 
 ## Skills
 
 - `adhd`: clear, concise communication on any topic.
 - `refine`: explore software ideas and resolve decisions with the human.
-- `create-pr` and `create-ticket`: concise pull requests and product tickets.
-- `effect`: Effect guidance from Kit Langton.
+- `create-pr`: concise pull request titles and descriptions.
+- `create-ticket`: concise product tickets and bug reports.
+
+The shared installer also includes `effect`, installed directly from
+[Kit Langton's skills](https://github.com/kitlangton/skills). Third-party skills
+stay in their original repositories so updates come from their authors.
 
 Install the whole collection so references between skills, such as
 `refine` → `adhd`, remain available. Skill names stay unchanged across harnesses.
 
-## Disabled skills
-
-`pid` and `pid-ui-sensors` are retained under `disabled/` for future work.
-Their entrypoints are named `SKILL.md.disabled` so skill discovery does not load
-them. They are excluded from Winston's installed skills.
-To re-enable one, move it back under `skills/` and restore its `SKILL.md` filename.
-
 ## Installation
 
-Winston downloads the latest `dev` branch from this repository on every skills
-installation. It copies the active `skills/` collection into machine-local
-storage and connects the agent harnesses to it. Skills are maintained here;
-Winston owns installation and harness setup. No npm release or version pin is
-required: merge a skill change into `dev`, then rerun Winston's installer.
-
-The workspace package is marked `private: true` to prevent npm publication.
-
-For local development, Winston accepts the package directory directly:
+Use Node.js and the [skills CLI](https://github.com/vercel-labs/skills) to install
+the shared selection. From a Nopeus checkout, run:
 
 ```sh
-./scripts/install-skills.sh --source ../nopeus/packages/nopeus-skills
+bash packages/nopeus-skills/install.sh --global
 ```
 
-Run this command from the Winston repository. It installs a snapshot; rerun it
-after editing the skills.
+The script installs Nopeus skills from `dev` and Effect from its upstream
+repository. Run it on each machine to install the same selection. Each source
+tracks its latest version, so installations at different times may differ.
 
-## Upstream updates
+Choose your agents in the installer, or pass options such as
+`--agent claude-code cursor --yes`. Options apply to both sources. Omit
+`--global` to install into the current project; you can invoke the script by its
+absolute path from another project.
 
-`upstream-lock.json` records the source, exact commit, and original Git tree of
-each vendored skill. Review updates in a Nopeus PR, update the lock entry, and
-preserve the upstream license. The licenses live inside their skill folders so
-they travel with individual installations. Local edits must be described in the
-lock entry; the upstream tree identifies the original source, not local edits.
+Without a checkout, run the same installation commands directly:
 
-Your own skills use the package's MIT license. Third-party skills retain their
-original copyright notices. App-synced caches remain machine-local and are
-excluded from this collection.
+```sh
+npx skills add https://github.com/adamaho/nopeus/tree/dev/packages/nopeus-skills --skill '*' --global
+npx skills add kitlangton/skills --skill effect --global
+```
+
+To install from a local checkout, run this from the Nopeus repository root:
+
+```sh
+npx skills add ./packages/nopeus-skills --skill '*'
+```
+
+This local command installs only Nopeus's own skills. Rerun it after local edits.
+
+## Updates
+
+Rerun the shared installer to apply the current selection, including newly
+added skills. To refresh all globally installed skills from their recorded
+sources, run:
+
+```sh
+npx skills update --global
+```
+
+For project installations, use `npx skills update --project`. Effect updates
+come directly from Kit's repository and do not require a Nopeus PR.
+
+If Effect was previously installed from Nopeus, rerun the upstream install
+command once and accept replacing the existing skill. This records Kit's
+repository as its update source:
+
+```sh
+npx skills add kitlangton/skills --skill effect --global
+```
+
+Use the same scope and agents as the existing installation.
+
+Nopeus's own skills use the package's MIT license. Third-party skills retain
+their upstream licenses. App-synced caches remain machine-local and are excluded
+from this collection.
 
 Changesets are not needed for this private workspace package.
