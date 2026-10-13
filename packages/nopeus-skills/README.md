@@ -1,7 +1,7 @@
 # Nopeus skills
 
-The canonical collection of Adam's shared agent skills, packaged as
-`@adamaho/nopeus-skills`. Each skill uses the portable `SKILL.md` format.
+The canonical collection of Adam's shared agent skills, organized as the workspace package
+`@adamaho/nopeus-skills`. It is public on GitHub and is not published to npm. Each skill uses the portable `SKILL.md` format.
 
 ## Skills
 
@@ -17,24 +17,23 @@ Install the whole collection so references between skills, such as
 
 `pid` and `pid-ui-sensors` are retained under `disabled/` for future work.
 Their entrypoints are named `SKILL.md.disabled` so skill discovery does not load
-them. They are excluded from the npm package and Winston's installed skills.
+them. They are excluded from Winston's installed skills.
 To re-enable one, move it back under `skills/` and restore its `SKILL.md` filename.
 
 ## Installation
 
-Winston installs a pinned Nopeus Git revision into the machine's shared agent
-skill directory and connects Claude and Cursor to that directory. Skills are
-maintained here; Winston owns machine setup and the installed revision.
+Winston downloads the latest `dev` branch from this repository on every skills
+installation. It copies the active `skills/` collection into machine-local
+storage and connects the agent harnesses to it. Skills are maintained here;
+Winston owns installation and harness setup. No npm release or version pin is
+required: merge a skill change into `dev`, then rerun Winston's installer.
 
-The npm package contains the same `skills/` tree, references, and licenses.
-Installing the npm package alone does not register skills with an agent. Link
-its skill directories into your harness's skill directory, or use a skill
-installer that accepts this package directory as a local source.
+The workspace package is marked `private: true` to prevent npm publication.
 
 For local development, Winston accepts the package directory directly:
 
 ```sh
-python3 scripts/install-skills.py --source ../nopeus/packages/nopeus-skills
+node scripts/install-skills.mjs --source ../nopeus/packages/nopeus-skills
 ```
 
 Run this command from the Winston repository. It installs a snapshot; rerun it
@@ -49,8 +48,7 @@ they travel with individual installations. Local edits must be described in the
 lock entry; the upstream tree identifies the original source, not local edits.
 
 Your own skills use the package's MIT license. Third-party skills retain their
-original copyright notices. App-synced caches and licensed ui.sh content are
-machine-local and excluded from this public package.
+original copyright notices. App-synced caches remain machine-local and are
+excluded from this collection.
 
-Add a Changeset when changing the published collection. Nopeus's existing
-release workflow versions and publishes the package.
+Changesets are not needed for this private workspace package.
