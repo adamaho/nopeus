@@ -50,6 +50,18 @@ npx skills add ./packages/nopeus-skills --skill '*'
 
 This local command installs only Nopeus's own skills. Rerun it after local edits.
 
+To preview the complete selection, including upstream Effect, use the shared
+installer with a local source override:
+
+```sh
+NOPEUS_SKILLS_SOURCE="$PWD/packages/nopeus-skills" \
+  bash packages/nopeus-skills/install.sh --global --agent codex claude-code cursor --yes
+```
+
+The override affects only Nopeus's own skills; third-party sources remain
+unchanged. Normal installations continue to use the `dev` branch.
+
+
 ## Updates
 
 Rerun the shared installer to apply the current selection, including newly
