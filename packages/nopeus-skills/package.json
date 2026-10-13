@@ -1,0 +1,21 @@
+{
+  "name": "@adamaho/nopeus-skills",
+  "version": "0.0.0",
+  "description": "Shared agent skills for refining, implementing, and reviewing software.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamaho/nopeus.git",
+    "directory": "packages/nopeus-skills"
+  },
+  "files": [
+    "skills",
+    "upstream-lock.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}
