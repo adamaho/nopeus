@@ -29,13 +29,22 @@ If no code exists, start with the idea.
 Ask **one question at a time**, then wait for the answer. Each question must:
 
 - Address one decision whose prerequisites are understood.
-- Recommend an answer and briefly explain why.
-- Let the user accept with yes, reject with no, or add context.
+- Offer 2–3 short choices. Put the recommendation first, label it, and explain why.
+- Let the user choose an option or provide a custom answer.
 
-For example, if supported by the code:
+Use the native question tool whenever available and allowed.
+Send one question per call and wait for a submitted answer.
 
-> I recommend limiting invitations to workspace admins because that matches the
-> existing permissions. Should we use that rule here?
+Otherwise, use numbered choices in chat. Always allow a custom answer; use the
+tool's built-in entry when provided. If meaningful choices aren't possible,
+ask a focused free-text question.
+
+For example, if supported by the code, present this through the question tool:
+
+> Who should be allowed to invite workspace members?
+>
+> 1. **Workspace admins (Recommended)** — Matches the existing permissions.
+> 2. **All members** — Makes invitations easier but expands member permissions.
 
 Investigate missing evidence before recommending. If only the user can clarify,
 label the recommendation as tentative. Never present a guess as fact or treat
