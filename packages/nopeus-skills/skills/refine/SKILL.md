@@ -32,8 +32,7 @@ Ask **one question at a time**, then wait for the answer. Each question must:
 - Offer 2–3 short choices. Put the recommendation first, label it, and explain why.
 - Let the user choose an option or provide a custom answer.
 
-Use the native question tool whenever available and allowed: `request_user_input`
-or `request_user_input_async` in Codex, or `AskUserQuestion` in Claude Code.
+Use the native question tool whenever available and allowed.
 Send one question per call and wait for a submitted answer.
 
 Otherwise, use numbered choices in chat. Always allow a custom answer; use the
