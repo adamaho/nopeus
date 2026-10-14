@@ -8,8 +8,8 @@ description: >-
 # Spec
 
 Write a disposable plan for upcoming work. Code remains the source of truth for
-implemented behavior. Settle behavior and technical boundaries so the slice skill
-can divide the work; leave routine coding choices to implementation.
+implemented behavior. Settle behavior, architecture, and contracts so the slice
+skill can divide the work; leave routine coding choices to implementation.
 
 ## Write The Spec
 
@@ -17,7 +17,7 @@ can divide the work; leave routine coding choices to implementation.
   from proposed behavior.
 - When enough information is available, write the spec directly. Reuse settled
   decisions without another refinement pass.
-- Mark missing decisions as open questions and suggest using
+- List unresolved behavior, architecture, or contract decisions and suggest
   [refine](../refine/SKILL.md) to resolve them. Keep the spec as a draft until
   those decisions are settled; do not assume answers or start refinement
   automatically.
@@ -31,24 +31,29 @@ Use plain language and short sections, proportional to the feature:
 - **Behavior:** actions, results, permissions, failures, and relevant edge cases.
 - **Acceptance examples:** starting conditions, actions, and expected results.
 - **Scope:** included work and user-approved exclusions or deferrals.
-- **Technical context:** relevant code, existing capabilities, data ownership,
-  shared interfaces, and constraints.
+- **Technical context:** relevant code, existing capabilities, and constraints.
+- **Architecture:** module responsibilities, data ownership, what extends existing
+  code or needs a new module or package, dependency direction, and where pieces
+  are assembled. Show how requests or data flow between them when useful.
+- **Contracts:** shared interface inputs, outputs, permissions, failures, and retry
+  behavior that separate pieces must agree on.
 - **Dependencies:** prerequisites and shared contracts affecting order or parallel
   work. Leave task ordering to the slice skill.
 
-Give acceptance examples stable labels for slices to reference. Define shared
-interface inputs, outputs, and failures where separate pieces must agree.
-Describe complete outcomes, such as sending an invitation and showing it as
-pending, rather than separate database, backend, and UI task lists.
+Follow existing repository structure and composition patterns unless an agreed
+change requires otherwise. Give acceptance examples stable labels for slices to
+reference. Describe complete outcomes, such as sending an invitation and showing
+it as pending, rather than separate database, backend, and UI task lists.
 
 ## Ready For Slicing
 
 Another agent must be able to identify small, testable outcomes, trace them to
-acceptance examples, and see dependencies that limit parallel work.
+acceptance examples, understand how the pieces fit together, and see dependencies
+that limit parallel work.
 
-Resolve decisions affecting behavior, scope, acceptance, or dependencies before
-marking the spec ready. A deferred decision that blocks slicing keeps it a draft;
-explain the blocker.
+Resolve decisions affecting behavior, architecture, contracts, scope, acceptance,
+or dependencies before marking the spec ready. A deferred decision that blocks
+slicing keeps it a draft; explain the blocker.
 
 ## Delivery
 
