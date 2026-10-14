@@ -29,27 +29,16 @@ If no code exists, start with the idea.
 Ask **one question at a time**, then wait for the answer. Each question must:
 
 - Address one decision whose prerequisites are understood.
-- Recommend an answer and briefly explain why.
-- Offer 2–3 distinct, concise choices, with the recommended choice first and
-  labeled as recommended. Briefly explain the tradeoff for each choice.
+- Offer 2–3 short choices. Put the recommendation first, label it, and explain why.
 - Let the user choose an option or provide a custom answer.
 
-Use the agent's native multiple-choice question tool for every refinement
-question when available and permitted in the current mode. For example, use
-`request_user_input` or `request_user_input_async` in Codex, or `AskUserQuestion`
-in Claude Code. Follow the available tool's schema and restrictions; do not
-change modes just to access a question tool. Send exactly one question per call.
+Use the native question tool whenever available and allowed: `request_user_input`
+or `request_user_input_async` in Codex, or `AskUserQuestion` in Claude Code.
+Send one question per call and wait for a submitted answer.
 
-Use the tool's built-in custom-answer entry when provided; do not add a redundant
-"Other" option. If the tool is unavailable or disallowed, ask the same question
-in chat with numbered choices and invite a custom answer. When meaningful
-choices cannot be grounded in the available evidence, ask one focused free-text
-question instead of inventing options.
-
-Wait for the user's submitted answer before asking the next question or treating
-the decision as settled. A preselected option or an unanswered tool call is not
-an answer. With an asynchronous tool, continue only independent investigation
-while the answer is pending.
+Otherwise, use numbered choices in chat. Always allow a custom answer; use the
+tool's built-in entry when provided. If meaningful choices aren't possible,
+ask a focused free-text question.
 
 For example, if supported by the code, present this through the question tool:
 
