@@ -42,7 +42,7 @@ details:
 - **Contracts:** shared interface inputs, outputs, permissions, failures, and retry
   behavior that separate pieces must agree on.
 - **Dependencies:** prerequisites and shared contracts affecting order or parallel
-  work. Leave task ordering to the slice skill.
+  work.
 
 Follow existing repository structure and composition patterns unless an agreed
 change requires otherwise. Give acceptance examples stable labels for slices to
