@@ -30,12 +30,33 @@ Ask **one question at a time**, then wait for the answer. Each question must:
 
 - Address one decision whose prerequisites are understood.
 - Recommend an answer and briefly explain why.
-- Let the user accept with yes, reject with no, or add context.
+- Offer 2–3 distinct, concise choices, with the recommended choice first and
+  labeled as recommended. Briefly explain the tradeoff for each choice.
+- Let the user choose an option or provide a custom answer.
 
-For example, if supported by the code:
+Use the agent's native multiple-choice question tool for every refinement
+question when available and permitted in the current mode. For example, use
+`request_user_input` or `request_user_input_async` in Codex, or `AskUserQuestion`
+in Claude Code. Follow the available tool's schema and restrictions; do not
+change modes just to access a question tool. Send exactly one question per call.
 
-> I recommend limiting invitations to workspace admins because that matches the
-> existing permissions. Should we use that rule here?
+Use the tool's built-in custom-answer entry when provided; do not add a redundant
+"Other" option. If the tool is unavailable or disallowed, ask the same question
+in chat with numbered choices and invite a custom answer. When meaningful
+choices cannot be grounded in the available evidence, ask one focused free-text
+question instead of inventing options.
+
+Wait for the user's submitted answer before asking the next question or treating
+the decision as settled. A preselected option or an unanswered tool call is not
+an answer. With an asynchronous tool, continue only independent investigation
+while the answer is pending.
+
+For example, if supported by the code, present this through the question tool:
+
+> Who should be allowed to invite workspace members?
+>
+> 1. **Workspace admins (Recommended)** — Matches the existing permissions.
+> 2. **All members** — Makes invitations easier but expands member permissions.
 
 Investigate missing evidence before recommending. If only the user can clarify,
 label the recommendation as tentative. Never present a guess as fact or treat
