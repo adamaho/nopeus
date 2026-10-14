@@ -70,5 +70,6 @@ the repository's disposable workspace convention. Otherwise, save to
 `.scratch/specs/<feature>.md` and ensure the directory is ignored by Git before
 writing. Update an existing spec in place when the request is a revision.
 
-Return the spec link and a brief readiness status. Creating a spec does not itself
-start slicing, create tickets, or implement the feature.
+Return the spec link and a brief readiness status. Keep chat-specific permissions
+out of the spec. Creating a spec does not itself start slicing, create tickets,
+or implement the feature.
