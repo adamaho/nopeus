@@ -17,9 +17,10 @@ can divide the work; leave routine coding choices to implementation.
   from proposed behavior.
 - When enough information is available, write the spec directly. Reuse settled
   decisions without another refinement pass.
-- Mark missing decisions as open questions. Use [refine](../refine/SKILL.md) if
-  available; otherwise ask one focused question at a time, with a recommendation
-  and concise choices when useful. Wait for answers rather than assuming them.
+- Mark missing decisions as open questions and suggest using
+  [refine](../refine/SKILL.md) to resolve them. Keep the spec as a draft until
+  those decisions are settled; do not assume answers or start refinement
+  automatically.
 - Update the draft as decisions are resolved.
 
 ## Spec Contents
