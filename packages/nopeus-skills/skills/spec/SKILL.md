@@ -1,74 +1,59 @@
 ---
 name: spec
 description: >-
-  Turn software ideas into feature specifications through refinement and codebase
-  exploration. Use when asked to draft, create, or refine a spec for later slicing
-  into small, testable pieces of work.
+  Create or revise disposable feature specs ready for slicing into small,
+  testable pieces of work. Use with an idea, existing draft, or agreed decisions.
 ---
 
 # Spec
 
-Read and apply [refine](../refine/SKILL.md), including its communication guidance.
+Write a disposable plan for upcoming work. Code remains the source of truth for
+implemented behavior. Settle behavior and technical boundaries so the slice skill
+can divide the work; leave routine coding choices to implementation.
 
-Create a spec that the slice skill can use without guessing at product decisions.
-Settle behavior and technical boundaries; leave routine coding choices to
-implementation. The slice skill decides how to divide and order the work.
+## Write The Spec
 
-The spec is a disposable plan for upcoming work. Code is the source of truth for
-implemented behavior; do not maintain completed specs as permanent documentation.
-
-## Draft And Refine
-
-Start from the user's idea, existing draft, or agreed refinement decisions.
-Explore the relevant code and repository conventions before describing the
-current system. Reuse settled decisions instead of asking the user again.
-
-Draft what is known, marking unresolved decisions as open questions. Apply refine
-to resolve them one at a time, then update the draft with each answer. Keep
-proposed behavior distinct from facts verified in the code.
+- Inspect relevant code and repository conventions. Distinguish verified facts
+  from proposed behavior.
+- When enough information is available, write the spec directly. Reuse settled
+  decisions without another refinement pass.
+- Mark missing decisions as open questions. Use [refine](../refine/SKILL.md) if
+  available; otherwise ask one focused question at a time, with a recommendation
+  and concise choices when useful. Wait for answers rather than assuming them.
+- Update the draft as decisions are resolved.
 
 ## Spec Contents
 
-Keep the spec concise and proportional to the feature. Cover:
+Use plain language and short sections, proportional to the feature:
 
-- **Purpose:** who needs the feature, their problem, and the desired outcome.
-- **Behavior:** user actions and observable results, including relevant failures,
-  permissions, and edge cases.
-- **Acceptance examples:** concrete starting conditions, actions, and expected
-  results that show when the feature works.
-- **Scope:** what is included, excluded, or explicitly deferred by the user.
-- **Technical context:** relevant code locations, existing capabilities, shared
-  interfaces, data ownership, and constraints that affect the work.
-- **Dependencies:** external prerequisites and shared decisions or contracts that
-  affect sequencing or whether work can proceed independently.
+- **Purpose:** users, problem, and desired outcome.
+- **Behavior:** actions, results, permissions, failures, and relevant edge cases.
+- **Acceptance examples:** starting conditions, actions, and expected results.
+- **Scope:** included work and user-approved exclusions or deferrals.
+- **Technical context:** relevant code, existing capabilities, data ownership,
+  shared interfaces, and constraints.
+- **Dependencies:** prerequisites and shared contracts affecting order or parallel
+  work. Leave task ordering to the slice skill.
 
-Give each acceptance example a stable label so slices can refer back to it.
-Include only technical detail needed to preserve behavior, expose dependencies,
-or respect constraints. Identify shared interface inputs, outputs, and failure
-behavior when separate pieces of work will need to agree on them.
-
-Describe complete outcomes across the affected parts of the system. For example,
-an invitation spec covers sending an invitation and showing it as pending,
-including permissions and delivery failures. Avoid organizing requirements as
-separate database, backend, and UI task lists.
+Give acceptance examples stable labels for slices to reference. Define shared
+interface inputs, outputs, and failures where separate pieces must agree.
+Describe complete outcomes, such as sending an invitation and showing it as
+pending, rather than separate database, backend, and UI task lists.
 
 ## Ready For Slicing
 
-Check whether another agent can identify small, independently testable outcomes,
-trace them to acceptance examples, and see which shared contracts or prerequisites
-could block parallel work. Record actual dependencies, not a proposed task order.
+Another agent must be able to identify small, testable outcomes, trace them to
+acceptance examples, and see dependencies that limit parallel work.
 
-Resolve questions that could change behavior, scope, acceptance, or dependencies
-before declaring the spec ready. Keep user-approved exclusions and deferrals
-explicit. If a deferred decision still blocks slicing, mark the spec as a draft
-and explain the blocker.
+Resolve decisions affecting behavior, scope, acceptance, or dependencies before
+marking the spec ready. A deferred decision that blocks slicing keeps it a draft;
+explain the blocker.
 
 ## Delivery
 
-Keep specs outside versioned documentation. Use the user's requested location or
-the repository's disposable workspace convention. Otherwise, save to
-`.scratch/specs/<feature>.md` and ensure the directory is ignored by Git before
-writing. Update an existing spec in place when the request is a revision.
+Use the requested location or repository scratch convention. Otherwise, save to
+`.scratch/specs/<feature>.md`, ensuring Git ignores the directory before writing.
+Revise existing specs in place. Do not maintain completed specs as permanent docs.
 
 Return the spec link and a brief readiness status. Keep chat-specific permissions
 out of the spec. Creating a spec does not itself start slicing, create tickets,

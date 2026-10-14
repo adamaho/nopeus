@@ -7,7 +7,7 @@ The canonical collection of shared agent skills, organized as the workspace pack
 
 - `adhd`: clear, concise communication on any topic.
 - `refine`: explore software ideas and resolve decisions with the human.
-- `spec`: refine ideas into feature specifications ready for slicing.
+- `spec`: turn ideas or agreed decisions into disposable specs ready for slicing.
 - `create-pr`: concise pull request titles and descriptions.
 - `create-ticket`: concise product tickets and bug reports.
 
