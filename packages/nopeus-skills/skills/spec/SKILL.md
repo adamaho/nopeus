@@ -1,8 +1,9 @@
 ---
 name: spec
 description: >-
-  Create or revise disposable feature specs ready for slicing into small,
-  testable pieces of work. Use with an idea, existing draft, or agreed decisions.
+  Create or revise disposable specs for planned software changes, ready for
+  slicing into small, testable pieces of work. Use with an idea, existing draft,
+  or agreed decisions.
 ---
 
 # Spec
@@ -25,11 +26,14 @@ skill can divide the work; leave routine coding choices to implementation.
 
 ## Spec Contents
 
-Use plain language and short sections, proportional to the feature:
+Use plain language and short sections suited to the change. Include only relevant
+details:
 
-- **Purpose:** users, problem, and desired outcome.
-- **Behavior:** actions, results, permissions, failures, and relevant edge cases.
-- **Acceptance examples:** starting conditions, actions, and expected results.
+- **Purpose:** affected users or systems, problem, and desired outcome.
+- **Behavior:** what changes and what must stay unchanged, including permissions,
+  failures, and edge cases.
+- **Acceptance examples:** starting conditions, actions, and observable results or
+  measurable targets.
 - **Scope:** included work and user-approved exclusions or deferrals.
 - **Technical context:** relevant code, existing capabilities, and constraints.
 - **Architecture:** module responsibilities, data ownership, what extends existing
@@ -42,8 +46,8 @@ Use plain language and short sections, proportional to the feature:
 
 Follow existing repository structure and composition patterns unless an agreed
 change requires otherwise. Give acceptance examples stable labels for slices to
-reference. Describe complete outcomes, such as sending an invitation and showing
-it as pending, rather than separate database, backend, and UI task lists.
+reference. Describe complete, testable outcomes across the affected components.
+Include compatibility, transition, and rollback requirements when relevant.
 
 ## Ready For Slicing
 
@@ -58,9 +62,9 @@ slicing keeps it a draft; explain the blocker.
 ## Delivery
 
 Use the requested location or repository scratch convention. Otherwise, save to
-`.scratch/specs/<feature>.md`, ensuring Git ignores the directory before writing.
+`.scratch/specs/<change>.md`, ensuring Git ignores the directory before writing.
 Revise existing specs in place. Do not maintain completed specs as permanent docs.
 
 Return the spec link and a brief readiness status. Keep chat-specific permissions
 out of the spec. Creating a spec does not itself start slicing, create tickets,
-or implement the feature.
+or implement the change.
