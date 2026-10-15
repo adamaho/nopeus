@@ -9,6 +9,8 @@ The canonical collection of shared agent skills, organized as the workspace pack
 - `refine`: explore software ideas and resolve decisions with the human.
 - `spec`: define behavior, architecture, contracts, and acceptance for software changes.
 - `graph`: plan and maintain implementation dependencies, PR groups, and completion requirements.
+- `implement`: coordinate an idea through planning, tickets, implementation, and review in one conversation.
+- `execute`: carry out a ready spec and graph with mixed-model agents through validation and human review readiness.
 - `create-pr`: concise pull request titles and descriptions.
 - `create-ticket`: concise product tickets and bug reports.
 
