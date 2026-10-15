@@ -18,10 +18,8 @@ against available models rather than treating them as fixed identifiers.
 - **Ambiguous or unavailable model:** explain the gap and ask for an available
   choice or supported handoff. Never silently substitute a model or claim a
   switch that did not occur.
-- If the requested orchestrator differs from the current session, arrange an
-  authorized, supported handoff or ask the user to start the appropriate session.
+- **Different orchestrator:** arrange an authorized handoff if supported, or ask
+  the user to start a session with the requested model.
 - **Independent review:** use a separate agent session or review service that did
   not implement the changes. It may use the same model as another role.
-- Record the selected models and their assignments with execution progress so
-  resumed work retains the choices. Honor later user overrides explicitly.
-
+- **Resuming:** retain recorded model assignments. Honor later user overrides.
