@@ -26,6 +26,12 @@ If no code exists, start with the idea.
 
 ## Ask And Refine
 
+Number questions throughout each refinement: **Question 1**, **Question 2**, and
+so on. Put the number in the visible question text, including when using a native
+question tool. Count orienting questions and follow-ups, and continue the count
+when resuming the same refinement. Repeating an unanswered question keeps its
+number. Do not claim a fixed total; new questions may emerge from the answers.
+
 Ask **one question at a time**, then wait for the answer. Each question must:
 
 - Address one decision whose prerequisites are understood.
@@ -41,7 +47,7 @@ ask a focused free-text question.
 
 For example, if supported by the code, present this through the question tool:
 
-> Who should be allowed to invite workspace members?
+> Question 1: Who should be allowed to invite workspace members?
 >
 > 1. **Workspace admins (Recommended)** — Matches the existing permissions.
 > 2. **All members** — Makes invitations easier but expands member permissions.
@@ -100,5 +106,6 @@ Finish only when every question needed to specify the agreed scope is answered:
 an answer.** Record approved deferrals explicitly; they are not established facts.
 
 Give a brief readback of the purpose, chosen direction, key decisions, boundaries,
-and approved deferrals. Refinement alone does not start documentation, task
+and approved deferrals. Include the number of questions answered, with deferred
+questions counted separately. Refinement alone does not start documentation, task
 planning, or implementation.

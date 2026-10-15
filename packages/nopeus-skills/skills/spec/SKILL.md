@@ -9,8 +9,8 @@ description: >-
 # Spec
 
 Write a disposable plan for upcoming work. Code remains the source of truth for
-implemented behavior. Settle behavior, architecture, and contracts so the slice
-skill can divide the work; leave routine coding choices to implementation.
+implemented behavior. Settle behavior, architecture, and contracts; leave routine
+coding choices to implementation.
 
 ## Write The Spec
 
