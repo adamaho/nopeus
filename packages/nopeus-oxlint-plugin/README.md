@@ -502,6 +502,43 @@ export const loadUsers = Users.all;
 Effect.runPromise(loadUsers);
 ```
 
+### nopeus/no-try-catch
+
+Rejects JavaScript `catch` clauses in files using the Effect preset, including
+synchronous helpers and tests without Effect imports. Use `Result.try` for
+throwing synchronous operations that return a `Result`, `Effect.try` for those
+that return an `Effect`, and `Effect.tryPromise` for promise-based operations.
+Handle existing Effect failures with `Effect.catch` or `Effect.catchTag`.
+
+Bad:
+
+```ts
+try {
+  return Result.succeed(parse(text));
+} catch (error) {
+  return Result.fail(toParseError(error));
+}
+```
+
+Good:
+
+```ts
+return Result.try({
+  try: () => parse(text),
+  catch: toParseError,
+});
+```
+
+Keep error classification when migrating: convert expected parser errors into
+domain errors and preserve the existing treatment of unexpected exceptions.
+Do not introduce promises around synchronous work just to use `Effect.tryPromise`.
+
+`try/catch/finally` is also rejected; cleanup-only `try/finally` remains allowed.
+For Effect resource lifetimes, prefer `Effect.ensuring` or `Effect.acquireRelease`
+as appropriate. The general `/base` preset does not enable this rule.
+No autofix is offered because return types, error mapping, and cleanup need
+application-specific decisions.
+
 ### nopeus/no-fallible-effect-promise
 
 Rejects Effect.promise. The canonical policy treats every external Promise as

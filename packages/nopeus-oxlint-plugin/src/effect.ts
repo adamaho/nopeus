@@ -61,6 +61,7 @@ export default function effect({ packageName, runtimeEntryPoints = [] }: NopeusE
       "nopeus/require-fetch-abort-signal": "error",
       "nopeus/no-effect-runners-in-library": ["error", { allowFiles: [...runtimeEntryPoints] }],
       "nopeus/no-fallible-effect-promise": "error",
+      "nopeus/no-try-catch": "error",
       "nopeus/no-inline-live-layer": "error",
       "nopeus/no-unscoped-fork": "error",
       "nopeus/no-untyped-effect-errors": "error",

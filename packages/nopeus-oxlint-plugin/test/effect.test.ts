@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 
+import base from "#src/base.ts";
 import effect, { serviceKeyPrefixFromPackageName } from "#src/effect.ts";
 import plugin from "#src/index.ts";
 
@@ -13,6 +14,7 @@ const canonicalRules = [
   "nopeus/require-fetch-abort-signal",
   "nopeus/no-effect-runners-in-library",
   "nopeus/no-fallible-effect-promise",
+  "nopeus/no-try-catch",
   "nopeus/no-inline-live-layer",
   "nopeus/require-effect-construction-spacing",
   "nopeus/no-unscoped-fork",
@@ -62,6 +64,10 @@ test("configures the namespace rule from the package name", () => {
     "error",
     { prefix: "@nopeus/" },
   ]);
+});
+
+test("keeps the try/catch restriction out of the general TypeScript preset", () => {
+  expect(base.rules).not.toHaveProperty("nopeus/no-try-catch");
 });
 
 test("configures the runtime boundary from explicit entrypoints", () => {
