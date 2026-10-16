@@ -43,6 +43,8 @@ export const request = (url: string) => Effect.tryPromise({
 });
 /** @internal */
 export const codes: ReadonlyMap<string, number> = new Map([["ok", 200]]);
+const parsed = Effect.try({ try: () => JSON.parse("{}"), catch: cause => new ReadFailed({ cause }) });
+try { JSON.stringify(codes); } finally { JSON.stringify(codes); }
 it.effect("decodes a user", () => Effect.gen(function* () {
   const user = yield* Schema.decodeUnknownEffect(User)({ id: "1" });
   expect(user.id).toBe("1");
@@ -50,6 +52,10 @@ it.effect("decodes a user", () => Effect.gen(function* () {
 `;
 
 const invalid = [
+  [
+    "no-try-catch",
+    'import { Result } from "effect"; function parseRecords(text: string) { try { return Result.succeed(JSON.parse(text)); } catch (error) { return Result.fail(error); } }',
+  ],
   [
     "require-effect-namespace",
     'import { Effect } from "effect"; const load = Effect.fn("load")(() => Effect.void);',
@@ -70,7 +76,7 @@ const invalid = [
   ],
 ] as const;
 
-test("the syntax policy accepts v4 code and executes both added rules", () => {
+test("the syntax policy accepts v4 code and rejects policy violations", () => {
   const directory = mkdtempSync(join(packageRoot, ".effect-v4-"));
   try {
     mkdirSync(join(directory, "test"));

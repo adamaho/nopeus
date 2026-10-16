@@ -4,6 +4,7 @@ import { noEffectRunnersInLibraryRule } from "./effect/rules/no-effect-runners-i
 import { noFallibleEffectPromiseRule } from "./effect/rules/no-fallible-effect-promise.ts";
 import { noInlineLiveLayerRule } from "./effect/rules/no-inline-live-layer.ts";
 import { noModuleLevelMutableStateRule } from "./effect/rules/no-module-level-mutable-state.ts";
+import { noTryCatchRule } from "./effect/rules/no-try-catch.ts";
 import { noUnscopedForkRule } from "./effect/rules/no-unscoped-fork.ts";
 import { noUntypedEffectErrorsRule } from "./effect/rules/no-untyped-effect-errors.ts";
 import { preferEffectPlatformServicesRule } from "./effect/rules/prefer-effect-platform-services.ts";
@@ -41,6 +42,7 @@ const nopeusPlugin = eslintCompatPlugin({
     "require-test-location": requireTestLocationRule,
     "no-effect-runners-in-library": noEffectRunnersInLibraryRule,
     "no-fallible-effect-promise": noFallibleEffectPromiseRule,
+    "no-try-catch": noTryCatchRule,
     "no-inline-live-layer": noInlineLiveLayerRule,
     "no-module-level-mutable-state": noModuleLevelMutableStateRule,
     "require-fetch-abort-signal": requireFetchAbortSignalRule,
