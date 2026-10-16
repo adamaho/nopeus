@@ -1,5 +1,13 @@
 # @adamaho/nopeus-oxlint-plugin
 
+## 0.10.0
+
+### Minor Changes
+
+- 59b46e1: Add `nopeus/no-try-catch` to the Effect preset. Reject catch clauses in favor of
+  `Result.try`, `Effect.try`, `Effect.tryPromise`, or Effect recovery combinators.
+  Cleanup-only `try/finally` remains allowed, and the base preset is unchanged.
+
 ## 0.9.0
 
 ### Minor Changes
