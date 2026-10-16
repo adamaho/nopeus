@@ -9,7 +9,7 @@ default exports at the package root and `/base`.
 Install the config and its Oxfmt peer:
 
 ```bash
-pnpm add --save-dev @adamaho/nopeus-oxfmt-config 'oxfmt@^0.71.0'
+pnpm add --save-dev @adamaho/nopeus-oxfmt-config 'oxfmt@^0.73.0'
 ```
 
 Create `oxfmt.config.ts` in the project root:
@@ -35,7 +35,7 @@ Use one Oxfmt config per directory; replace an existing `.oxfmtrc.json` or
 `.oxfmtrc.jsonc` when adopting the TypeScript config. Install `oxfmt` locally
 so editor integrations use the same formatter as the CLI.
 
-Requires Node.js `^22.18.0 || >=24.0.0` and Oxfmt `^0.71.0`.
+Requires Node.js `^22.18.0 || >=24.0.0` and Oxfmt `>=0.71.0 <1`.
 
 ## Base settings
 

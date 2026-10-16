@@ -16,54 +16,56 @@ function run(cwd: string, command: string, args: readonly string[]) {
   return result.stdout;
 }
 
-test("published config formats with both exports and supports consumer overrides and ignores", () => {
-  const directory = mkdtempSync(join(tmpdir(), "nopeus-oxfmt-package-"));
-  try {
-    run(packageDirectory, "pnpm", ["pack", "--out", join(directory, "config.tgz")]);
-    const root = JSON.parse(readFileSync(join(repository, "package.json"), "utf8"));
-    const typescript = JSON.parse(
-      readFileSync(join(packageDirectory, "node_modules/typescript/package.json"), "utf8"),
-    );
-    writeFileSync(
-      join(directory, "package.json"),
-      JSON.stringify({
-        private: true,
-        type: "module",
-        packageManager: root.packageManager,
-        devDependencies: {
-          "@adamaho/nopeus-oxfmt-config": "file:./config.tgz",
-          oxfmt: "0.71.0",
-          typescript: typescript.version,
-        },
-      }),
-    );
-    run(directory, "pnpm", ["install", "--strict-peer-dependencies"]);
+test.each(["0.71.0", "0.72.0", "0.73.0"])(
+  "published config supports exports, overrides, and ignores with Oxfmt %s",
+  (oxfmtVersion) => {
+    const directory = mkdtempSync(join(tmpdir(), "nopeus-oxfmt-package-"));
+    try {
+      run(packageDirectory, "pnpm", ["pack", "--out", join(directory, "config.tgz")]);
+      const root = JSON.parse(readFileSync(join(repository, "package.json"), "utf8"));
+      const typescript = JSON.parse(
+        readFileSync(join(packageDirectory, "node_modules/typescript/package.json"), "utf8"),
+      );
+      writeFileSync(
+        join(directory, "package.json"),
+        JSON.stringify({
+          private: true,
+          type: "module",
+          packageManager: root.packageManager,
+          devDependencies: {
+            "@adamaho/nopeus-oxfmt-config": "file:./config.tgz",
+            oxfmt: oxfmtVersion,
+            typescript: typescript.version,
+          },
+        }),
+      );
+      run(directory, "pnpm", ["install", "--strict-peer-dependencies"]);
 
-    const input = 'import z from "z";\nimport a from "a";\nexport const value={z,a}';
-    const expected = 'import a from "a";\nimport z from "z";\nexport const value = { z, a };\n';
-    for (const entry of ["@adamaho/nopeus-oxfmt-config", "@adamaho/nopeus-oxfmt-config/base"]) {
+      const input = 'import z from "z";\nimport a from "a";\nexport const value={z,a}';
+      const expected = 'import a from "a";\nimport z from "z";\nexport const value = { z, a };\n';
+      for (const entry of ["@adamaho/nopeus-oxfmt-config", "@adamaho/nopeus-oxfmt-config/base"]) {
+        writeFileSync(
+          join(directory, "oxfmt.config.ts"),
+          `import base from "${entry}";\nexport default base;\n`,
+        );
+        writeFileSync(join(directory, "example.ts"), input);
+        run(directory, "pnpm", ["exec", "oxfmt", "example.ts"]);
+        expect(readFileSync(join(directory, "example.ts"), "utf8")).toBe(expected);
+        run(directory, "pnpm", [
+          "exec",
+          "tsc",
+          "--noEmit",
+          "--strict",
+          "--module",
+          "nodenext",
+          "--skipLibCheck",
+          "oxfmt.config.ts",
+        ]);
+      }
+
       writeFileSync(
         join(directory, "oxfmt.config.ts"),
-        `import base from "${entry}";\nexport default base;\n`,
-      );
-      writeFileSync(join(directory, "example.ts"), input);
-      run(directory, "pnpm", ["exec", "oxfmt", "example.ts"]);
-      expect(readFileSync(join(directory, "example.ts"), "utf8")).toBe(expected);
-      run(directory, "pnpm", [
-        "exec",
-        "tsc",
-        "--noEmit",
-        "--strict",
-        "--module",
-        "nodenext",
-        "--skipLibCheck",
-        "oxfmt.config.ts",
-      ]);
-    }
-
-    writeFileSync(
-      join(directory, "oxfmt.config.ts"),
-      `import base from "@adamaho/nopeus-oxfmt-config";
+        `import base from "@adamaho/nopeus-oxfmt-config";
 import { defineConfig } from "oxfmt";
 export default defineConfig({
   ...base,
@@ -71,15 +73,19 @@ export default defineConfig({
   ignorePatterns: ["ignored.ts"],
 });
 `,
-    );
-    writeFileSync(join(directory, "ignored.ts"), "const intentionallyInvalid = ;\n");
-    run(directory, "pnpm", ["exec", "oxfmt", "example.ts", "ignored.ts"]);
-    expect(readFileSync(join(directory, "example.ts"), "utf8")).toBe(expected.replaceAll('"', "'"));
-    expect(readFileSync(join(directory, "ignored.ts"), "utf8")).toBe(
-      "const intentionallyInvalid = ;\n",
-    );
-    run(directory, "pnpm", ["exec", "oxfmt", "--check", "example.ts", "ignored.ts"]);
-  } finally {
-    rmSync(directory, { recursive: true, force: true });
-  }
-}, 240_000);
+      );
+      writeFileSync(join(directory, "ignored.ts"), "const intentionallyInvalid = ;\n");
+      run(directory, "pnpm", ["exec", "oxfmt", "example.ts", "ignored.ts"]);
+      expect(readFileSync(join(directory, "example.ts"), "utf8")).toBe(
+        expected.replaceAll('"', "'"),
+      );
+      expect(readFileSync(join(directory, "ignored.ts"), "utf8")).toBe(
+        "const intentionallyInvalid = ;\n",
+      );
+      run(directory, "pnpm", ["exec", "oxfmt", "--check", "example.ts", "ignored.ts"]);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  },
+  240_000,
+);

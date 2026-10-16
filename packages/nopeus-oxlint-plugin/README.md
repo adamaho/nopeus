@@ -52,9 +52,10 @@ uses Effect; there is no need to extend both plugin presets.
 Extend the canonical policy from an oxlint.config.ts file:
 
 ```ts
-import packageJson from "./package.json" with { type: "json" };
 import effect from "@adamaho/nopeus-oxlint-plugin/effect";
 import { defineConfig } from "oxlint";
+
+import packageJson from "./package.json" with { type: "json" };
 
 export default defineConfig({
   extends: [
