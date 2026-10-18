@@ -71,6 +71,7 @@ Give each worker:
 - The spec and graph references, assigned node IDs, and PR group scope.
 - Relevant contracts, settled decisions, prerequisites, and acceptance criteria.
 - Its branch, worktree, target branch, and required checks.
+- [audit](../audit/SKILL.md) to simplify implementation and reuse test coverage.
 - A requirement to report changes, evidence, blockers, and the commit or PR link.
 
 The orchestrator owns integration, merges, and shared graph and ticket updates.
@@ -84,8 +85,10 @@ independent review before merging into the feature branch. Preserve existing
 functionality as required by the graph; the full feature may remain incomplete.
 
 Give the reviewer the spec, group scope, relevant code, diff against its target,
-and validation evidence. Findings must be grounded in the changes. If no
-independent reviewer is available, mark review blocked and explain why.
+and validation evidence. Apply [audit](../audit/SKILL.md) for excess complexity
+and coverage duplicated elsewhere. The implementer simplifies within scope;
+the reviewer verifies. Ground findings in the changes. If no independent reviewer
+is available, mark review blocked and explain why.
 
 Fix clear defects within scope, rerun affected checks, and obtain renewed review.
 Address each finding or explain with evidence why no change is needed. If repairs
@@ -120,7 +123,8 @@ After all groups are integrated:
 2. Validate the integrated feature against the spec's acceptance criteria and
    repository checks, including relevant regressions and cross-group behavior.
 3. Obtain independent agent review of the combined feature diff against the
-   target branch. Repair findings and refresh affected validation and review.
+   target branch, including `audit` for complexity and duplicate coverage across
+   groups. Repair findings and refresh affected validation and review.
 4. Update the feature PR and graph with the final state. Mark the feature PR
    ready for human review only when the required evidence is complete.
 

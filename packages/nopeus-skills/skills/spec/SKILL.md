@@ -56,6 +56,9 @@ Include compatibility, transition, and rollback requirements when relevant.
 
 ## Ready For Slicing
 
+Apply [audit](../audit/SKILL.md) before marking the spec ready: simplify the plan
+and reuse existing capabilities and test coverage within agreed scope.
+
 Another agent must be able to identify small, testable outcomes, trace them to
 acceptance examples, understand how the pieces fit together, and see dependencies
 that limit parallel work.

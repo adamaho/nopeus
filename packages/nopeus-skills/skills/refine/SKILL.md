@@ -27,30 +27,30 @@ If no code exists, start with the idea.
 ## Ask And Refine
 
 Number questions throughout each refinement: **Question 1**, **Question 2**, and
-so on. Put the number in the visible question text, including when using a native
-question tool. Count orienting questions and follow-ups, and continue the count
+so on. Count orienting questions and follow-ups, and continue the count
 when resuming the same refinement. Repeating an unanswered question keeps its
 number. Do not claim a fixed total; new questions may emerge from the answers.
 
 Ask **one question at a time**, then wait for the answer. Each question must:
 
 - Address one decision whose prerequisites are understood.
-- Offer 2–3 short choices. Put the recommendation first, label it, and explain why.
-- Let the user choose an option or provide a custom answer.
+- Offer 2–3 short choices, with the recommendation last. Label it and explain why.
+- End with a yes/no question proposing the recommendation.
+- Accept yes, no, another option, or a custom answer. A no rejects the
+  recommendation; it does not select an alternative.
 
-Use the native question tool whenever available and allowed.
-Send one question per call and wait for a submitted answer.
+Ask directly in chat; do not use native question or choice tools.
+If meaningful choices or a grounded recommendation aren't possible, ask a
+focused free-text question instead.
 
-Otherwise, use numbered choices in chat. Always allow a custom answer; use the
-tool's built-in entry when provided. If meaningful choices aren't possible,
-ask a focused free-text question.
+For example, if supported by the code:
 
-For example, if supported by the code, present this through the question tool:
-
-> Question 1: Who should be allowed to invite workspace members?
+> **Question 1: Workspace invitations**
 >
-> 1. **Workspace admins (Recommended)** — Matches the existing permissions.
-> 2. **All members** — Makes invitations easier but expands member permissions.
+> 1. **All members** — Easier invitations, but broader permissions.
+> 2. **Workspace admins (Recommended)** — Matches the existing permissions.
+>
+> Should we limit invitations to workspace admins?
 
 Investigate missing evidence before recommending. If only the user can clarify,
 label the recommendation as tentative. Never present a guess as fact or treat

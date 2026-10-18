@@ -8,6 +8,7 @@ The canonical collection of shared agent skills, organized as the workspace pack
 - `adhd`: clear, concise communication on any topic.
 - `refine`: explore software ideas and resolve decisions with the human.
 - `spec`: define behavior, architecture, contracts, and acceptance for software changes.
+- `audit`: simplify specs and code changes, reusing test coverage and removing redundancy.
 - `graph`: plan and maintain implementation dependencies, PR groups, and completion requirements.
 - `implement`: take an idea through planning, tickets, coding, and review in one conversation.
 - `execute`: carry out a ready spec and graph with chosen models, validation, and independent review.
