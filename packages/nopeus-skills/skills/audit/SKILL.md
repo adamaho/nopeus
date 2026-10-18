@@ -48,9 +48,10 @@ When the change adds or alters models:
 
 - Keep entities, fields, and relationships tied to current requirements.
 - Avoid storing duplicate or easily derived data unless a concrete need justifies it.
-- Use explicit states for lifecycle or status values. Represent mutually exclusive
-  states as `state: "playing" | "paused"`, not separate `isPlaying` and `isPaused`
-  booleans. Keep booleans for independent yes/no facts.
+- Check whether the model allows contradictory values. For example, if playing
+  and paused are mutually exclusive, `state: "playing" | "paused"` could avoid
+  combinations allowed by separate `isPlaying` and `isPaused` booleans. Choose
+  the representation that fits the actual behavior.
 - Use types and constraints to prevent invalid combinations and transitions.
 - Check compatibility with existing data and consumers, including migration and
   rollback needs.
