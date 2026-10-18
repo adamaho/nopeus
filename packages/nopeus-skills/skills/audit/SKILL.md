@@ -1,8 +1,9 @@
 ---
 name: audit
 description: >-
-  Audit specs and code changes for unnecessary complexity, excess scope, and
-  redundant tests. Use when asked to simplify work or during spec and execute.
+  Audit specs and code changes for unnecessary complexity, excessive defenses,
+  excess scope, and redundant tests. Use when asked to simplify work or during
+  spec and execute.
 ---
 
 # Audit
@@ -29,6 +30,17 @@ agreed decision.
   behavior or useful boundary.
 - Prefer readable code. Keep complexity that protects contracts, permissions,
   realistic failures, or data integrity; fewer lines alone are not the goal.
+
+## Trim Excess Defenses
+
+- Require a reachable failure case for guards, retries, and fallbacks.
+- Remove repeated validation when an earlier check guarantees the same condition
+  on every path and the value cannot change before use.
+- Avoid silent defaults, swallowed errors, or false success results that hide
+  broken assumptions. Preserve explicit failures unless recovery is required.
+- Keep validation at untrusted boundaries and defenses for permissions, data
+  integrity, and realistic dependency failures. Static types alone do not validate
+  external data. If a guarantee is unclear, investigate before removing its guard.
 
 ## Check Data Models
 
