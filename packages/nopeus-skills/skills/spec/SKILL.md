@@ -8,6 +8,8 @@ description: >-
 
 # Spec
 
+Read and apply [adhd](../adhd/SKILL.md) to the spec itself and chat responses.
+
 Write a disposable plan for upcoming work. Code remains the source of truth for
 implemented behavior. Settle behavior, architecture, and contracts; leave routine
 coding choices to implementation.
@@ -31,8 +33,8 @@ coding choices to implementation.
 
 ## Spec Contents
 
-Use plain language and short sections suited to the change. Include only relevant
-details:
+Use this as a coverage checklist, not a required outline. Combine related topics
+and omit irrelevant sections:
 
 - **Purpose:** affected users or systems, problem, and desired outcome.
 - **Behavior:** what changes and what must stay unchanged, including permissions,
@@ -54,7 +56,24 @@ change requires otherwise. Give acceptance examples stable labels for slices to
 reference. Describe complete, testable outcomes across the affected components.
 Include compatibility, transition, and rollback requirements when relevant.
 
+## Keep It Readable
+
+- Open with a short explanation of what will change and why it matters.
+- State each requirement once. Reference acceptance labels instead of repeating
+  behavior in architecture, contracts, and validation sections.
+- Use short bullets for distinct requirements and compact tables when they help
+  compare contracts or acceptance examples. Avoid nested lists and dense prose.
+- Link existing code and conventions instead of restating them. Keep proposed
+  behavior, agreed decisions, and implementation-critical details in the spec.
+- Include rationale only when it explains a tradeoff or constraint. Omit exploration
+  history, rejected options, and routine implementation instructions unless needed.
+- Scale detail to the change. Preserve exact contracts, failure behavior, and
+  acceptance criteria where needed; do not trade clarity for a word limit.
+
 ## Ready For Slicing
+
+Apply [audit](../audit/SKILL.md) before marking the spec ready: simplify the plan
+and reuse existing capabilities and test coverage within agreed scope.
 
 Another agent must be able to identify small, testable outcomes, trace them to
 acceptance examples, understand how the pieces fit together, and see dependencies
@@ -68,6 +87,9 @@ Before delivery, check the spec for unanswered questions and conflicting decisio
 Return to `refine` for any that prevent readiness, unless the user has explicitly
 paused or deferred that work. Record approved deferrals and their effect on
 readiness; they do not count as resolved decisions.
+
+Then apply `adhd` again to the finished spec: remove repetition and simplify wording
+while preserving every decision and criterion needed to implement and verify it.
 
 ## Delivery
 
