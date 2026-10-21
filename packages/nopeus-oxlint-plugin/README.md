@@ -2,7 +2,8 @@
 
 Custom Oxlint rules for AI-assisted TypeScript codebases. The `base` preset
 enables general TypeScript rules; `effect` adds Effect-specific syntax rules.
-Both apply to production and test code.
+Both apply to production and test code. The opt-in `react` preset adds routing
+and data-layer boundaries.
 
 ## Usage
 
@@ -69,6 +70,113 @@ export default defineConfig({
 
 The root package name defines the owned Effect service namespace. Both goho and
 @adamaho/goho require trace names and service keys beginning with @goho/.
+
+### React and domain boundaries
+
+The `react` preset is opt-in and composes with the built-in config and either
+plugin preset. It enables `nopeus/no-react-layer-imports` and restricts raw
+`fetch`. It does not require React, a router, or a cache library at runtime.
+
+```ts
+import builtins from "@adamaho/nopeus-oxlint-config";
+import effect from "@adamaho/nopeus-oxlint-plugin/effect";
+import react from "@adamaho/nopeus-oxlint-plugin/react";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  extends: [
+    builtins,
+    effect({ packageName: "goho" }),
+    react({
+      root: import.meta.dirname,
+      clientModules: ["@goho/client"],
+      transports: ["src/transport/**"],
+    }),
+  ],
+  rules: {
+    "nopeus/no-cross-domain-internals": [
+      "error",
+      {
+        root: import.meta.dirname,
+        domains: [{ root: "src/features/receipts", public: ["repository.ts", "model.ts"] }],
+      },
+    ],
+  },
+});
+```
+
+`root` must be the absolute directory of the config file, usually
+`import.meta.dirname`, so running Oxlint from the repository or a package gives
+the same result. All file patterns are relative to it. Each list replaces its
+default:
+
+| Option           | Default                                                                 | Grants                                     |
+| ---------------- | ----------------------------------------------------------------------- | ------------------------------------------ |
+| `files`          | `src/**`                                                                | Governed source files                      |
+| `routes`         | `src/routes/**`                                                         | Router imports and feature data            |
+| `adapters`       | `src/navigation/**`                                                     | Router imports                             |
+| `containers`     | `src/features/**/page.{ts,tsx}`, `src/features/**/*-container.{ts,tsx}` | Feature data                               |
+| `data`           | `src/data/**`, `src/features/**/data/**`                                | SDK/cache imports and feature data         |
+| `transports`     | None                                                                    | Raw `fetch`, including generated transport |
+| `fetchTestFiles` | `test/**`, `tests/**`, `**/__tests__/**`, `**/*.{test,spec}.*`          | Raw `fetch` in test setup                  |
+| `routerModules`  | `react-router`, `react-router-dom`, `@tanstack/react-router`            | Concrete router modules                    |
+| `queryModules`   | `@tanstack/react-query`, `swr`                                          | Cache library modules                      |
+| `clientModules`  | None                                                                    | Project SDK/client modules                 |
+
+Module lists match each module and its subpaths. Other governed files are
+visual components. A file in several lists receives only the listed grants: a
+route may consume feature data, but cannot import the cache library unless it is
+also a data file.
+
+File patterns use Oxlint's override globs with deliberately narrow syntax: a
+leading `./` is ignored, and a pattern without `/`, such as `*.tsx`, matches at
+any depth. As in Oxlint, `*` and `**` also match dot-prefixed names such as
+`src/.storybook/`, and extglobs such as `+(a|b)` are not supported. Keep brace
+alternatives within one path segment, such as `*.{ts,tsx}`. For alternatives
+that span directories or contain `**`, such as `src/{a,b/**}/x.ts`, list
+separate patterns: the import check and Oxlint's override may match them
+differently. Patterns that are absolute, negated (`!src/**`), or contain `..`
+segments fail the run; list positive root-relative patterns instead.
+
+```text
+Route reads params -> Page/container consumes feature data -> SDK/cache
+                              |
+                              v
+                       Visual props/callbacks
+```
+
+Governed files outside `transports` and `fetchTestFiles` cannot reference global
+`fetch`, or `fetch` on the global object through `globalThis`, `self`, or
+`window`; local bindings named `fetch`, `globalThis`, `self`, or `window` are
+allowed. Production folders named `test` or `tests`, such as
+`src/routes/test/`, are not exempt.
+
+`fetchTestFiles` only exempts test setup from this fetch check; tests still get
+every other lint rule. The import and domain rules recognize tests by their
+package instead, so they need no option. A config at a monorepo root lists
+package paths for every layer and replaces the root-level test defaults;
+otherwise the `src/...` layer defaults match nothing, and every governed file is
+treated as a visual component:
+
+```ts
+react({
+  root: import.meta.dirname,
+  files: ["packages/*/src/**"],
+  routes: ["packages/*/src/routes/**"],
+  adapters: ["packages/*/src/navigation/**"],
+  containers: [
+    "packages/*/src/features/**/page.{ts,tsx}",
+    "packages/*/src/features/**/*-container.{ts,tsx}",
+  ],
+  data: ["packages/*/src/data/**", "packages/*/src/features/**/data/**"],
+  fetchTestFiles: ["packages/*/test/**"],
+});
+```
+
+The preset sets `eslint/no-restricted-globals` with
+`checkGlobalObject` in an override for those files, which replaces any
+project-level options for that rule there: restrict other globals in those files
+with a later override that repeats the `fetch` entry.
 
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
@@ -168,6 +276,63 @@ All three structure rules are errors in both `/base` and `/effect`. Include
 both `src` and `test` in the consuming project's lint command. Narrowly exclude
 deliberately invalid fixture projects, not ordinary test code. The built-in
 config package supplies filename casing separately.
+
+### nopeus/no-react-layer-imports
+
+Enabled by `/react`. Concrete router modules are allowed only in routes and
+adapters, and SDK/cache modules only in data files. Imports that resolve to
+local data files are allowed only in routes, containers, and data files.
+
+Bad, in `src/features/receipts/receipt-details.tsx`:
+
+```ts
+import { useParams } from "react-router";
+
+import { useReceipt } from "#src/features/receipts/data/receipts.ts";
+```
+
+Good: the route reads `receiptId`, `ReceiptPage({ receiptId })` consumes the data
+layer, and `ReceiptDetails({ receipt, onDelete })` renders props. Visual files
+may still import app navigation facades, such as `src/navigation/link.tsx`, and
+public model or contract modules outside the data layer.
+
+The rule checks imports; it does not infer whether a wrapper calls router hooks.
+Tests and test resources skip this rule, so they may import routers, cache setup,
+and data. The domain and package boundary rules still limit them to their own
+package's internals.
+
+### nopeus/no-cross-domain-internals
+
+Opt-in; configure it explicitly. Every consumer, including startup code, must
+import another configured domain through its declared public modules.
+
+```ts
+"nopeus/no-cross-domain-internals": [
+  "error",
+  {
+    root: import.meta.dirname,
+    domains: [
+      { root: "src/receipts", public: ["repository.ts", "model.ts"] },
+      { root: "src/receipt-uploads", public: ["service.ts"] },
+    ],
+  },
+],
+```
+
+Domain roots are relative to `root`. Public entries are exact file paths
+relative to their domain, including the extension. No barrel or pass-through
+service is required: a public module may export private implementation, and a
+service may use several domains' public repositories. Imports within a domain
+are allowed. Nested domains use the most specific root. Unconfigured folders
+have no domain. Own-package tests may import domain internals.
+
+Missing roots, relative `root` values, and missing public files stop the lint
+run with an error naming the option.
+
+Both rules use the same resolution and import forms as the package boundary
+rules, including aliases, type-only imports, re-exports, TypeScript import
+types, literal dynamic imports, and unshadowed `require`. Computed module
+names and unresolved aliases cannot be classified and are not checked.
 
 ### nopeus/no-module-level-mutable-state
 

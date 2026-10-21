@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -44,7 +44,9 @@ test("published base presets install and lint without Effect packages", () => {
     const packages = readdirSync(join(directory, "node_modules/.pnpm"));
     expect(
       packages.filter((name) =>
-        /^(?:effect@|@effect\+|oxlint-tsgolint@|@oxlint-tsgolint\+)/u.test(name),
+        /^(?:effect@|@effect\+|oxlint-tsgolint@|@oxlint-tsgolint\+|react@|react-|@tanstack\+|swr@)/u.test(
+          name,
+        ),
       ),
     ).toEqual([]);
 
@@ -128,6 +130,81 @@ test("published base presets install and lint without Effect packages", () => {
     );
     expect(effectCodes).toContain("eslint(no-restricted-imports)");
     expect(effectCodes).toContain("nopeus(no-module-level-mutable-state)");
+
+    // The opt-in React preset ships types and composes with base and Effect policies.
+    writeFileSync(
+      join(directory, "types.ts"),
+      'import react, { type NopeusReactOptions } from "@adamaho/nopeus-oxlint-plugin/react";\n' +
+        'const options: NopeusReactOptions = { root: "/repo", transports: ["src/transport/**"], fetchTestFiles: ["packages/*/test/**"] };\n' +
+        "export const config = react(options);\n",
+    );
+    writeFileSync(
+      join(directory, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: { module: "nodenext", strict: true, noEmit: true, types: [] },
+        files: ["types.ts"],
+      }),
+    );
+    run(directory, process.execPath, [
+      fileURLToPath(new URL("bin/tsc", import.meta.resolve("typescript/package.json"))),
+      "-p",
+      "tsconfig.json",
+    ]);
+    writeFileSync(
+      join(directory, "oxlint.config.ts"),
+      `
+      import base from "@adamaho/nopeus-oxlint-config";
+      import effect from "@adamaho/nopeus-oxlint-plugin/effect";
+      import react from "@adamaho/nopeus-oxlint-plugin/react";
+      export default {
+        extends: [
+          base,
+          effect({ packageName: "fixture" }),
+          react({ root: import.meta.dirname, transports: ["src/transport/**"] }),
+        ],
+      };
+    `,
+    );
+    mkdirSync(join(directory, "src/transport"), { recursive: true });
+    writeFileSync(join(directory, "src/transport/http.ts"), 'void fetch("/a");\n');
+    writeFileSync(
+      join(directory, "src/visual.tsx"),
+      'import "react-router";\nvoid globalThis.fetch("/a");\nvoid self.fetch("/b");\n',
+    );
+    // Preset override globs stay relative to the consuming config across cwd.
+    for (const cwd of [directory, join(directory, "src")]) {
+      const composed = spawnSync(
+        "pnpm",
+        [
+          "exec",
+          "oxlint",
+          "--config",
+          join(directory, "oxlint.config.ts"),
+          "--format",
+          "json",
+          join(directory, "valid.ts"),
+          join(directory, "src/visual.tsx"),
+          join(directory, "src/transport/http.ts"),
+        ],
+        { cwd, encoding: "utf8", timeout: 60_000 },
+      );
+      expect(composed.error).toBeUndefined();
+      expect(composed.status, composed.stdout + composed.stderr).toBe(1);
+      const diagnostics: readonly { code: string; filename: string }[] = JSON.parse(
+        composed.stdout,
+      ).diagnostics;
+      const codes = (file: string) =>
+        diagnostics
+          .filter((diagnostic) => diagnostic.filename.endsWith(file))
+          .map((diagnostic) => diagnostic.code);
+      expect(codes("valid.ts")).toContain("eslint(no-restricted-imports)");
+      expect(codes("valid.ts")).toContain("nopeus(no-module-level-mutable-state)");
+      expect(codes("visual.tsx")).toContain("nopeus(no-react-layer-imports)");
+      expect(
+        codes("visual.tsx").filter((code) => code === "eslint(no-restricted-globals)"),
+      ).toHaveLength(2);
+      expect(codes("http.ts")).not.toContain("eslint(no-restricted-globals)");
+    }
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

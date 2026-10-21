@@ -22,7 +22,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./effect": "./src/effect.ts",
-    "./base": "./src/base.ts"
+    "./base": "./src/base.ts",
+    "./react": "./src/react.ts"
   },
   "publishConfig": {
     "exports": {
@@ -37,6 +38,10 @@
       "./base": {
         "types": "./dist/base.d.mts",
         "import": "./dist/base.mjs"
+      },
+      "./react": {
+        "types": "./dist/react.d.mts",
+        "import": "./dist/react.mjs"
       }
     },
     "access": "public",
@@ -52,6 +57,7 @@
   },
   "dependencies": {
     "@oxlint/plugins": "catalog:",
+    "minimatch": "catalog:",
     "oxc-resolver": "catalog:"
   },
   "devDependencies": {

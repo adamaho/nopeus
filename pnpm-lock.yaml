@@ -182,6 +182,9 @@ catalogs:
     effect:
       specifier: 4.0.5
       version: 4.0.5
+    minimatch:
+      specifier: 10.2.6
+      version: 10.2.6
     oxc-resolver:
       specifier: 11.24.2
       version: 11.24.2
@@ -291,6 +294,9 @@ importers:
       '@oxlint/plugins':
         specifier: 'catalog:'
         version: 1.88.0
+      minimatch:
+        specifier: 'catalog:'
+        version: 10.2.6
       oxc-resolver:
         specifier: 'catalog:'
         version: 11.24.2
