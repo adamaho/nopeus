@@ -8,6 +8,7 @@ The canonical collection of shared agent skills, organized as the workspace pack
 - `adhd`: clear, concise communication on any topic.
 - `refine`: explore software ideas and resolve decisions with the human.
 - `spec`: define behavior, architecture, contracts, and acceptance for software changes.
+- `review`: shape concise specs and guide human review of architecture, composition, and public interfaces.
 - `audit`: simplify specs and code changes, reusing test coverage and removing redundancy.
 - `graph`: plan and maintain implementation dependencies, PR groups, and completion requirements.
 - `implement`: take an idea through planning, tickets, coding, and review in one conversation.
@@ -21,6 +22,13 @@ stay in their original repositories so updates come from their authors.
 
 Install the whole collection so references between skills, such as
 `refine` → `adhd`, remain available. Skill names stay unchanged across harnesses.
+
+`implement` coordinates `refine` → `spec` → `graph` → `create-ticket` → `execute`.
+`review` supplies shared design guidance during planning and implementation, then
+guides the human through the completed change at handoff. It also works directly
+on an existing PR. `audit` simplifies plans and code; `execute` retains independent
+correctness review and uses `create-pr` for concise PR descriptions. `adhd` applies
+throughout.
 
 ## Installation
 
