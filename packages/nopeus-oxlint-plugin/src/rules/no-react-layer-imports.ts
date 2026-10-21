@@ -4,8 +4,8 @@ import {
   configRoot,
   matchesAny,
   optionObject,
-  relativePatterns,
   rootPath,
+  rootPatterns,
   stringList,
   testPackage,
 } from "#src/shared/config-root.ts";
@@ -60,7 +60,7 @@ export const noReactLayerImportsRule = defineRule({
   create(context) {
     const option = optionObject(context.options[0]);
     const root = configRoot(name, option.root);
-    const layer = (key: string) => relativePatterns(name, key, stringList(option[key]));
+    const layer = (key: string) => rootPatterns(name, key, stringList(option[key]));
     const data = layer("data");
     const filename = physicalPath(context.filename);
     const path = rootPath(root, filename);

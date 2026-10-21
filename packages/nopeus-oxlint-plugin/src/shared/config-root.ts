@@ -44,15 +44,22 @@ export function configRoot(rule: string, root: OptionValue | undefined): string 
   return physicalPath(root);
 }
 
-/** Reject absolute globs, which would otherwise silently match nothing. */
-export function relativePatterns(rule: string, name: string, patterns: readonly string[]) {
-  const absolute = patterns.find((pattern) => isAbsolute(pattern));
-  if (absolute !== undefined) {
-    throw new TypeError(
-      `${rule}: ${name} patterns are relative to the config root; received ${JSON.stringify(absolute)}.`,
-    );
-  }
-  return patterns;
+/**
+ * Normalize globs to match Oxlint overrides: drop a leading `./`, and match
+ * slash-free patterns such as `*.tsx` at any depth. Reject absolute, parent and
+ * negated patterns, which would otherwise silently match nothing or differ.
+ */
+export function rootPatterns(rule: string, name: string, patterns: readonly string[]) {
+  return patterns.map((pattern) => {
+    // Validate after normalizing so `./!src/**` or `.//src/**` cannot slip through.
+    const path = pattern.replace(/^(?:\.\/)+/u, "");
+    if (isAbsolute(path) || path.startsWith("!") || path.split("/").includes("..")) {
+      throw new TypeError(
+        `${rule}: ${name} patterns must be positive globs relative to the config root, without ".." segments; received ${JSON.stringify(pattern)}.`,
+      );
+    }
+    return path.includes("/") ? path : "**/" + path;
+  });
 }
 
 /** Return a portable root-relative path, or null for files outside the root. */

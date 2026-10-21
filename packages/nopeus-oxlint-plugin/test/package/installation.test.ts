@@ -135,7 +135,7 @@ test("published base presets install and lint without Effect packages", () => {
     writeFileSync(
       join(directory, "types.ts"),
       'import react, { type NopeusReactOptions } from "@adamaho/nopeus-oxlint-plugin/react";\n' +
-        'const options: NopeusReactOptions = { root: "/repo", transports: ["src/transport/**"] };\n' +
+        'const options: NopeusReactOptions = { root: "/repo", transports: ["src/transport/**"], fetchTestFiles: ["packages/*/test/**"] };\n' +
         "export const config = react(options);\n",
     );
     writeFileSync(

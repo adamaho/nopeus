@@ -110,22 +110,28 @@ export default defineConfig({
 the same result. All file patterns are relative to it. Each list replaces its
 default:
 
-| Option          | Default                                                                 | Grants                                     |
-| --------------- | ----------------------------------------------------------------------- | ------------------------------------------ |
-| `files`         | `src/**`                                                                | Governed source files                      |
-| `routes`        | `src/routes/**`                                                         | Router imports and feature data            |
-| `adapters`      | `src/navigation/**`                                                     | Router imports                             |
-| `containers`    | `src/features/**/page.{ts,tsx}`, `src/features/**/*-container.{ts,tsx}` | Feature data                               |
-| `data`          | `src/data/**`, `src/features/**/data/**`                                | SDK/cache imports and feature data         |
-| `transports`    | None                                                                    | Raw `fetch`, including generated transport |
-| `routerModules` | `react-router`, `react-router-dom`, `@tanstack/react-router`            | Concrete router modules                    |
-| `queryModules`  | `@tanstack/react-query`, `swr`                                          | Cache library modules                      |
-| `clientModules` | None                                                                    | Project SDK/client modules                 |
+| Option           | Default                                                                 | Grants                                     |
+| ---------------- | ----------------------------------------------------------------------- | ------------------------------------------ |
+| `files`          | `src/**`                                                                | Governed source files                      |
+| `routes`         | `src/routes/**`                                                         | Router imports and feature data            |
+| `adapters`       | `src/navigation/**`                                                     | Router imports                             |
+| `containers`     | `src/features/**/page.{ts,tsx}`, `src/features/**/*-container.{ts,tsx}` | Feature data                               |
+| `data`           | `src/data/**`, `src/features/**/data/**`                                | SDK/cache imports and feature data         |
+| `transports`     | None                                                                    | Raw `fetch`, including generated transport |
+| `fetchTestFiles` | `test/**`, `tests/**`, `**/__tests__/**`, `**/*.{test,spec}.*`          | Raw `fetch` in test setup                  |
+| `routerModules`  | `react-router`, `react-router-dom`, `@tanstack/react-router`            | Concrete router modules                    |
+| `queryModules`   | `@tanstack/react-query`, `swr`                                          | Cache library modules                      |
+| `clientModules`  | None                                                                    | Project SDK/client modules                 |
 
 Module lists match each module and its subpaths. Other governed files are
 visual components. A file in several lists receives only the listed grants: a
 route may consume feature data, but cannot import the cache library unless it is
 also a data file.
+
+File patterns use Oxlint's override globs with deliberately narrow syntax: a
+leading `./` is ignored, and a pattern without `/`, such as `*.tsx`, matches at
+any depth. Patterns that are absolute, negated (`!src/**`), or contain `..`
+segments fail the run; list positive root-relative patterns instead.
 
 ```text
 Route reads params -> Page/container consumes feature data -> SDK/cache
@@ -134,10 +140,26 @@ Route reads params -> Page/container consumes feature data -> SDK/cache
                        Visual props/callbacks
 ```
 
-Governed files outside `transports` and test resources cannot reference global
+Governed files outside `transports` and `fetchTestFiles` cannot reference global
 `fetch`, or `fetch` on the global object through `globalThis`, `self`, or
 `window`; local bindings named `fetch`, `globalThis`, `self`, or `window` are
-allowed. The preset sets `eslint/no-restricted-globals` with
+allowed. Production folders named `test` or `tests`, such as
+`src/routes/test/`, are not exempt.
+
+`fetchTestFiles` only exempts test setup from this fetch check; tests still get
+every other lint rule. The import and domain rules recognize tests by their
+package instead, so they need no option. A config at a monorepo root lists
+package paths for its layers and replaces the root-level test defaults:
+
+```ts
+react({
+  root: import.meta.dirname,
+  files: ["packages/*/src/**"],
+  fetchTestFiles: ["packages/*/test/**"],
+});
+```
+
+The preset sets `eslint/no-restricted-globals` with
 `checkGlobalObject` in an override for those files, which replaces any
 project-level options for that rule there: restrict other globals in those files
 with a later override that repeats the `fetch` entry.
