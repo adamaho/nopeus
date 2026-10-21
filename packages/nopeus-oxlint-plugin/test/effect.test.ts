@@ -103,9 +103,9 @@ test("rejects a package name without a project segment", () => {
 
 test("the Effect preset enables every canonical plugin rule", () => {
   const config = effect({ packageName: "nopeus" });
-  const optIn = ["no-cross-domain-internals", "no-react-layer-imports"];
   for (const name of Object.keys(plugin.rules)) {
-    if (optIn.includes(name)) expect(config.rules).not.toHaveProperty("nopeus/" + name);
+    if (name === "no-cross-domain-internals")
+      expect(config.rules).not.toHaveProperty("nopeus/" + name);
     else expect(config.rules).toHaveProperty("nopeus/" + name);
   }
   expect(plugin.rules).not.toHaveProperty("require-service-make-layer");
