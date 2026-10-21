@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@oxlint/plugins": "catalog:",
+    "minimatch": "catalog:",
     "oxc-resolver": "catalog:"
   },
   "devDependencies": {

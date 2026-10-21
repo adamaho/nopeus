@@ -64,7 +64,8 @@ export const noReactLayerImportsRule = defineRule({
     const data = layer("data");
     const filename = physicalPath(context.filename);
     const path = rootPath(root, filename);
-    // Tests may use router and query setup tools and their own package's data.
+    // Tests may use router, query and data setup; package and domain rules still
+    // limit them to their own package's internals.
     if (path === null || !matchesAny(path, layer("files")) || testPackage(filename)) return {};
     const isRoute = matchesAny(path, layer("routes"));
     const isAdapter = matchesAny(path, layer("adapters"));

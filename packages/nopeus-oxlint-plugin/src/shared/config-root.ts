@@ -1,7 +1,8 @@
 import { statSync } from "node:fs";
-import { isAbsolute, posix, relative, sep } from "node:path";
+import { isAbsolute, relative, sep } from "node:path";
 
 import type { Options } from "@oxlint/plugins";
+import { minimatch } from "minimatch";
 
 import { isTestPath, packageOwner, packagePath, physicalPath } from "./package-layout.ts";
 
@@ -67,8 +68,13 @@ export function rootPath(root: string, filename: string): string | null {
   return isWithin(root, filename) ? relative(root, filename).split(sep).join("/") : null;
 }
 
+/**
+ * Match like Oxlint overrides, so the rule and the preset's fetch override select
+ * the same files: `*` and `**` include dot-prefixed names, and extglobs such as
+ * `+(a|b)` are literal. Node's `matchesGlob` exposes neither option.
+ */
 export function matchesAny(path: string, patterns: readonly string[]): boolean {
-  return patterns.some((pattern) => posix.matchesGlob(path, pattern));
+  return patterns.some((pattern) => minimatch(path, pattern, { dot: true, noext: true }));
 }
 
 /** Return the package owner of a test or test resource, which keeps internal access. */

@@ -130,7 +130,12 @@ also a data file.
 
 File patterns use Oxlint's override globs with deliberately narrow syntax: a
 leading `./` is ignored, and a pattern without `/`, such as `*.tsx`, matches at
-any depth. Patterns that are absolute, negated (`!src/**`), or contain `..`
+any depth. As in Oxlint, `*` and `**` also match dot-prefixed names such as
+`src/.storybook/`, and extglobs such as `+(a|b)` are not supported. Keep brace
+alternatives within one path segment, such as `*.{ts,tsx}`. For alternatives
+that span directories or contain `**`, such as `src/{a,b/**}/x.ts`, list
+separate patterns: the import check and Oxlint's override may match them
+differently. Patterns that are absolute, negated (`!src/**`), or contain `..`
 segments fail the run; list positive root-relative patterns instead.
 
 ```text
@@ -149,12 +154,21 @@ allowed. Production folders named `test` or `tests`, such as
 `fetchTestFiles` only exempts test setup from this fetch check; tests still get
 every other lint rule. The import and domain rules recognize tests by their
 package instead, so they need no option. A config at a monorepo root lists
-package paths for its layers and replaces the root-level test defaults:
+package paths for every layer and replaces the root-level test defaults;
+otherwise the `src/...` layer defaults match nothing, and every governed file is
+treated as a visual component:
 
 ```ts
 react({
   root: import.meta.dirname,
   files: ["packages/*/src/**"],
+  routes: ["packages/*/src/routes/**"],
+  adapters: ["packages/*/src/navigation/**"],
+  containers: [
+    "packages/*/src/features/**/page.{ts,tsx}",
+    "packages/*/src/features/**/*-container.{ts,tsx}",
+  ],
+  data: ["packages/*/src/data/**", "packages/*/src/features/**/data/**"],
   fetchTestFiles: ["packages/*/test/**"],
 });
 ```
@@ -283,7 +297,9 @@ may still import app navigation facades, such as `src/navigation/link.tsx`, and
 public model or contract modules outside the data layer.
 
 The rule checks imports; it does not infer whether a wrapper calls router hooks.
-Tests and test resources may import routers, cache setup, and their own data.
+Tests and test resources skip this rule, so they may import routers, cache setup,
+and data. The domain and package boundary rules still limit them to their own
+package's internals.
 
 ### nopeus/no-cross-domain-internals
 

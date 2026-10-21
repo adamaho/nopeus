@@ -78,7 +78,7 @@ tester.run("nopeus/no-react-layer-imports", noReactLayerImportsRule, {
       "const loaded = import(name);",
       'function load(require: (path: string) => void) { require("./data/queries.ts"); }',
     ].map((code) => ({ code, filename: visual, options })),
-    // Tests may set up routers, caches, and their own package's data.
+    // Tests skip this rule; package and domain rules still check their ownership.
     ...[router, query, dataImport].map((code) => ({
       code,
       filename: file("test/features/receipt-details.test.tsx"),

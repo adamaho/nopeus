@@ -174,14 +174,20 @@ test("the React preset and domain rule behave alike from repository and package 
   }
 }, 120_000);
 
-test("shorthand, ./ and fetch test patterns select the same files for both checks", () => {
+test("shorthand, ./, dot-path and fetch test patterns select the same files for both checks", () => {
   const workspace = testWorkspace();
   try {
     installPlugin(workspace, ".");
     workspace.write("packages/app/package.json", JSON.stringify({ name: "@fixture/app" }));
     workspace.write("packages/app/src/store/items.ts", "export const items = [];\n");
+    workspace.write("packages/app/src/store/.generated/items.ts", "export const items = [];\n");
     const files = [
       workspace.write("packages/app/src/view.tsx", 'import "./store/items.ts";\nfetch("/");\n'),
+      // Globs match dot-prefixed folders for governed files and data targets, like Oxlint.
+      workspace.write(
+        "packages/app/src/.storybook/preview.tsx",
+        'import "react-router"; import "../store/.generated/items.ts";\nfetch("/");\n',
+      ),
       workspace.write("packages/app/src/routes/test/results.tsx", 'fetch("/");\n'),
       // Package test setup may use fetch; ordinary rules still run there.
       workspace.write("packages/app/test/setup.tsx", 'fetch("/");\ndebugger;\n'),
@@ -199,6 +205,9 @@ test("shorthand, ./ and fetch test patterns select the same files for both check
       return result.diagnostics();
     });
     expect(outcomes[0]).toEqual([
+      "packages/app/src/.storybook/preview.tsx eslint(no-restricted-globals)",
+      "packages/app/src/.storybook/preview.tsx nopeus(no-react-layer-imports)",
+      "packages/app/src/.storybook/preview.tsx nopeus(no-react-layer-imports)",
       "packages/app/src/routes/test/results.tsx eslint(no-restricted-globals)",
       "packages/app/src/view.tsx eslint(no-restricted-globals)",
       "packages/app/src/view.tsx nopeus(no-react-layer-imports)",
