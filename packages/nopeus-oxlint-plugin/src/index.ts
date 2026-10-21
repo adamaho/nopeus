@@ -16,11 +16,13 @@ import { requireFetchAbortSignalRule } from "./effect/rules/require-fetch-abort-
 import { requireServiceConstructorNamesRule } from "./effect/rules/require-service-constructor-names.ts";
 import { requireServiceKeyPrefixRule } from "./effect/rules/require-service-key-prefix.ts";
 import { noConditionalEmptyObjectSpreadRule } from "./rules/no-conditional-empty-object-spread.ts";
+import { noCrossDomainInternalsRule } from "./rules/no-cross-domain-internals.ts";
 import { noCrossPackageInternalsRule } from "./rules/no-cross-package-internals.ts";
 import { noExportAssignmentRule } from "./rules/no-export-assignment.ts";
 import { noKnownValueWideningRule } from "./rules/no-known-value-widening.ts";
 import { noModuleMockingRule } from "./rules/no-module-mocking.ts";
 import { noObjectParametersRule } from "./rules/no-object-parameters.ts";
+import { noReactLayerImportsRule } from "./rules/no-react-layer-imports.ts";
 import { noReflectApplyRule } from "./rules/no-reflect-apply.ts";
 import { noReflectGetRule } from "./rules/no-reflect-get.ts";
 import { noRuntimeTypeofRule } from "./rules/no-runtime-typeof.ts";
@@ -38,6 +40,8 @@ const nopeusPlugin = eslintCompatPlugin({
   rules: {
     "no-export-assignment": noExportAssignmentRule,
     "no-cross-package-internals": noCrossPackageInternalsRule,
+    "no-cross-domain-internals": noCrossDomainInternalsRule,
+    "no-react-layer-imports": noReactLayerImportsRule,
     "no-test-imports": noTestImportsRule,
     "require-test-location": requireTestLocationRule,
     "no-effect-runners-in-library": noEffectRunnersInLibraryRule,
