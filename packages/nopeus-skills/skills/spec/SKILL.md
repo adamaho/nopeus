@@ -9,6 +9,8 @@ description: >-
 # Spec
 
 Read and apply [adhd](../adhd/SKILL.md) to the spec itself and chat responses.
+Use [review](../review/SKILL.md)'s planning guidance and relevant design references
+to make responsibilities, composition, and public interfaces understandable.
 
 Write a disposable plan for upcoming work. Code remains the source of truth for
 implemented behavior. Settle behavior, architecture, and contracts; leave routine
@@ -33,28 +35,27 @@ coding choices to implementation.
 
 ## Spec Contents
 
-Use this as a coverage checklist, not a required outline. Combine related topics
-and omit irrelevant sections:
+Start with three compact parts; combine or expand them only when the change needs
+it. Keep one canonical spec for the human and implementing agents:
 
-- **Purpose:** affected users or systems, problem, and desired outcome.
-- **Behavior:** what changes and what must stay unchanged, including permissions,
-  failures, and edge cases.
-- **Acceptance examples:** starting conditions, actions, and observable results or
-  measurable targets.
-- **Scope:** included work and user-approved exclusions or deferrals.
-- **Technical context:** relevant code, existing capabilities, and constraints.
-- **Architecture:** module responsibilities, data ownership, what extends existing
-  code or needs a new module or package, dependency direction, and where pieces
-  are assembled. Show how requests or data flow between them when useful.
-- **Contracts:** shared interface inputs, outputs, permissions, failures, and retry
-  behavior that separate pieces must agree on.
-- **Dependencies:** prerequisites and shared contracts affecting order or parallel
-  work.
+- **Outcome and scope:** who benefits, what changes or stays unchanged, important
+  constraints, and agreed exclusions or deferrals.
+- **Design and contracts:** the affected responsibilities and data flow, changed
+  public interfaces, and consequential decisions. Use a small map, folder tree,
+  contract table, or consumer example where useful. Link existing capabilities
+  and conventions; describe the change and any agreed exceptions.
+- **Acceptance examples:** labeled starting conditions, actions, and observable
+  outcomes or measurable targets that slices can reference.
 
-Follow existing repository structure and composition patterns unless an agreed
-change requires otherwise. Give acceptance examples stable labels for slices to
-reference. Describe complete, testable outcomes across the affected components.
-Include compatibility, transition, and rollback requirements when relevant.
+Include the permissions, failure behavior, edge cases, retries, compatibility,
+transition, and rollback details needed to implement and verify the change.
+Preserve exact inputs and outputs where separate components must agree. Record
+prerequisites that constrain slicing; leave task order, PR groups, assignments,
+and progress to [graph](../graph/SKILL.md).
+
+Follow the design guidance in `review` and existing repository conventions unless
+an agreed change requires otherwise. State change-specific decisions once; do
+not reproduce the shared architecture guidance as sections of every spec.
 
 ## Keep It Readable
 

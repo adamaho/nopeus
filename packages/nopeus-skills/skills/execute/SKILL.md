@@ -27,6 +27,10 @@ Read the spec, graph, repository instructions, and relevant code. Identify the
 feature's scope, target branch, PR groups, dependencies, acceptance criteria,
 required checks, and tracking location.
 
+Read [review](../review/SKILL.md)'s shared design guidance and the references
+relevant to the change. Carry those conventions and agreed exceptions into
+implementation; use its human walkthrough for the final handoff.
+
 If the spec or graph is incomplete:
 
 - **Called by [implement](../implement/SKILL.md):** return the gap to the parent
@@ -70,6 +74,7 @@ Give each worker:
 
 - The spec and graph references, assigned node IDs, and PR group scope.
 - Relevant contracts, settled decisions, prerequisites, and acceptance criteria.
+- The relevant `review` design references and any agreed exceptions.
 - Its branch, worktree, target branch, and required checks.
 - [audit](../audit/SKILL.md) to simplify implementation and reuse test coverage.
 - A requirement to report changes, evidence, blockers, and the commit or PR link.
@@ -129,7 +134,8 @@ After all groups are integrated:
    ready for human review only when the required evidence is complete.
 
 Use `create-pr` for the PR description. Keep detailed evidence in linked tracking
-records. In the handoff, report:
+records. Use [review](../review/SKILL.md) to present the implemented architecture
+and interfaces, then guide the human through consequential decisions. Include:
 
 - The feature PR and the validated commit and target-branch commit.
 - Acceptance criteria covered and validation results.

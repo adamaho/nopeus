@@ -50,10 +50,11 @@ questions and for permissions not already granted.
 | Stage | Skill | Result |
 | --- | --- | --- |
 | Resolve the idea | [refine](../refine/SKILL.md) | Agreed behavior, scope, outcomes, and decisions needed for the spec. |
-| Specify the change | [spec](../spec/SKILL.md) | Behavior, architecture, contracts, and acceptance examples. |
+| Specify the change | [spec](../spec/SKILL.md) with [review](../review/SKILL.md) guidance | A concise agreement on behavior, architecture, public contracts, and acceptance examples. |
 | Plan the work | [graph](../graph/SKILL.md) | Dependencies, PR groups, completion requirements, and a flowchart. |
 | Create tracking | [create-ticket](../create-ticket/SKILL.md) | A parent for the spec and graph, plus one child per PR group. |
-| Execute and review | [execute](../execute/SKILL.md) | Implementation, independent reviews, validation, and a feature PR ready for human review. |
+| Execute and verify | [execute](../execute/SKILL.md) | Implementation, independent reviews, validation, and a feature PR ready for human review. |
+| Present the design | [review](../review/SKILL.md), through `execute`'s handoff | A short brief and guided human walkthrough of the implemented design and consequential decisions. |
 
 Let `execute` manage implementation. It uses [create-pr](../create-pr/SKILL.md)
 for smaller PRs and the feature PR.
@@ -81,7 +82,8 @@ Use existing conversation decisions until there is a document to hold them.
 
 ## Hand off to the human
 
-Use `execute`'s final validation and review results. Return:
+Reuse `execute`'s `review` walkthrough and final validation results. Continue the
+human discussion without repeating a delivered overview. Include:
 
 - The feature PR, parent and child tickets, and spec and graph links.
 - The validated revision and target base, acceptance coverage, and review results.
