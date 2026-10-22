@@ -1,5 +1,11 @@
 # @adamaho/nopeus-oxlint-config
 
+## 0.6.0
+
+### Minor Changes
+
+- fbe273e: Require Node.js 24.22.1 or later in the 24.x line and update the Oxlint plugin runtime dependency to 1.89.0. Node.js 22 and other release lines are no longer supported.
+
 ## 0.5.0
 
 ### Minor Changes
