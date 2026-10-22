@@ -134,12 +134,20 @@ After all groups are integrated:
    ready for human review only when the required evidence is complete.
 
 Use `create-pr` for the PR description. Keep detailed evidence in linked tracking
-records. Use [review](../review/SKILL.md) to present the implemented architecture
-and interfaces, then guide the human through consequential decisions. Include:
+records. Before writing the final response, apply
+[review](../review/SKILL.md)'s written handoff to the combined completed work.
+Explain the result in the final response; do not end with only PR links, check
+results, or an offer to review later. Independent agent review does not replace
+this human-facing explanation. Include:
 
 - The feature PR and the validated commit and target-branch commit.
 - Acceptance criteria covered and validation results.
 - Independent review results and remaining limitations.
+
+When called by `implement`, return the walkthrough and evidence to the
+orchestrator for delivery in its final response. When called directly, deliver
+them to the human. Cover all completed groups, not just the last PR or worker's
+changes, and distinguish completed work from unfinished or deferred scope.
 
 Do not call blocked or unverified work ready.
 
