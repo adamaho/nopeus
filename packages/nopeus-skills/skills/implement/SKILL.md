@@ -82,12 +82,21 @@ Use existing conversation decisions until there is a document to hold them.
 
 ## Hand off to the human
 
-Reuse `execute`'s `review` walkthrough and final validation results. Continue the
-human discussion without repeating a delivered overview. Include:
+Before writing the final response, apply [review](../review/SKILL.md)'s written
+handoff to the completed work across the session. This is a required workflow
+stage, not an offer to review later. Use `execute`'s implementation evidence and
+validation results; confirm that its walkthrough reached the human rather than
+assuming an internal agent review satisfied this step.
+
+Make the final response understandable without opening code or earlier messages.
+If a walkthrough was already delivered, give a concise recap instead of repeating
+the full discussion. Include:
 
 - The feature PR, parent and child tickets, and spec and graph links.
 - The validated revision and target base, acceptance coverage, and review results.
 - Remaining limitations or blockers, with links to detailed evidence.
+
+PR links and check results support the explanation; they do not replace it.
 
 Keep the handoff concise. Leave the feature PR open for human review and final
 merge; ready for review does not mean the feature is complete.

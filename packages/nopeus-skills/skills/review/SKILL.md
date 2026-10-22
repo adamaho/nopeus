@@ -3,7 +3,8 @@ name: review
 description: >-
   Guide human review of software design and implementation: how components fit
   together, who owns each responsibility, and what public interfaces connect
-  them. Use when shaping specs or walking a human through a PR or code change.
+  them. Use when shaping specs, walking a human through a PR or code change,
+  or writing the final human handoff from implement or execute.
 ---
 
 # Review
@@ -73,7 +74,37 @@ that the implementation behaves correctly. Reuse [audit](../audit/SKILL.md)
 findings for unnecessary complexity; this walkthrough does not replace independent
 correctness review. Keep discovered bugs visible with supporting evidence.
 
-## Present the review
+## Write the final handoff
+
+When called by `implement` or `execute` at the end of work, use this written
+handoff as the final response. Explain the completed work across the session so
+the human can evaluate it without reading code or reopening earlier messages.
+Use the combined diff and execution evidence, not only the last commit or PR.
+
+Cover what matters for this change:
+
+- **Outcome:** what users or systems can do now, with a concrete before-and-after
+  example when useful. Separate completed work from deferred or unfinished scope.
+- **How it works:** the main components, their responsibilities, and the request
+  or data flow between them. Explain technical terms in plain language.
+- **Interfaces and decisions:** meaningful changes to public contracts, design
+  tradeoffs, and departures from the agreed plan, with their practical effects.
+- **Evidence and limits:** what was validated, what independent review found,
+  the revisions covered, and anything still unverified or blocked.
+- **Human attention:** decisions or concerns that remain, plus links to the PR,
+  spec, graph, and tickets where available. State whether the work is ready for
+  human review and whether it has merged or been released.
+
+Scale the detail to the work. Group related changes by outcome or responsibility;
+do not enumerate every file. Add a small diagram when it makes the relationships
+clearer. Code snippets and source links are optional supporting evidence, not
+required reading for understanding the explanation.
+
+Deliver the overview immediately. Do not substitute a status-only summary, a
+list of links, or an offer to run `review` next. Ask a focused follow-up only when
+a material decision needs the human's answer; do not invent an approval question.
+
+## Guide an interactive review
 
 Start with a short brief: what changed, how the pieces fit together, the important
 interfaces, and the decisions or concerns that deserve attention. Scale the brief
