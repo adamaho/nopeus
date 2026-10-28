@@ -70,6 +70,40 @@ export default defineConfig({
 The root package name defines the owned Effect service namespace. Both goho and
 @adamaho/goho require trace names and service keys beginning with @goho/.
 
+### Domain boundaries
+
+`nopeus/no-cross-domain-internals` is opt-in. Enable it alongside the built-in
+config and the `base` or `effect` preset, and list each domain root with its
+exact public modules:
+
+```ts
+import builtins from "@adamaho/nopeus-oxlint-config";
+import effect from "@adamaho/nopeus-oxlint-plugin/effect";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  extends: [builtins, effect({ packageName: "goho" })],
+  rules: {
+    "nopeus/no-cross-domain-internals": [
+      "error",
+      {
+        root: import.meta.dirname,
+        domains: [
+          { root: "src/receipts", public: ["repository.ts", "model.ts"] },
+          { root: "src/receipt-uploads", public: ["service.ts"] },
+        ],
+      },
+    ],
+  },
+});
+```
+
+`root` must be the absolute directory of the config file, usually
+`import.meta.dirname`, so running Oxlint from the repository or a package gives
+the same result. Here, an upload service may import the receipt repository and
+model, but not `src/receipts/sql.ts`. Public repositories are valid interfaces
+between domains.
+
 The package publishes compiled ESM and requires Node.js 22.18 or newer, or
 Node.js 24 or newer.
 
@@ -168,6 +202,44 @@ All three structure rules are errors in both `/base` and `/effect`. Include
 both `src` and `test` in the consuming project's lint command. Narrowly exclude
 deliberately invalid fixture projects, not ordinary test code. The built-in
 config package supplies filename casing separately.
+
+### nopeus/no-cross-domain-internals
+
+Opt-in; neither `/base` nor `/effect` enables it. See
+[Domain boundaries](#domain-boundaries) for a complete config. Every consumer,
+including startup code, must import another configured domain through its
+declared public modules.
+
+Bad, in `src/receipt-uploads/service.ts`:
+
+```ts
+import { insertReceipt } from "#src/receipts/sql.ts";
+```
+
+Good:
+
+```ts
+import { ReceiptRepository } from "#src/receipts/repository.ts";
+```
+
+Domain roots are relative to `root`. Public entries are exact file paths
+relative to their domain, including the extension. No barrel or pass-through
+service is required: a public module may export private implementation, and a
+service may use several domains' public repositories. Imports within a domain
+are allowed. Nested domains use the most specific root. Unconfigured folders
+have no domain. Own-package tests may import domain internals.
+
+The rule checks which files an import reaches. It does not infer Effect service
+kinds, inspect exported symbols, or require a particular folder layout inside a
+domain.
+
+Missing domain roots, relative `root` values, and missing public files stop the
+lint run with an error naming the option.
+
+The rule uses the same resolution and import forms as the package boundary
+rules, including aliases, type-only imports, re-exports, TypeScript import
+types, literal dynamic imports, and unshadowed `require`. Computed module
+names and unresolved aliases cannot be classified and are not checked.
 
 ### nopeus/no-module-level-mutable-state
 
