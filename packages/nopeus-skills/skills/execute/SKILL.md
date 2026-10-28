@@ -1,15 +1,17 @@
 ---
 name: execute
 description: >-
-  Execute or resume a ready spec and dependency graph. Coordinate PR groups,
+  Execute or resume a feature agreement and graph one ready slice at a time.
+  Coordinate PR groups,
   model assignments, independent review, and validation until the feature PR is
-  ready for human review. Use implement to start from an idea.
+  ready for human review. Use build to start from an idea.
 ---
 
 # Execute
 
-Execute a ready spec and graph. Work through the whole feature unless the user
-limits scope, and stop at a validated feature PR ready for human review.
+Execute the current ready slice from the feature agreement and graph. Progress
+through the feature one slice at a time unless the user limits scope, and stop
+at a validated feature PR ready for human review.
 Apply [adhd](../adhd/SKILL.md) to questions, progress updates, and handoffs.
 
 ## Scope and permissions
@@ -25,17 +27,23 @@ Apply [adhd](../adhd/SKILL.md) to questions, progress updates, and handoffs.
 
 Read the spec, graph, repository instructions, and relevant code. Identify the
 feature's scope, target branch, PR groups, dependencies, acceptance criteria,
-required checks, and tracking location.
+required checks, ticket mode, and tracking location. Default to no tickets unless
+`build` passes an existing choice to use tickets or the user requests them.
+Without tickets: do not create or update tickets, invoke
+`create-ticket`, or request tracker access. Keep progress and evidence with the
+local spec and graph. Every ticket update below is conditional on ticket mode.
 
-Read [review](../review/SKILL.md)'s shared design guidance and the references
+Read [summarize](../summarize/SKILL.md)'s shared design guidance and the references
 relevant to the change. Carry those conventions and agreed exceptions into
-implementation; use its human walkthrough for the final handoff.
+implementation; use its detailed written summary for the final handoff.
 
-If the spec or graph is incomplete:
+An outlined future slice is not a blocker for the current slice unless its
+unresolved details affect current guarantees. If the feature agreement or current
+slice lacks required implementation detail:
 
-- **Called by [implement](../implement/SKILL.md):** return the gap to the parent
+- **Called by [build](../build/SKILL.md):** return the gap to the parent
   workflow for resolution.
-- **Called directly:** explain what is missing and suggest `implement` or the
+- **Called directly:** explain what is missing and suggest `build` or the
   relevant planning skill. Do not silently start the full planning workflow.
 
 Before starting or resuming, inspect branches, worktrees, PRs, reviews, and check
@@ -45,7 +53,7 @@ conflicts before affected work proceeds.
 ## Confirm model assignments
 
 Read [model selection](references/models.md). Reuse the orchestrator, worker, and
-reviewer choices passed by `implement` or already supplied by the user. When
+reviewer choices passed by `build` or already supplied by the user. When
 invoked directly, ask for missing choices before execution. Verify availability
 and retain independent review; do not silently substitute models.
 
@@ -62,19 +70,25 @@ tickets, graph groups, and PRs so their relationships are visible.
 
 ## Coordinate ready work
 
-Select ready PR groups from the graph. A group starts only after its prerequisite
-groups merge into the feature branch. Within a group, follow node dependencies.
+Select one ready PR group from the graph. A group starts only after its
+prerequisite groups merge into the feature branch. Within it, follow node
+dependencies. Default to one active implementation slice, even when multiple
+groups are independent; parallel implementation requires an explicit user request.
+A separate reviewer does not create another implementation slice.
 
-- **Independent groups:** delegate in isolated worktrees when useful.
-- **Overlapping changes or shared integration:** work sequentially.
-- **Parallel work unavailable or unhelpful:** work sequentially while keeping
-  the selected models and independent review requirement.
+Follow [graph](../graph/SKILL.md)'s size estimates and exception rules. Compare
+actual added plus deleted lines against the PR's target during implementation and
+before submission, including review fixes. Report generated and lockfile changes
+separately alongside the total. Revisit the boundary as the diff approaches
+600–700 lines. If it will exceed 700 without an agreed exception, explain the
+actual size and a coherent split or exception for the user to decide before
+continuing the oversized PR. Preserve work; do not discard changes to shrink it.
 
 Give each worker:
 
 - The spec and graph references, assigned node IDs, and PR group scope.
 - Relevant contracts, settled decisions, prerequisites, and acceptance criteria.
-- The relevant `review` design references and any agreed exceptions.
+- The relevant `summarize` design references and any agreed exceptions.
 - Its branch, worktree, target branch, and required checks.
 - [audit](../audit/SKILL.md) to simplify implementation and reuse test coverage.
 - A requirement to report changes, evidence, blockers, and the commit or PR link.
@@ -104,7 +118,18 @@ feature branch changed, assess the impact and repeat affected validation or
 review. Respect branch protections; do not bypass failed checks or required review.
 
 Confirm the merge succeeded before marking the group merged or unblocking its
-dependents. Update the graph and child ticket with links and observed evidence.
+dependents. Update the graph and child ticket with links, observed evidence, and
+actual PR size. Before detailing or implementing the next slice, deliver a written
+[summarize](../summarize/SKILL.md) checkpoint covering this slice's outcome,
+relevant interfaces and data structures, validation, and what remains unfinished.
+When delegated, send it to the orchestrator for delivery to the human.
+
+Use what was learned to refine and specify the next outlined slice, then update
+the graph and its estimate. Through `build`, return to its planning stages.
+When invoked directly, continue already-ready slices; if the next needs decisions
+or missing planning detail, preserve progress and request the relevant planning
+step rather than silently treating an outline as ready. Routine progression needs
+no new approval when scope and decisions are already settled.
 
 ## Handle discoveries and interruptions
 
@@ -113,7 +138,8 @@ settled decisions. Keep its flowchart, tickets, dependencies, and status aligned
 
 If discoveries affect agreed scope, behavior, architecture, or contracts, use
 [refine](../refine/SKILL.md) before affected work continues. Mark affected nodes
-and dependents blocked; continue independent work where possible.
+and dependents blocked; keep the current slice in focus. Ask before reordering
+implementation to another slice.
 
 Save progress alongside the graph: model assignments, branches and PRs, completed
 groups, evidence, blockers, and next ready work. Distinguish written, validated,
@@ -135,21 +161,27 @@ After all groups are integrated:
 
 Use `create-pr` for the PR description. Keep detailed evidence in linked tracking
 records. Before writing the final response, apply
-[review](../review/SKILL.md)'s written handoff to the combined completed work.
+[summarize](../summarize/SKILL.md)'s detailed written implementation summary to the
+combined completed work. This is mandatory whenever an implementation is
+completed, including when `execute` is invoked directly. Explain changes,
+components and flow, interfaces and public APIs, data structures and state, and
+consequential decisions where relevant.
 Explain the result in the final response; do not end with only PR links, check
-results, or an offer to review later. Independent agent review does not replace
+results, or an offer to summarize later. Independent agent review does not replace
 this human-facing explanation. Include:
 
 - The feature PR and the validated commit and target-branch commit.
 - Acceptance criteria covered and validation results.
 - Independent review results and remaining limitations.
 
-When called by `implement`, return the walkthrough and evidence to the
+When called by `build`, return the detailed summary and evidence to the
 orchestrator for delivery in its final response. When called directly, deliver
 them to the human. Cover all completed groups, not just the last PR or worker's
 changes, and distinguish completed work from unfinished or deferred scope.
 
-Do not call blocked or unverified work ready.
+If execution stops partially complete or blocked, still summarize completed
+changes and identify unfinished scope and blockers. Do not call blocked or
+unverified work ready.
 
 Leave the feature PR open and the root outcome awaiting human review and final
 merge. Ready for review does not mean the feature is complete.
