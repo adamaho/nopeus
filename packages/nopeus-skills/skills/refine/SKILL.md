@@ -11,10 +11,8 @@ description: >-
 Read and apply [adhd](../adhd/SKILL.md) before communicating with the user.
 
 Start from the user's idea, even a single sentence. Investigate facts and
-recommend answers; the human settles consequential decisions about the desired
-outcome, scope, behavior, and contracts. Reuse repository conventions and leave
-routine implementation choices to the implementing agent within those boundaries.
-Keep decisions and their reasoning in the chat. Create documents only when requested.
+recommend answers; the human makes the decisions. Keep decisions and their
+reasoning in the chat. Create documents only when requested.
 
 ## Familiarize
 
@@ -25,20 +23,6 @@ use what you learn to ask better questions.
 Explore enough to ask an informed first question. Investigate further as answers
 reveal new areas. If the direction is unclear, ask a brief orienting question.
 If no code exists, start with the idea.
-
-## Refine one slice at a time
-
-For a larger change, first agree on overall behavior, scope, important shared
-contracts, and likely dependencies. Then resolve the detail needed for the next
-slice. A slice is a bounded, independently verifiable change that fits a reviewable
-PR. It may complete one layer or a narrow behavior across layers; do not require
-end-to-end work when a database, server, or frontend boundary is clearer.
-
-Keep later slices as an outline with explicit open decisions. Their details need
-not be settled before the current slice starts unless they constrain its contracts
-or feasibility. This is staged refinement, not permission to guess future behavior.
-Revisit the next slice after the current one is implemented, verified, reviewed,
-and summarized. Use the completed work as evidence for the next refinement.
 
 ## Ask And Refine
 
@@ -77,12 +61,9 @@ summary. Explore its effects on behavior, scope, permissions, failures, and
 compatibility. Surface conflicting answers rather than choosing between them.
 Let unresolved decisions guide the next question.
 
-Never replace a consequential decision with an assumption. Ask when alternatives
-would change agreed behavior, public contracts, permissions, compatibility, or
-other material constraints. Do not ask the human to choose private helper names,
-routine coding details, or conventions the repository already settles.
-Only the user can defer a required decision or exclude it from scope. When
-revisiting a draft, keep settled decisions and focus on newly exposed questions.
+Never fill a gap with an assumption or leave a decision for implementation.
+Only the user can defer a question or exclude it from scope. When revisiting a
+draft, keep settled decisions and focus on newly exposed questions.
 
 ## Parallel Investigation
 
@@ -114,26 +95,17 @@ Be able to explain:
 - The problem, users, and desired outcome.
 - Expected behavior, concrete examples, and edge cases.
 - Scope, constraints, and user-approved exclusions or deferrals.
-- How success will be observed, including realistic failure cases that matter.
-- Which implementation choices remain with the agent and when it must return
-  to the human for a decision.
+- How success will be observed.
 
-Mentally draft the specification. A missing consequential decision, conflicting
-answer, or unsupported constraint means more investigation or another question.
-Investigate uncertain technical feasibility with focused code inspection or a
-bounded experiment when authorized; a user preference cannot establish a technical
-fact. If evidence is unavailable, explain the gap and its effect on readiness.
+Mentally draft the specification. Any missing choice, conflicting answer, or
+unsupported constraint means more investigation or another question. If evidence
+is unavailable, explain the gap and ask the user how to proceed.
 
-Finish only when every question needed for the current slice and the shared
-agreement it depends on is answered:
-**consequential decisions are agreed, facts have evidence, and no assumption
-replaces a needed answer.** Record approved deferrals explicitly; they are not
-established facts. Routine implementation choices do not prevent readiness.
+Finish only when every question needed to specify the agreed scope is answered:
+**decisions come from the user, facts have evidence, and no assumption replaces
+an answer.** Record approved deferrals explicitly; they are not established facts.
 
-Give a brief readback that can feed directly into `spec`: the purpose, chosen
-direction, agreed decisions and constraints, relevant code evidence, agent-owned
-choices, and approved deferrals or remaining blockers. Preserve reasons where
-they constrain implementation; do not require a new document. Include the number
-of questions answered, with deferred questions counted separately. Distinguish
-later-slice decisions awaiting refinement from blockers for the current slice.
-Refinement alone does not start documentation, task planning, or implementation.
+Give a brief readback of the purpose, chosen direction, key decisions, boundaries,
+and approved deferrals. Include the number of questions answered, with deferred
+questions counted separately. Refinement alone does not start documentation, task
+planning, or implementation.
