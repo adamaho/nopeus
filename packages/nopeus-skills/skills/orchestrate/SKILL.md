@@ -84,6 +84,9 @@ Construct a complete prompt for each worker, including:
 - [audit](../audit/SKILL.md) guidance for simplicity and useful test coverage.
 - Instructions to report changes, commits, validation evidence, blockers, and
   discoveries; do not integrate into trunk or change shared scope independently.
+- A requirement to use [summarize](../summarize/SKILL.md) for the proposed change's
+  handoff to the orchestrator. Workers do not ask the human for approval directly;
+  the orchestrator delivers the verified brief and owns the approval gate.
 
 Workers may make as many checkpoint commits as useful. Each implementation task
 ultimately becomes one coherent proposed trunk commit, including relevant tests
@@ -109,10 +112,17 @@ failed checks or incomplete review ready for human approval.
 
 ## Obtain human approval and integrate
 
-For each ready change, apply `summarize`'s written handoff before asking for approval.
+For every proposed trunk integration, read and apply
+[summarize](../summarize/SKILL.md)'s approval brief before asking for approval.
+Verify and refresh the worker's handoff against the final proposed commit,
+validation, and independent review. Deliver the brief to the human; an internal
+worker summary, passing checks, or a commit link alone does not satisfy this step.
+
 Explain the outcome, consequential design decisions, concrete diff or commit,
 validation, independent review results, and remaining limitations. Identify the
-task ID, proposed commit, and compared trunk revision. A PR is not required.
+task ID, proposed commit, and compared trunk revision. Then ask for explicit
+approval of that change. A PR is not required. Keep the brief proportional to the
+change, but do not defer it until the final feature summary or after integration.
 
 Mark the task `awaiting-human-review` and wait for explicit approval of that
 change. Review feedback returns the task to implementation and affected checks.
@@ -123,8 +133,9 @@ After approval, integrate one task at a time:
 
 1. Inspect current trunk and reconcile the proposed commit with any newer changes.
 2. Refresh affected validation and independent review. If the change or relevant
-   context differs materially from what the human approved, present the updated
-   change and obtain renewed approval. Pure commit identity changes with an
+   context differs materially from what the human approved, refresh and deliver
+   the `summarize` brief for the updated change, then obtain renewed approval.
+   Pure commit identity changes with an
    equivalent diff and unaffected context do not alone invalidate approval;
    record the mapping and evidence.
 3. Integrate the approved task as one commit on trunk using the repository's
