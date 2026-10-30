@@ -53,7 +53,7 @@ For each task, record:
 Keep records proportional to the task; leave unobserved evidence explicitly
 pending. The orchestrator owns task status and derives summaries from the graph.
 
-Prepare enough context for `execute` to craft each worker prompt: task ID and
+Prepare enough context for `orchestrate` to craft each worker prompt: task ID and
 scope, relevant requirements and contracts, integrated prerequisites, acceptance
 criteria, required checks, checkout and trunk revision, and reporting expectations.
 Include necessary information directly; use code references as supporting evidence,

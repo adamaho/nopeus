@@ -12,7 +12,7 @@ The canonical collection of shared agent skills, organized as the workspace pack
 - `audit`: simplify specs and code changes, reusing test coverage and removing redundancy.
 - `graph`: plan and maintain implementation dependencies, PR groups, and completion requirements.
 - `implement`: take an idea through planning, tickets, coding, and review in one conversation.
-- `execute`: carry out a ready spec and graph with chosen models, validation, and independent review.
+- `orchestrate`: coordinate parallel graph tasks, validation, independent review, and human approval before each trunk integration.
 - `create-pr`: concise pull request titles and descriptions.
 - `create-ticket`: concise product tickets and bug reports.
 
@@ -23,10 +23,10 @@ stay in their original repositories so updates come from their authors.
 Install the whole collection so references between skills, such as
 `refine` → `adhd`, remain available. Skill names stay unchanged across harnesses.
 
-`implement` coordinates `refine` → `spec` → `graph` → `create-ticket` → `execute`.
+`implement` coordinates `refine` → `spec` → `graph` → `create-ticket` → `orchestrate`.
 `review` supplies shared design guidance during planning and implementation, then
 guides the human through the completed change at handoff. It also works directly
-on an existing PR. `audit` simplifies plans and code; `execute` retains independent
+on an existing PR. `audit` simplifies plans and code; `orchestrate` retains independent
 correctness review and uses `create-pr` for concise PR descriptions. `adhd` applies
 throughout.
 

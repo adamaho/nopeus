@@ -4,7 +4,7 @@ description: >-
   Guide human review of software design and implementation: how components fit
   together, who owns each responsibility, and what public interfaces connect
   them. Use when shaping specs, walking a human through a PR or code change,
-  or writing the final human handoff from implement or execute.
+  or writing the final human handoff from implement or orchestrate.
 ---
 
 # Review
@@ -76,7 +76,7 @@ correctness review. Keep discovered bugs visible with supporting evidence.
 
 ## Write the final handoff
 
-When called by `implement` or `execute` at the end of work, use this written
+When called by `implement` or `orchestrate` at the end of work, use this written
 handoff as the final response. Explain the completed work across the session so
 the human can evaluate it without reading code or reopening earlier messages.
 Use the combined diff and execution evidence, not only the last commit or PR.

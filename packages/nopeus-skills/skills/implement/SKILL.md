@@ -3,7 +3,7 @@ name: implement
 description: >-
   Coordinate a software feature from idea to a validated PR ready for human
   review. Use for the full workflow: refinement, spec, graph, tickets, execution,
-  and review. Use execute for a ready spec and graph, or individual skills for
+  and review. Use orchestrate for a ready spec and graph, or individual skills for
   focused planning and ticket requests.
 ---
 
@@ -32,13 +32,13 @@ each skill investigate the details it needs.
 
 ## Choose models
 
-Use the shared [model selection rules](../execute/references/models.md) before
+Use the shared [model selection rules](../orchestrate/references/models.md) before
 starting. Ask for any missing orchestrator, worker, and reviewer choices together;
 reuse choices already supplied. Mixed models and providers are supported only
 where available tools can run them.
 
 The orchestrator leads the conversation and moves between stages. Pass model
-choices, decisions, artifact links, and permissions to `execute` without asking
+choices, decisions, artifact links, and permissions to `orchestrate` without asking
 for the same choices again.
 
 ## Connect the skills
@@ -53,10 +53,10 @@ questions and for permissions not already granted.
 | Specify the change | [spec](../spec/SKILL.md) with [review](../review/SKILL.md) guidance | A concise agreement on behavior, architecture, public contracts, and acceptance examples. |
 | Plan the work | [graph](../graph/SKILL.md) | Dependencies, PR groups, completion requirements, and a flowchart. |
 | Create tracking | [create-ticket](../create-ticket/SKILL.md) | A parent for the spec and graph, plus one child per PR group. |
-| Execute and verify | [execute](../execute/SKILL.md) | Implementation, independent reviews, validation, and a feature PR ready for human review. |
-| Present the design | [review](../review/SKILL.md), through `execute`'s handoff | A short brief and guided human walkthrough of the implemented design and consequential decisions. |
+| Execute and verify | [orchestrate](../orchestrate/SKILL.md) | Implementation, independent reviews, validation, and a feature PR ready for human review. |
+| Present the design | [review](../review/SKILL.md), through `orchestrate`'s handoff | A short brief and guided human walkthrough of the implemented design and consequential decisions. |
 
-Let `execute` manage implementation. It uses [create-pr](../create-pr/SKILL.md)
+Let `orchestrate` manage implementation. It uses [create-pr](../create-pr/SKILL.md)
 for smaller PRs and the feature PR.
 
 Use the spec's local draft as working material. Publish the full spec and graph
@@ -84,7 +84,7 @@ Use existing conversation decisions until there is a document to hold them.
 
 Before writing the final response, apply [review](../review/SKILL.md)'s written
 handoff to the completed work across the session. This is a required workflow
-stage, not an offer to review later. Use `execute`'s implementation evidence and
+stage, not an offer to review later. Use `orchestrate`'s implementation evidence and
 validation results; confirm that its walkthrough reached the human rather than
 assuming an internal agent review satisfied this step.
 

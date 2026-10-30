@@ -7,8 +7,8 @@ select defaults.
 | Role | Responsibility |
 | --- | --- |
 | Orchestrator | Coordinate the requested work, integration, progress, and human handoff. |
-| Workers | Implement assigned PR groups and provide validation evidence. |
-| Reviewers | Independently review smaller PRs and the combined feature. |
+| Workers | Implement assigned graph tasks and provide validation evidence. |
+| Reviewers | Independently review task changes and the combined feature. |
 
 Roles may use different models or providers when the tools support them. For
 example: Claude orchestrates and reviews; Astra implements. Resolve these names

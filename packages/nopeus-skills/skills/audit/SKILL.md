@@ -3,7 +3,7 @@ name: audit
 description: >-
   Audit specs and code changes for unnecessary complexity, excessive defenses,
   excess scope, and redundant tests. Use when asked to simplify work or during
-  spec and execute.
+  spec and orchestrate.
 ---
 
 # Audit
