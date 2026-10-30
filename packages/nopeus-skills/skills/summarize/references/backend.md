@@ -68,3 +68,12 @@ The Goho client is derived from its Effect API contract; it is not generated fro
 OpenAPI. An SDK or OpenAPI-generated client is also appropriate elsewhere. Keep
 one authoritative API contract and expose deliberate package exports or public
 domain modules; do not require a barrel file for every folder.
+
+## Show changed backend contracts
+
+Show changed request/response schemas or type signatures, endpoint names, and
+representative payloads when they help explain an API change. Show meaningful
+changes to data models and database table structure with concise model or table
+definitions, including relevant relationships, keys, and constraints. Select the
+contracts that matter to the change; keep the brief understandable without
+requiring the reader to open the source.

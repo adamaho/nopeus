@@ -51,7 +51,8 @@ spec workflow. Do not create a separate architecture document or repeat the spec
 Keep the design understandable through a compact responsibility map, the changed
 interfaces, and the consequential decisions. Use a small diagram, folder tree,
 or consumer snippet when it explains more clearly than prose. Label proposed
-interfaces as proposals and link existing contracts instead of copying them.
+interfaces as proposals. Show selected changed contracts needed to evaluate the
+design, with source links for supporting context.
 
 Keep only change-specific decisions and necessary exceptions in the spec. Link
 the shared conventions once. Acceptance examples belong in the spec; task order,
@@ -75,6 +76,14 @@ that the implementation behaves correctly. Reuse [audit](../audit/SKILL.md)
 findings for unnecessary complexity; this walkthrough does not replace independent
 correctness review. Keep discovered bugs visible with supporting evidence.
 
+## Show changed contracts
+
+Show meaningful changed contracts with concise code snippets: schemas, type
+signatures, or consumer examples. Use actual implementation excerpts and label
+simplified examples or omitted annotations. Keep snippets proportional to the
+change, with source links as supporting evidence; the brief should be
+understandable without opening them.
+
 ## Write an approval brief or final handoff
 
 When called before a task integrates, summarize that proposed change for human
@@ -96,6 +105,8 @@ Cover what matters for this change:
   or data flow between them. Explain technical terms in plain language.
 - **Interfaces and decisions:** meaningful changes to public contracts, design
   tradeoffs, and departures from the agreed plan, with their practical effects.
+- **Compatibility and release:** affected consumers, breaking behavior, and any
+  migration or rollout needs where relevant.
 - **Evidence and limits:** what was validated, what independent review found,
   the revisions covered, and anything still unverified or blocked.
 - **Human attention:** decisions or concerns that remain, plus links to the PR,
@@ -104,8 +115,8 @@ Cover what matters for this change:
 
 Scale the detail to the work. Group related changes by outcome or responsibility;
 do not enumerate every file. Add a small diagram when it makes the relationships
-clearer. Code snippets and source links are optional supporting evidence, not
-required reading for understanding the explanation.
+clearer. Apply "Show changed contracts" to written briefs and interactive reviews;
+source links support the explanation rather than replacing it.
 
 Deliver the overview immediately. Do not substitute a status-only summary, a
 list of links, or an offer to run `summarize` next. Ask a focused follow-up only when
