@@ -1,7 +1,7 @@
 ---
 name: spec
 description: >-
-  Create or revise disposable specs for planned software changes, ready for
+  Clarify behavior, contracts, and acceptance in conversation context, ready for
   slicing into small, testable pieces of work. Use with an idea, existing draft,
   or agreed decisions.
 ---
@@ -9,10 +9,10 @@ description: >-
 # Spec
 
 Read and apply [adhd](../adhd/SKILL.md) to the spec itself and chat responses.
-Use [review](../review/SKILL.md)'s planning guidance and relevant design references
+Use [summarize](../summarize/SKILL.md)'s planning guidance and relevant design references
 to make responsibilities, composition, and public interfaces understandable.
 
-Write a disposable plan for upcoming work. Code remains the source of truth for
+Clarify the plan in conversation context without creating or persisting files. Code remains the source of truth for
 implemented behavior. Settle behavior, architecture, and contracts; leave routine
 coding choices to implementation.
 
@@ -36,7 +36,7 @@ coding choices to implementation.
 ## Spec Contents
 
 Start with three compact parts; combine or expand them only when the change needs
-it. Keep one canonical spec for the human and implementing agents:
+it. Keep one shared statement of intent in context for the human and agents:
 
 - **Outcome and scope:** who benefits, what changes or stays unchanged, important
   constraints, and agreed exclusions or deferrals.
@@ -50,10 +50,10 @@ it. Keep one canonical spec for the human and implementing agents:
 Include the permissions, failure behavior, edge cases, retries, compatibility,
 transition, and rollback details needed to implement and verify the change.
 Preserve exact inputs and outputs where separate components must agree. Record
-prerequisites that constrain slicing; leave task order, PR groups, assignments,
+prerequisites that constrain slicing; leave task order, dependencies, assignments,
 and progress to [graph](../graph/SKILL.md).
 
-Follow the design guidance in `review` and existing repository conventions unless
+Follow the design guidance in `summarize` and existing repository conventions unless
 an agreed change requires otherwise. State change-specific decisions once; do
 not reproduce the shared architecture guidance as sections of every spec.
 
@@ -94,10 +94,11 @@ while preserving every decision and criterion needed to implement and verify it.
 
 ## Delivery
 
-Use the requested location or repository scratch convention. Otherwise, save to
-`.scratch/specs/<change>.md`, ensuring Git ignores the directory before writing.
-Revise existing specs in place. Do not maintain completed specs as permanent docs.
+Return the concise agreed intent and readiness status in the conversation. Do not
+create or persist spec files, planning documents, or a separate storage system.
+Reuse existing context instead of requiring a standalone spec when the intent is
+already precise enough for `graph` to plan tasks. Carry relevant decisions and
+acceptance examples into graph context and worker prompts.
 
-Return the spec link and a brief readiness status. Keep chat-specific permissions
-out of the spec. Creating a spec does not itself start slicing, create tickets,
-or implement the change.
+Clarifying intent does not itself start implementation, create tickets or PRs,
+or authorize trunk integration. Respect requests to stop at planning.

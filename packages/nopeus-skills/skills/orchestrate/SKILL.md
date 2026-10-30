@@ -35,7 +35,7 @@ task IDs, prerequisites, shared contracts, acceptance examples, required checks,
 and any existing implementation or approval evidence. A separate spec document
 is not required.
 
-Use [review](../review/SKILL.md)'s shared design guidance and relevant references
+Use [summarize](../summarize/SKILL.md)'s shared design guidance and relevant references
 for implementation and human walkthroughs. If the graph lacks a consequential
 decision, return the gap to `implement` when called by that workflow; when called
 directly, explain the gap and use the relevant planning skill within authorized
@@ -109,7 +109,7 @@ failed checks or incomplete review ready for human approval.
 
 ## Obtain human approval and integrate
 
-For each ready change, apply `review`'s written handoff before asking for approval.
+For each ready change, apply `summarize`'s written handoff before asking for approval.
 Explain the outcome, consequential design decisions, concrete diff or commit,
 validation, independent review results, and remaining limitations. Identify the
 task ID, proposed commit, and compared trunk revision. A PR is not required.
@@ -173,7 +173,7 @@ review to this feature's commits and affected current code, accounting for other
 trunk changes. Record the exact revisions covered. New defects become follow-up
 tasks that pass through the same validation and human approval gates.
 
-Apply `review`'s written handoff to the whole outcome. Explain what works, how
+Apply `summarize`'s written handoff to the whole outcome. Explain what works, how
 components fit together, consequential decisions, acceptance coverage, independent
 review results, integrated commits, and remaining limits. Distinguish integrated,
 verified, blocked, and awaiting-human-review work; do not imply integration means

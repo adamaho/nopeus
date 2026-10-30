@@ -7,11 +7,11 @@ The canonical collection of shared agent skills, organized as the workspace pack
 
 - `adhd`: clear, concise communication on any topic.
 - `refine`: explore software ideas and resolve decisions with the human.
-- `spec`: define behavior, architecture, contracts, and acceptance for software changes.
-- `review`: shape concise specs and guide human review of architecture, composition, and public interfaces.
+- `spec`: clarify behavior, architecture, contracts, and acceptance in conversation context.
+- `summarize`: explain designs, proposed changes, and completed outcomes for human evaluation.
 - `audit`: simplify specs and code changes, reusing test coverage and removing redundancy.
-- `graph`: plan and maintain implementation dependencies, PR groups, and completion requirements.
-- `implement`: take an idea through planning, tickets, coding, and review in one conversation.
+- `graph`: maintain tasks, dependencies, parallelism constraints, and completion evidence in context.
+- `implement`: take an idea through planning and human-approved trunk integration in one conversation.
 - `orchestrate`: coordinate parallel graph tasks, validation, independent review, and human approval before each trunk integration.
 - `create-pr`: concise pull request titles and descriptions.
 - `create-ticket`: concise product tickets and bug reports.
@@ -23,12 +23,17 @@ stay in their original repositories so updates come from their authors.
 Install the whole collection so references between skills, such as
 `refine` → `adhd`, remain available. Skill names stay unchanged across harnesses.
 
-`implement` coordinates `refine` → `spec` → `graph` → `create-ticket` → `orchestrate`.
-`review` supplies shared design guidance during planning and implementation, then
-guides the human through the completed change at handoff. It also works directly
-on an existing PR. `audit` simplifies plans and code; `orchestrate` retains independent
-correctness review and uses `create-pr` for concise PR descriptions. `adhd` applies
-throughout.
+`implement` resolves intent with `refine` and, when useful, `spec`, then uses
+`graph` and `orchestrate` to plan and coordinate the work. Planning stays in
+conversation context; workers receive complete task prompts. No planning files
+are persisted. Ready independent tasks run in parallel within available capacity.
+
+`summarize` supplies shared design guidance, explains each proposed task change
+before human approval, and presents the combined outcome. `audit` simplifies
+plans and code. `orchestrate` requires independent correctness review and explicit
+human approval before integrating each task as one commit on trunk. Workers may
+make any number of checkpoint commits. Tickets and PRs are created only when
+requested; feature branches are not required. `adhd` applies throughout.
 
 ## Installation
 

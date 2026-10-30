@@ -1,13 +1,14 @@
 ---
-name: review
+name: summarize
 description: >-
-  Guide human review of software design and implementation: how components fit
-  together, who owns each responsibility, and what public interfaces connect
+  Summarize software design and implementation for human evaluation: how
+  components fit together, who owns each responsibility, and what public interfaces connect
   them. Use when shaping specs, walking a human through a PR or code change,
-  or writing the final human handoff from implement or orchestrate.
+  or preparing per-change approval briefs and final handoffs for implement or
+  orchestrate. Summaries do not replace independent correctness review.
 ---
 
-# Review
+# Summarize
 
 Read and apply [adhd](../adhd/SKILL.md) to every spec contribution, overview,
 diagram, question, and walkthrough. Help the human evaluate the design without
@@ -54,7 +55,7 @@ interfaces as proposals and link existing contracts instead of copying them.
 
 Keep only change-specific decisions and necessary exceptions in the spec. Link
 the shared conventions once. Acceptance examples belong in the spec; task order,
-PR groups, and progress belong in [graph](../graph/SKILL.md). Do not require the
+dependencies, and progress belong in [graph](../graph/SKILL.md). Do not require the
 human to approve every convention again. Use [refine](../refine/SKILL.md) when a
 consequential decision remains unresolved.
 
@@ -65,7 +66,7 @@ surrounding implementation, and consumers. For local changes, identify the
 comparison being reviewed. Trace the affected request or data flow across layers.
 
 Compare the implementation with the agreed design and explain meaningful drift.
-A standalone review can use the PR, issue, and repository context without a spec;
+A standalone summary can use the PR, issue, and repository context without a spec;
 state missing intent rather than inventing requirements or starting planning.
 
 Use validation and independent code-review results as evidence, with their
@@ -74,7 +75,13 @@ that the implementation behaves correctly. Reuse [audit](../audit/SKILL.md)
 findings for unnecessary complexity; this walkthrough does not replace independent
 correctness review. Keep discovered bugs visible with supporting evidence.
 
-## Write the final handoff
+## Write an approval brief or final handoff
+
+When called before a task integrates, summarize that proposed change for human
+approval. Identify its task ID, concrete diff or commit, compared trunk revision,
+validation, independent review results, and limitations. Hand the approval decision
+back to `orchestrate`; a summary is not approval to integrate. Describe proposed
+behavior as proposed until integration is verified.
 
 When called by `implement` or `orchestrate` at the end of work, use this written
 handoff as the final response. Explain the completed work across the session so
@@ -101,8 +108,10 @@ clearer. Code snippets and source links are optional supporting evidence, not
 required reading for understanding the explanation.
 
 Deliver the overview immediately. Do not substitute a status-only summary, a
-list of links, or an offer to run `review` next. Ask a focused follow-up only when
-a material decision needs the human's answer; do not invent an approval question.
+list of links, or an offer to run `summarize` next. Ask a focused follow-up only when
+a material decision needs the human's answer. Preserve the explicit per-change
+integration approval gate when called by `orchestrate`; for a standalone summary,
+do not invent an approval request.
 
 ## Guide an interactive review
 
@@ -119,11 +128,12 @@ or illustrative examples so they are not mistaken for the full implementation.
 Distinguish a demonstrated problem from an agreed convention or a preference that
 needs the human's judgment. Ask one focused question when an answer is needed,
 wait for it, and reuse the answer in later discussion. Do not manufacture a concern
-or approval question when there is no material decision. Honor requests for a
-single written overview instead of a guided conversation.
+when there is no material decision. This does not waive the required approval
+before a proposed change integrates into trunk. Honor requests for a single
+written overview instead of a guided conversation.
 
 Report validation gaps plainly. Keep the walkthrough in the conversation or the
 requested review destination; [create-pr](../create-pr/SKILL.md) owns the concise
 PR description. Do not publish comments, edit code, or merge solely because a
-review was requested. When fixes are authorized, use the established workflow
+summary was requested. When fixes are authorized, use the established workflow
 and update affected decisions and evidence.

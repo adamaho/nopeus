@@ -1,102 +1,110 @@
 ---
 name: implement
 description: >-
-  Coordinate a software feature from idea to a validated PR ready for human
-  review. Use for the full workflow: refinement, spec, graph, tickets, execution,
-  and review. Use orchestrate for a ready spec and graph, or individual skills for
-  focused planning and ticket requests.
+  Coordinate a software change from idea through agreed intent, a task graph,
+  parallel implementation, and human-approved trunk integration. Use for the
+  full workflow. Use orchestrate for a ready graph, or individual skills for
+  focused planning, summaries, ticket, and PR requests.
 ---
 
 # Implement
 
-Take an idea through to a reviewed, validated feature PR in one conversation.
-Connect the focused skills below so the user does not have to invoke each one.
+Lead one conversation from an idea to a validated outcome on trunk. Connect the
+focused skills without requiring the user to invoke each stage separately.
 Apply [adhd](../adhd/SKILL.md) throughout.
 
 ## Scope and permissions
 
-- An end-to-end request authorizes planning artifacts, parent and child tickets,
-  branches, commits, pushes, PRs, progress updates, and smaller PR merges into
-  the feature branch, within the agreed plan.
-- Reuse supplied destinations. Ask for missing repository or tracker details
-  before writing there. Respect permissions and explicit user limits.
-- Stop before the final feature merge. Deployment and release are outside scope.
-- Reading or discussing this skill does not start execution. Requests for an
-  individual skill stay within that skill unless the user asks to continue.
+An end-to-end request authorizes planning in context, isolated implementation,
+local commits, validation, independent agent review, and progress updates within
+agreed scope. Obtain explicit human approval of each concrete change before it
+integrates into trunk. Agreement on a plan does not authorize future integrations.
+Deployment and release are outside scope.
+
+Do not create planning files, feature branches, tickets, or PRs by default. Tickets
+and PRs are optional, requested integrations, not stages required to proceed.
+Respect repository protections, permissions, unrelated work, and explicit user
+limits. Reading or discussing this skill does not start implementation. A request
+for an individual skill stays within that scope unless the user asks to continue.
 
 ## Choose the starting stage
 
-Find existing specs, graphs, tickets, and PRs. Verify progress, then start at the
-earliest incomplete stage. Reuse settled decisions and existing artifacts. Let
-each skill investigate the details it needs.
+Inspect available conversation context and relevant repository state. Reuse
+settled intent, graph tasks, decisions, and existing work; verify progress before
+starting at the earliest incomplete stage. Use existing specs, tickets, or PRs
+when supplied, without requiring or recreating them.
+
+Keep the lead agent as the orchestrator across stages. Skill transitions do not
+require separate lead agents or restarting the conversation.
 
 ## Choose models
 
-Use the shared [model selection rules](../orchestrate/references/models.md) before
-starting. Ask for any missing orchestrator, worker, and reviewer choices together;
-reuse choices already supplied. Mixed models and providers are supported only
-where available tools can run them.
-
-The orchestrator leads the conversation and moves between stages. Pass model
-choices, decisions, artifact links, and permissions to `orchestrate` without asking
-for the same choices again.
+Use the shared [model selection rules](../orchestrate/references/models.md).
+Reuse choices already supplied; ask for missing orchestrator, worker, and reviewer
+choices together. Verify tool and model availability. Pass assignments and agreed
+permissions to `orchestrate` without asking for them again.
 
 ## Connect the skills
 
-Read each skill when needed and follow its rules. Move between authorized stages
-without asking the user to invoke the next skill. Wait for answers to unresolved
-questions and for permissions not already granted.
+Read each skill when needed. Continue through authorized stages without asking
+the user to invoke the next one. Wait for necessary decisions and per-change
+integration approval; continue independent work when another part is blocked.
 
 | Stage | Skill | Result |
 | --- | --- | --- |
-| Resolve the idea | [refine](../refine/SKILL.md) | Agreed behavior, scope, outcomes, and decisions needed for the spec. |
-| Specify the change | [spec](../spec/SKILL.md) with [review](../review/SKILL.md) guidance | A concise agreement on behavior, architecture, public contracts, and acceptance examples. |
-| Plan the work | [graph](../graph/SKILL.md) | Dependencies, PR groups, completion requirements, and a flowchart. |
-| Create tracking | [create-ticket](../create-ticket/SKILL.md) | A parent for the spec and graph, plus one child per PR group. |
-| Execute and verify | [orchestrate](../orchestrate/SKILL.md) | Implementation, independent reviews, validation, and a feature PR ready for human review. |
-| Present the design | [review](../review/SKILL.md), through `orchestrate`'s handoff | A short brief and guided human walkthrough of the implemented design and consequential decisions. |
+| Resolve intent | [refine](../refine/SKILL.md), when decisions are missing | Agreed outcome, scope, behavior, and constraints. |
+| Clarify contracts | [spec](../spec/SKILL.md), when useful | Concise architecture, public contracts, and acceptance examples in context. |
+| Plan tasks | [graph](../graph/SKILL.md) | In-context tasks, dependencies, parallelism constraints, completion requirements, and a flowchart. |
+| Coordinate implementation | [orchestrate](../orchestrate/SKILL.md) | Parallel workers, validation, independent review, and human-approved task integration into trunk. |
+| Explain changes | [summarize](../summarize/SKILL.md) | A clear brief for each human approval and a combined outcome summary. |
 
-Let `orchestrate` manage implementation. It uses [create-pr](../create-pr/SKILL.md)
-for smaller PRs and the feature PR.
+Use `spec` only to clarify intent that needs more structure; do not rewrite settled
+requirements into a mandatory document. Let `graph` use agreed intent directly
+when sufficient. Apply `summarize`'s shared design guidance during planning and
+implementation and [audit](../audit/SKILL.md) to simplify within agreed scope.
 
-Use the spec's local draft as working material. Publish the full spec and graph
-in the chosen parent ticket or linked document. Use spec-based ticket descriptions
-to preserve the necessary detail. Reuse existing tickets and keep the published
-artifacts current; individual nodes remain graph entries.
+Delegate execution management to `orchestrate`: it schedules all ready independent
+tasks within available capacity, supplies complete worker prompts, validates and
+independently reviews changes, and serializes approved integrations. Each task
+gets human review before reaching trunk; there is no final feature-branch merge.
 
-When a stage reveals unanswered questions, use `refine`, then update the affected
-spec, graph, and tickets. Continue only after the decisions needed for that work
-are settled. Independent work can continue while another part is blocked.
+Use [create-ticket](../create-ticket/SKILL.md) and
+[create-pr](../create-pr/SKILL.md) only when requested. Reuse supplied destinations
+and ask for missing destination details only when that integration is needed.
+An explicitly requested PR may require a source branch; its use does not remove
+the human approval gate.
 
-## Preserve progress
+## Handle changes and interruptions
 
-Keep decisions, model choices, artifact links, current stage, evidence, blockers,
-and next work alongside the graph, or with the spec before a graph exists.
-Use existing conversation decisions until there is a document to hold them.
+Keep shared intent, model choices, graph state, assignments, commits, evidence,
+approvals, blockers, and next ready work in the orchestrator's context. Do not
+persist planning files or introduce a storage system. Use the environment's agent
+communication and concise conversation updates.
 
-- **Blocked:** preserve drafts and progress, explain what is missing, and ask for
-  the tools, access, or destination details needed. Keep incomplete stages open.
-- **Resuming:** let the relevant skill verify actual state before continuing.
-- **Coordination:** keep one conversation with the user; workers and reviewers
-  may use separate sessions.
+When discoveries affect agreed behavior, architecture, contracts, or scope, use
+`refine` for the needed human decision and block affected work. Update intent and
+the graph together. Let `orchestrate` send revised instructions to affected workers,
+require reconciliation, and invalidate stale evidence or approval. Continue work
+whose assumptions remain valid.
+
+On interruption, explain the current state and resume point in the conversation.
+On resume, verify actual repository, worker, and review state against available
+context. Recover missing intent or approval evidence rather than guessing or
+assuming the previous context survived. Keep incomplete stages open.
 
 ## Hand off to the human
 
-Before writing the final response, apply [review](../review/SKILL.md)'s written
-handoff to the completed work across the session. This is a required workflow
-stage, not an offer to review later. Use `orchestrate`'s implementation evidence and
-validation results; confirm that its walkthrough reached the human rather than
-assuming an internal agent review satisfied this step.
+Ensure `orchestrate` delivers `summarize`'s written brief for each proposed task
+change before seeking integration approval. Independent correctness review and a
+summary do not themselves grant human approval.
 
-Make the final response understandable without opening code or earlier messages.
-If a walkthrough was already delivered, give a concise recap instead of repeating
-the full discussion. Include:
+Use `summarize` for the combined outcome at the end of work. Explain what changed,
+how the pieces fit, consequential decisions, acceptance coverage, exact validated
+and integrated revisions, independent review results, and remaining limitations.
+Distinguish integrated work from blocked, unfinished, or awaiting-review tasks.
+Do not imply integration means release.
 
-- The feature PR, parent and child tickets, and spec and graph links.
-- The validated revision and target base, acceptance coverage, and review results.
-- Remaining limitations or blockers, with links to detailed evidence.
-
-PR links and check results support the explanation; they do not replace it.
-
-Keep the handoff concise. Leave the feature PR open for human review and final
-merge; ready for review does not mean the feature is complete.
+Make the result understandable without opening code or earlier messages. Reuse
+already delivered walkthroughs with a concise recap. Link commits and any requested
+PRs or tickets as supporting evidence, not substitutes for explanation. Completion
+requires combined outcome evidence, not just completed worker assignments.
