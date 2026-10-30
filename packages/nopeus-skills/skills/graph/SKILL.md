@@ -1,142 +1,168 @@
 ---
 name: graph
 description: >-
-  Plan and maintain a dependency graph for a software change, with implementation
-  nodes, PR groups, and completion evidence. Use with a spec when asked to plan
-  dependencies, organize reviewable work, or update a plan after new discoveries.
-  This skill plans work; it does not execute it.
+  Plan and maintain a software change as a graph of tasks with dependencies,
+  shared intent, and completion evidence. Use when asked to turn agreed intent
+  or an existing spec into work for agents, identify parallel tasks, or update
+  a plan after discoveries. This skill plans work; it does not execute it.
 ---
 
 # Graph
 
-Turn a spec into a plan that people and agents can follow. Keep the graph alongside
-the spec in its ticket or document. Record requirements for implementation and
-review without performing those activities.
+Create a task graph that fresh agents can implement and reviewers can
+verify. Plan small changes that integrate directly into trunk after human review.
+Tickets, PRs, and a separate spec document are optional.
+Apply [adhd](../adhd/SKILL.md) throughout.
 
 ## Ground the plan
 
-- Read the spec and relevant code. Check existing behavior, architecture,
-  contracts, acceptance examples, and repository checks.
-- Reuse settled decisions. Use [refine](../refine/SKILL.md) to resolve unanswered
-  questions that affect the plan. Do not replace missing decisions with guesses.
-- Mark affected nodes and their dependents as blocked until questions are resolved.
-  Independent parts of the plan can still progress.
+Read agreed intent, any existing spec, relevant code, and repository instructions.
+Identify the actual trunk branch, existing behavior, shared contracts, acceptance
+examples, and required checks. Reuse settled decisions and existing tasks.
+Use [refine](../refine/SKILL.md) for unanswered questions affecting behavior,
+architecture, contracts, or scope. Block affected tasks and dependents until those
+decisions are resolved; independent work can remain ready.
 
-## Build the graph
+## Build the graph in context
 
-Represent the completed feature as the root outcome. Break it into small
-implementation nodes, including integration work. Shared prerequisites can support
-multiple nodes; do not force the graph into a tree.
+Keep the authoritative graph in the orchestrator's working context and present
+it in the conversation. Do not create planning files, repository artifacts, or a
+separate storage system. No spec document is required; use agreed intent and any
+existing context supplied by the user.
 
-For each node, record:
+Maintain shared intent once: overall outcome, scope, trunk branch, constraints,
+contracts, and labeled feature acceptance examples. Break the outcome into small,
+independently reviewable tasks. Include the relevant shared intent in each worker
+handoff rather than assuming workers inherit the conversation.
 
-- **ID and outcome:** a stable identifier and what the node contributes.
-- **Scope:** affected components, relevant contracts, and exclusions.
-- **Prerequisites:** node IDs and why each is needed.
-- **Completion evidence:** observable behavior or checks that establish completion.
-- **Coverage:** the spec acceptance examples this node contributes to.
-- **Tracking:** status, PR group, and existing ticket or PR links.
+For each task, record:
 
-Use prerequisite IDs as the authoritative dependency relationships. Existing
-capabilities do not need new implementation nodes.
+- **ID and outcome:** stable identifier and observable contribution.
+- **Scope:** affected components, exclusions, and relevant code references.
+- **Context:** task-specific requirements and relevant shared intent and contracts
+  sufficient for an agent starting without conversation history.
+- **Prerequisites:** task IDs and why each must integrate before this task starts.
+- **Coordination:** shared files, schemas, resources, or contracts that constrain
+  parallel work, including any required serialization.
+- **Acceptance and evidence:** observable outcomes, relevant checks, and the
+  feature acceptance examples this task covers.
+- **Execution record:** status, worker and checkout when assigned, planning and
+  trunk revisions used, blockers, validation and review evidence, human approval,
+  and the integrated commit when available.
 
-## Visualize the graph
+Keep records proportional to the task; leave unobserved evidence explicitly
+pending. The orchestrator owns task status and derives summaries from the graph.
 
-Include a flowchart with every generated or updated graph. Use Mermaid where the
-destination supports it; otherwise use a supported diagram format or an attached
-image alongside the graph.
+Prepare enough context for `execute` to craft each worker prompt: task ID and
+scope, relevant requirements and contracts, integrated prerequisites, acceptance
+criteria, required checks, checkout and trunk revision, and reporting expectations.
+Include necessary information directly; use code references as supporting evidence,
+not as a substitute for instructions. This skill plans handoffs without dispatching
+workers.
 
-- Show the completed feature, implementation nodes, and dependency arrows.
-- Label nodes with their stable IDs and short outcome names.
-- Visually group nodes by PR group and label each group.
-- Draw arrows from prerequisites to dependent nodes and explain that direction.
-- Keep the chart consistent with the recorded dependencies and PR groups whenever
-  the plan changes. For large graphs, use an overview and linked detail charts.
+## Define small trunk changes
 
-Check that every acceptance example has coverage, including final integration.
-Remove dependency cycles by revising boundaries or resolving contracts. Preserve
-stable IDs when updating the graph; record replacements for removed or split nodes.
+Make each implementation task suitable for one final commit on trunk. Include its
+relevant tests and documentation. Workers may use any number of checkpoint
+commits; execution consolidates them into the proposed task commit before human
+review. Split work that cannot be coherently reviewed and integrated this way.
 
-## Group work for review
+Each integrated change must leave trunk working while the larger feature may be
+unfinished. Record compatibility, exposure, migration, and recovery requirements
+where relevant. Use feature flags or staged compatible changes when needed.
+Do not rely on a feature branch to hide incomplete behavior.
 
-Group related nodes into PRs with a clear scope and reviewable diff. Nodes can be
-internal implementation steps; each group need not deliver a complete user journey.
+Include feature-level integration and acceptance verification. A verification-only
+task need not manufacture a code commit; record its evidence against the revisions
+it checked. Later corrections to landed code become new tasks and commits, without
+rewriting trunk history.
 
-Record this branch structure in the plan:
+## Express dependencies and parallelism
 
-- A feature branch has a feature PR targeting the main development branch.
-- Smaller PRs target the feature branch.
-- Cross-group prerequisites must merge into the feature branch before dependent
-  groups start. Within a group, nodes follow dependency order.
-- Independent groups may proceed in parallel. Account for shared files, schema
-  changes, and integration work before identifying parallel groups.
+Use prerequisite IDs in the graph as the authoritative dependency edges. Remove
+cycles by revising task boundaries or resolving contracts. Preserve stable IDs
+when splitting or replacing tasks and record the replacement mapping.
 
-Ensure grouping does not introduce cycles between PR groups. Each group records
-its node IDs, scope, prerequisites, and required review and validation evidence.
+A task is ready only when its prerequisites are verified integrated into trunk,
+its required decisions are settled, and its resources are available. Written code,
+passing checks, or human approval alone do not satisfy an integration dependency.
 
-## Define completion requirements
+Plan for all ready, independent tasks to run concurrently. Do not impose an
+arbitrary worker limit or serialize unrelated tasks. Execution may launch as many
+workers and independent reviewers as useful within available tool, environment,
+and user limits. Account for shared resources and semantic conflicts, not just
+file overlap; record the reason when work must be sequential.
 
-For each smaller PR group, require:
+Require isolated checkouts for parallel workers, such as detached worktrees;
+named task branches are not required. The orchestrator owns shared planning
+updates and serializes trunk integration. Workers report discoveries instead of
+independently changing shared contracts or overwriting graph status.
 
-- Agent review and the repository's required checks.
-- Evidence that its own behavior and contracts work.
-- Preservation of existing functionality, including relevant permissions,
-  failure cases, and data integrity.
+## Define review and completion gates
 
-The larger feature may remain incomplete after a group merges. Record exposure,
-compatibility, migration, and recovery requirements where relevant; a feature
-branch alone does not establish that a change is safe to deploy.
+Record the planned lifecycle:
 
-For the completed feature, require:
+`blocked` → `ready` → `implementing` → `validating` → `awaiting-human-review`
+→ `approved` → `integrated`
 
-- Integration and full validation against the spec's acceptance criteria.
-- Agent review of the combined feature diff against the main development branch.
-- Human review before the feature PR merges into that branch.
+Allow returns to earlier states for repairs or stale evidence. Record the reason
+and resume point for blocked work. Verification-only tasks finish as `verified`
+after their required checks and review, without pretending code was integrated.
 
-Distinguish planned evidence from observed results. Completed nodes alone do not
-prove the root outcome: final validation and review must also have evidence.
+Before each implementation task integrates, require:
 
-## Map the graph to tickets
+- Behavioral evidence and repository checks covering the proposed change.
+- Independent agent correctness review, including relevant regressions.
+- A human-facing explanation and concrete diff or commit for approval.
+- Explicit human approval of that change before it reaches trunk.
 
-- **Parent:** holds the feature spec and graph, with a link to the feature PR
-  when available. If the spec lives in a separate document, link to it instead
-  of duplicating it.
-- **Child ticket per PR group:** describes the group's scope, node IDs,
-  prerequisites, acceptance criteria, and required review and validation evidence.
-  Link it to the parent and its PR when available.
-- **Nodes:** remain entries in the graph, not separate tickets.
+Tie approval and evidence to the proposed revision and compared trunk revision.
+Before integration, execution reconciles with current trunk and refreshes affected
+validation and independent review. Material changes to the reviewed change or its
+relevant context require renewed human review. Never treat planning approval as
+permission to integrate code, or bypass repository protections.
 
-Use [create-ticket](../create-ticket/SKILL.md) to draft the tickets, preserving
-necessary spec detail. Reuse existing tickets where they cover the planned work.
-Publish or update tracker tickets only when requested; otherwise return drafts.
+Mark a task integrated only after verifying the trunk update succeeded. Unblock
+its dependents from that evidence. Completed implementation tasks alone do not
+prove the feature outcome: require combined acceptance and integration evidence,
+independent review, and a human-facing outcome review as the feature comes together.
+There is no final feature-branch merge.
 
-## Maintain the graph
+## Maintain the plan during implementation
 
-Add, split, regroup, or reorder nodes as dependencies are discovered, while
-preserving agreed scope, behavior, architecture, and contracts. Record what changed
-and why so the plan remains understandable.
+Have workers report discoveries with affected task IDs and supporting evidence.
+The orchestrator resolves routine implementation adjustments within agreed scope;
+use `refine` and obtain needed human decisions for changes to agreed behavior,
+architecture, contracts, or scope before affected work continues.
 
-When PR groups change, update their ticket mapping and flag affected ticket
-descriptions for revision. Keep the graph authoritative for node dependencies.
+Update authoritative shared context, affected tasks, dependencies, and acceptance
+coverage together. Record what changed and why. Notify active workers of the
+changed planning revision and whether to continue, reconcile, or pause. Send
+revised task instructions explicitly; updating the orchestrator's context alone
+does not update a worker. Require workers to acknowledge and reconcile relevant
+updates before integration.
 
-If a discovery raises an unanswered question about those decisions, use `refine`
-before affected work continues. Reflect the blocker in the graph and reconsider
-downstream dependencies, PR groups, and acceptance coverage after resolution.
+Invalidate affected validation or approval when its basis changes. Reopen
+unintegrated tasks as needed; create follow-up tasks for changes to landed work.
+On resume, reconcile available conversation context with actual checkout, trunk,
+and review evidence. If intent, dependencies, or approval evidence is missing,
+recover it or ask for what is needed before affected work continues; do not assume
+context survived or invent prior approval. Keep unaffected work progressing.
 
-Update status from reported or verified evidence, with links where available.
-Distinguish implementation, validation, review, and merge status; do not treat
-code written as code merged or a planned check as a passed check.
+## Visualize and deliver
 
-## Delivery
+Present a flowchart in the conversation, showing stable task IDs, short outcomes,
+prerequisite-to-dependent arrows, and the overall feature outcome. Explain arrow
+direction. Use Mermaid where supported; split large graphs into an overview and
+detail charts. Derive the chart from task dependencies rather than making
+it a second authority. Check acceptance coverage, including combined behavior.
 
-Apply [adhd](../adhd/SKILL.md) to polish wording, grammar, and formatting while
-preserving the graph's dependencies and necessary detail.
+Create tickets only when requested, using [create-ticket](../create-ticket/SKILL.md)
+to publish the requested graph context. PRs are also created only on request through
+[create-pr](../create-pr/SKILL.md); an explicitly requested PR may require a source
+branch. Neither integration is a prerequisite for planning or execution.
 
-Save or update the graph alongside the spec in the requested ticket or document.
-If the destination or access is missing, ask for what is needed and retain the
-draft in the conversation. Avoid maintaining a competing authoritative copy.
-
-Return the graph link or draft, a brief readiness status, and unresolved blockers.
-This skill does not implement nodes, run validation, conduct reviews, create
-branches or PRs, or merge changes. The plan describes those requirements for a
-separate execution workflow.
+Return the graph, ready work, parallelism constraints, and unresolved blockers
+in the conversation. This skill prepares tasks and execution requirements;
+it does not launch workers, implement tasks, perform reviews, create tickets or
+PRs, or integrate changes into trunk.
