@@ -2,7 +2,6 @@ packages:
   - programs/*
   - packages/*
   - tools/*
-  - infra/*
 
 allowBuilds:
   esbuild: true

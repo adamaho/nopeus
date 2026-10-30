@@ -9,7 +9,6 @@ Install these before working in the repo:
 
 - [Node.js](https://nodejs.org/en/download) 24.22.1 or later in the 24.x line, matching `engines.node` in `package.json`
 - [pnpm](https://pnpm.io/installation) at the version pinned in `packageManager`
-- [Docker with Compose](https://docs.docker.com/get-docker/) when using local services
 
 ## Development Setup
 
@@ -22,12 +21,6 @@ Install dependencies:
 
 ```bash
 pnpm install --frozen-lockfile
-```
-
-Start local infrastructure when a package needs shared runtime services:
-
-```bash
-pnpm --filter=@monorepo/infra-local run infra:up
 ```
 
 ## Verification
@@ -57,7 +50,6 @@ Use the existing top-level workspace directories consistently:
 - `programs/*` for deployable applications, APIs, workers, and other executables
 - `packages/*` for shared features, reusable libraries, and external service clients
 - `tools/*` for internal tooling packages
-- `infra/*` for local and shared infrastructure helpers
 
 Programs are deployable entry points and should stay thin.
 Keep code used by only one deployable local to it, such as under
