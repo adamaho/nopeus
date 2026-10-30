@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Runs on every orb activation and wake. Keep it fast and idempotent.
+set -euo pipefail
+
+# oxlint (JS plugins) reserves a large fixed-size allocator pool up front. The
+# orb's default heuristic overcommit rejects that reservation on small machines
+# and oxlint panics in oxc_allocator. Kernel settings may not survive a
+# snapshot or wake, so reapply it here.
+if [[ "$(cat /proc/sys/vm/overcommit_memory)" != 1 ]]; then
+	sudo -n sysctl -q -w vm.overcommit_memory=1
+fi

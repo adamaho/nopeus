@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Prepares a fresh Amp orb: installs the pinned Node.js line and workspace dependencies.
+# Must stay non-interactive and idempotent; it reruns on stale project snapshots.
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+step() {
+	printf '\n==> %s\n' "$1"
+}
+
+timed() {
+	local start=$SECONDS
+	"$@"
+	printf '    (%ss)\n' "$((SECONDS - start))"
+}
+
+# The orb image ships a newer Node.js than engines.node (^24.22.1) allows, and
+# engineStrict makes pnpm refuse to install with it. Keep this in the 24.x line.
+node_version="v24.22.2"
+node_dir="$HOME/.local/share/node/$node_version"
+
+install_node() {
+	if [[ -x "$node_dir/bin/node" ]]; then
+		echo "Node.js $node_version already installed"
+		return
+	fi
+	local tmp
+	tmp="$(mktemp -d)"
+	curl -fsSL "https://nodejs.org/dist/$node_version/node-$node_version-linux-x64.tar.xz" |
+		tar -xJ -C "$tmp" --strip-components=1
+	mkdir -p "$(dirname "$node_dir")"
+	mv "$tmp" "$node_dir"
+}
+
+step "Installing Node.js $node_version"
+timed install_node
+
+# Put the pinned Node.js first on PATH for Amp and supervised services, which
+# start in login shells. The marker keeps reruns from appending duplicates; the
+# block is rewritten so a version bump replaces the old path.
+step "Persisting Node.js on PATH in ~/.bash_profile"
+profile="$HOME/.bash_profile"
+begin_marker="# >>> nopeus Node.js >>>"
+end_marker="# <<< nopeus Node.js <<<"
+touch "$profile"
+sed -i "/^$begin_marker\$/,/^$end_marker\$/d" "$profile"
+cat >>"$profile" <<EOF
+$begin_marker
+case ":\$PATH:" in
+	*":$node_dir/bin:"*) ;;
+	*) export PATH="$node_dir/bin:\$PATH" ;;
+esac
+$end_marker
+EOF
+export PATH="$node_dir/bin:$PATH"
+echo "node $(node --version), pnpm $(pnpm --version)"
+
+step "Installing workspace dependencies"
+timed pnpm install --frozen-lockfile
+
+echo
+echo "Setup complete."
