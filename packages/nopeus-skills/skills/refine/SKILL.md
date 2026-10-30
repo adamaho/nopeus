@@ -34,10 +34,22 @@ number. Do not claim a fixed total; new questions may emerge from the answers.
 Ask **one question at a time**, then wait for the answer. Each question must:
 
 - Address one decision whose prerequisites are understood.
-- Offer 2–3 short choices, with the recommendation last. Label it and explain why.
-- End with a yes/no question proposing the recommendation.
-- Accept yes, no, another option, or a custom answer. A no rejects the
-  recommendation; it does not select an alternative.
+- Offer the meaningful, viable alternatives for that decision. Let the decision
+  determine the number of choices; do not default to two or impose a fixed cap.
+  Use two when the decision is genuinely binary. Three to five is often useful
+  for broader decisions, but do not invent options to meet a quota.
+- Make choices distinct and explain each one's practical tradeoff briefly. Include
+  materially different approaches supported by the context, not just the
+  recommendation and an obviously weaker alternative. Include keeping the current
+  behavior or deferring only when they are viable choices.
+- Put the recommendation last, label it, and explain why it fits. Keep other
+  choices fairly represented. If many alternatives exist, group related ones
+  without hiding distinctions that could change the user's decision.
+- End with a yes/no question proposing the recommendation, even when several
+  alternatives were presented, so the user can simply say yes or no.
+- Accept yes, no, another option, or a custom answer. A yes accepts the stated
+  recommendation. A no rejects it without selecting an alternative; use the next
+  focused question to understand the objection or propose another grounded choice.
 
 Ask directly in chat; do not use native question or choice tools.
 If meaningful choices or a grounded recommendation aren't possible, ask a
@@ -47,10 +59,19 @@ For example, if supported by the code:
 
 > **Question 1: Workspace invitations**
 >
-> 1. **All members** — Easier invitations, but broader permissions.
-> 2. **Workspace admins (Recommended)** — Matches the existing permissions.
+> 1. **All members** — Fast invitations, but every member can grant access.
+> 2. **Owners only** — Tight control, but owners handle every invitation.
+> 3. **Members request approval** — Members initiate invitations; admins approve,
+>    adding a review step and implementation work.
+> 4. **Admins and owners (Recommended)** — Delegates invitations to trusted roles
+>    and matches the existing permissions.
 >
-> Should we limit invitations to workspace admins?
+> Should we allow admins and owners to send invitations?
+
+Before sending, check whether an omitted alternative could materially change the
+answer. Add it when relevant. Do not present a shortlist as exhaustive or hide
+viable alternatives merely to keep the question short. Preserve one decision per
+question rather than combining unrelated choices into packages.
 
 Investigate missing evidence before recommending. If only the user can clarify,
 label the recommendation as tentative. Never present a guess as fact or treat
