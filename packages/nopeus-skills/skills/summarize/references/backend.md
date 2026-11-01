@@ -77,3 +77,8 @@ changes to data models and database table structure with concise model or table
 definitions, including relevant relationships, keys, and constraints. Select the
 contracts that matter to the change; keep the brief understandable without
 requiring the reader to open the source.
+
+Evidence: tests that exercise the handler or service with real schemas, and
+integration tests against the database for repository or migration changes. A
+compiling contract is not proof of runtime status codes or transaction behavior.
+Noise: regenerated clients or OpenAPI output; report them as a count.

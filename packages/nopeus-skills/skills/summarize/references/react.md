@@ -60,3 +60,14 @@ Composition can also keep a layout independent of feature state:
 
 This is an illustrative composition, not a mandatory component hierarchy. Show
 the actual interfaces and relevant folders when reviewing an implementation.
+
+## Show changed React contracts
+
+Show the actual changed props and callback types, route param handling, data
+layer hooks or query keys, and context provider/consumer pairs that matter to
+the change. Include one consumer usage of the main changed component.
+
+Evidence: unit or component tests with explicit props, and Storybook or browser
+checks for visual and interaction behavior. A passing type check is not proof of
+rendering, loading, or error behavior. Noise: snapshot churn and formatting-only
+JSX changes; call them out rather than walking through them.
