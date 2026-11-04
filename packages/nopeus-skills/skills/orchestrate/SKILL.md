@@ -35,9 +35,10 @@ task IDs, prerequisites, shared contracts, acceptance examples, required checks,
 and any existing implementation or approval evidence. A separate spec document
 is not required.
 
-Use [summarize](../summarize/SKILL.md)'s shared design guidance and relevant references
-for implementation and human walkthroughs. If the graph lacks a consequential
-decision, return the gap to `implement` when called by that workflow; when called
+Load [summarize](../summarize/SKILL.md), using the agent's skill tool or by reading
+the linked `SKILL.md` when no such tool exists. Use its shared design guidance and
+relevant references for implementation and human walkthroughs. If the graph lacks
+a consequential decision, return the gap to `implement` when called by that workflow; when called
 directly, explain the gap and use the relevant planning skill within authorized
 scope. Block only affected work rather than inventing requirements.
 
@@ -84,9 +85,9 @@ Construct a complete prompt for each worker, including:
 - [audit](../audit/SKILL.md) guidance for simplicity and useful test coverage.
 - Instructions to report changes, commits, validation evidence, blockers, and
   discoveries; do not integrate into trunk or change shared scope independently.
-- A requirement to use [summarize](../summarize/SKILL.md) for the proposed change's
-  handoff to the orchestrator. Workers do not ask the human for approval directly;
-  the orchestrator delivers the verified brief and owns the approval gate.
+- A requirement to load [summarize](../summarize/SKILL.md) and follow it for the
+  proposed change's handoff to the orchestrator. Workers do not ask the human for
+  approval directly; the orchestrator delivers the verified brief and owns the approval gate.
 
 Workers may make as many checkpoint commits as useful. Each implementation task
 ultimately becomes one coherent proposed trunk commit, including relevant tests
@@ -112,9 +113,10 @@ failed checks or incomplete review ready for human approval.
 
 ## Obtain human approval and integrate
 
-For every proposed trunk integration, read and apply
+For every proposed trunk integration, apply
 [summarize](../summarize/SKILL.md)'s approval brief before asking for approval.
-Verify and refresh the worker's handoff against the final proposed commit,
+Load `summarize` again if it is no longer in context; do not write the brief from
+memory. Verify and refresh the worker's handoff against the final proposed commit,
 validation, and independent review. Deliver the brief to the human; an internal
 worker summary, passing checks, or a commit link alone does not satisfy this step.
 
@@ -184,7 +186,8 @@ review to this feature's commits and affected current code, accounting for other
 trunk changes. Record the exact revisions covered. New defects become follow-up
 tasks that pass through the same validation and human approval gates.
 
-Apply `summarize`'s written handoff to the whole outcome. Explain what works, how
+Load `summarize` again if it is no longer in context, then apply its written handoff
+to the whole outcome. Explain what works, how
 components fit together, consequential decisions, acceptance coverage, independent
 review results, integrated commits, and remaining limits. Distinguish integrated,
 verified, blocked, and awaiting-human-review work; do not imply integration means

@@ -46,9 +46,11 @@ permissions to `orchestrate` without asking for them again.
 
 ## Connect the skills
 
-Read each skill when needed. Continue through authorized stages without asking
-the user to invoke the next one. Wait for necessary decisions and per-change
-integration approval; continue independent work when another part is blocked.
+Load each skill when its stage starts, using the agent's skill tool or by reading
+the linked `SKILL.md` when no such tool exists. Do not work from memory of a skill.
+Continue through authorized stages without asking the user to invoke the next one.
+Wait for necessary decisions and per-change integration approval; continue
+independent work when another part is blocked.
 
 | Stage | Skill | Result |
 | --- | --- | --- |
@@ -60,8 +62,9 @@ integration approval; continue independent work when another part is blocked.
 
 Use `spec` only to clarify intent that needs more structure; do not rewrite settled
 requirements into a mandatory document. Let `graph` use agreed intent directly
-when sufficient. Apply `summarize`'s shared design guidance during planning and
-implementation and [audit](../audit/SKILL.md) to simplify within agreed scope.
+when sufficient. Load `summarize` and apply its shared design guidance during
+planning and implementation, and load [audit](../audit/SKILL.md) to simplify within
+agreed scope.
 
 Delegate execution management to `orchestrate`: it schedules all ready independent
 tasks within available capacity, supplies complete worker prompts, validates and
@@ -98,7 +101,8 @@ Ensure `orchestrate` delivers `summarize`'s written brief for each proposed task
 change before seeking integration approval. Independent correctness review and a
 summary do not themselves grant human approval.
 
-Use `summarize` for the combined outcome at the end of work. Explain what changed,
+Load `summarize` before writing the combined outcome at the end of work, and follow
+it rather than writing the handoff from memory. Explain what changed,
 how the pieces fit, consequential decisions, acceptance coverage, exact validated
 and integrated revisions, independent review results, and remaining limitations.
 Distinguish integrated work from blocked, unfinished, or awaiting-review tasks.
