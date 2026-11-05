@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -128,6 +128,57 @@ test("published base presets install and lint without Effect packages", () => {
     );
     expect(effectCodes).toContain("eslint(no-restricted-imports)");
     expect(effectCodes).toContain("nopeus(no-module-level-mutable-state)");
+
+    // The opt-in domain rule composes with the base and Effect policies.
+    writeFileSync(
+      join(directory, "oxlint.config.ts"),
+      `
+      import base from "@adamaho/nopeus-oxlint-config";
+      import effect from "@adamaho/nopeus-oxlint-plugin/effect";
+      export default {
+        extends: [base, effect({ packageName: "fixture" })],
+        rules: {
+          "nopeus/no-cross-domain-internals": [
+            "error",
+            { root: import.meta.dirname, domains: [{ root: "receipts", public: ["repository.ts"] }] },
+          ],
+        },
+      };
+    `,
+    );
+    mkdirSync(join(directory, "receipts"));
+    writeFileSync(join(directory, "receipts/repository.ts"), "export {};\n");
+    writeFileSync(join(directory, "receipts/sql.ts"), "export {};\n");
+    writeFileSync(
+      join(directory, "uploads.ts"),
+      'import "./receipts/repository.ts";\nimport "./receipts/sql.ts";\n',
+    );
+    const domains = spawnSync(
+      "pnpm",
+      [
+        "exec",
+        "oxlint",
+        "--config",
+        "oxlint.config.ts",
+        "--format",
+        "json",
+        "valid.ts",
+        "uploads.ts",
+      ],
+      { cwd: directory, encoding: "utf8", timeout: 60_000 },
+    );
+    expect(domains.error).toBeUndefined();
+    expect(domains.status, domains.stdout + domains.stderr).toBe(1);
+    const diagnostics: readonly { code: string; filename: string }[] = JSON.parse(
+      domains.stdout,
+    ).diagnostics;
+    const domainCodes = (file: string) =>
+      diagnostics
+        .filter((diagnostic) => diagnostic.filename === file)
+        .map((diagnostic) => diagnostic.code);
+    expect(domainCodes("valid.ts")).toContain("eslint(no-restricted-imports)");
+    expect(domainCodes("valid.ts")).toContain("nopeus(no-module-level-mutable-state)");
+    expect(domainCodes("uploads.ts")).toEqual(["nopeus(no-cross-domain-internals)"]);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

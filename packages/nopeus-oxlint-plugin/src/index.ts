@@ -16,6 +16,7 @@ import { requireFetchAbortSignalRule } from "./effect/rules/require-fetch-abort-
 import { requireServiceConstructorNamesRule } from "./effect/rules/require-service-constructor-names.ts";
 import { requireServiceKeyPrefixRule } from "./effect/rules/require-service-key-prefix.ts";
 import { noConditionalEmptyObjectSpreadRule } from "./rules/no-conditional-empty-object-spread.ts";
+import { noCrossDomainInternalsRule } from "./rules/no-cross-domain-internals.ts";
 import { noCrossPackageInternalsRule } from "./rules/no-cross-package-internals.ts";
 import { noExportAssignmentRule } from "./rules/no-export-assignment.ts";
 import { noKnownValueWideningRule } from "./rules/no-known-value-widening.ts";
@@ -38,6 +39,7 @@ const nopeusPlugin = eslintCompatPlugin({
   rules: {
     "no-export-assignment": noExportAssignmentRule,
     "no-cross-package-internals": noCrossPackageInternalsRule,
+    "no-cross-domain-internals": noCrossDomainInternalsRule,
     "no-test-imports": noTestImportsRule,
     "require-test-location": requireTestLocationRule,
     "no-effect-runners-in-library": noEffectRunnersInLibraryRule,
