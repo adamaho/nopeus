@@ -70,8 +70,7 @@ export default defineConfig({
 The root package name defines the owned Effect service namespace. Both goho and
 @adamaho/goho require trace names and service keys beginning with @goho/.
 
-The package publishes compiled ESM and requires Node.js 22.18 or newer, or
-Node.js 24 or newer.
+The package publishes compiled ESM and requires Node.js `^26.12.1`.
 
 ## Rules
 

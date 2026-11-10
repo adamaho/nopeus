@@ -7,7 +7,7 @@ and easy to review.
 
 Install these before working in the repo:
 
-- [Node.js](https://nodejs.org/en/download) 24.22.1 or later in the 24.x line, matching `engines.node` in `package.json`
+- [Node.js](https://nodejs.org/en/download) 26.12.1 or later in the 26.x line, matching `engines.node` in `package.json`
 - [pnpm](https://pnpm.io/installation) at the version pinned in `packageManager`
 
 ## Development Setup
