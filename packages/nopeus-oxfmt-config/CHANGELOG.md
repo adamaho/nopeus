@@ -1,5 +1,11 @@
 # @adamaho/nopeus-oxfmt-config
 
+## 0.3.0
+
+### Minor Changes
+
+- c886799: Support Node.js 26.12.1 or later in the 26.x line alongside Node.js 24.22.1 or later in the 24.x line, and update the Oxlint plugin runtime dependency to 1.92.0.
+
 ## 0.2.0
 
 ### Minor Changes
