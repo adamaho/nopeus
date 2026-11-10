@@ -35,7 +35,7 @@ Use one Oxfmt config per directory; replace an existing `.oxfmtrc.json` or
 `.oxfmtrc.jsonc` when adopting the TypeScript config. Install `oxfmt` locally
 so editor integrations use the same formatter as the CLI.
 
-Requires Node.js `^26.12.1` and Oxfmt `>=0.71.0 <1`.
+Requires Node.js `^24.22.1 || ^26.12.1` and Oxfmt `>=0.71.0 <1`.
 
 ## Base settings
 
