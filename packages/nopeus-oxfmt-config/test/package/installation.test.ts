@@ -16,7 +16,7 @@ function run(cwd: string, command: string, args: readonly string[]) {
   return result.stdout;
 }
 
-test.each(["0.71.0", "0.72.0", "0.73.0", "0.74.0"])(
+test.each(["0.71.0", "0.72.0", "0.73.0", "0.74.0", "0.75.0", "0.76.0", "0.77.0"])(
   "published config supports exports, overrides, and ignores with Oxfmt %s",
   (oxfmtVersion) => {
     const directory = mkdtempSync(join(tmpdir(), "nopeus-oxfmt-package-"));

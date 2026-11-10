@@ -67,8 +67,7 @@ run:
 pnpm exec oxlint --config oxlint.config.ts src
 ```
 
-The package publishes compiled ESM and requires Node.js 22.18 or newer, or
-Node.js 24 or newer.
+The package publishes compiled ESM and requires Node.js `^24.22.1 || ^26.12.1`.
 
 ## Custom Nopeus rules
 
