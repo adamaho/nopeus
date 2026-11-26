@@ -2,27 +2,29 @@
 name: implement
 description: >-
   Coordinate a software change from idea through agreed intent, a task graph,
-  parallel implementation, and human-approved trunk integration. Use for the
-  full workflow. Use orchestrate for a ready graph, or individual skills for
+  parallel implementation on a feature branch with human approval of each task,
+  and a final PR to trunk. Use for the full workflow. Use orchestrate for a ready graph, or individual skills for
   focused planning, summaries, ticket, and PR requests.
 ---
 
 # Implement
 
-Lead one conversation from an idea to a validated outcome on trunk. Connect the
+Lead one conversation from an idea to a validated feature branch with a PR open
+against trunk. Connect the
 focused skills without requiring the user to invoke each stage separately.
 Apply [adhd](../adhd/SKILL.md) throughout.
 
 ## Scope and permissions
 
-An end-to-end request authorizes planning in context, isolated implementation,
-local commits, validation, independent agent review, and progress updates within
-agreed scope. Obtain explicit human approval of each concrete change before it
-integrates into trunk. Agreement on a plan does not authorize future integrations.
-Deployment and release are outside scope.
+An end-to-end request authorizes planning in context, a feature branch, isolated
+implementation, local commits, validation, independent agent review, progress
+updates within agreed scope, and opening the final PR. Obtain explicit human
+approval of each concrete change before it integrates into the feature branch.
+Agreement on a plan does not authorize future integrations. Merging the PR,
+deployment, and release are outside scope.
 
-Do not create planning files, feature branches, tickets, or PRs by default. Tickets
-and PRs are optional, requested integrations, not stages required to proceed.
+Do not create planning files or tickets by default. Tickets are an optional,
+requested integration, not a stage required to proceed.
 Respect repository protections, permissions, unrelated work, and explicit user
 limits. Reading or discussing this skill does not start implementation. A request
 for an individual skill stays within that scope unless the user asks to continue.
@@ -57,8 +59,9 @@ independent work when another part is blocked.
 | Resolve intent | [refine](../refine/SKILL.md), when decisions are missing | Agreed outcome, scope, behavior, and constraints. |
 | Clarify contracts | [spec](../spec/SKILL.md), when useful | Concise architecture, public contracts, and acceptance examples in context. |
 | Plan tasks | [graph](../graph/SKILL.md) | In-context tasks, dependencies, parallelism constraints, completion requirements, and a flowchart. |
-| Coordinate implementation | [orchestrate](../orchestrate/SKILL.md) | Parallel workers, validation, independent review, and human-approved task integration into trunk. |
+| Coordinate implementation | [orchestrate](../orchestrate/SKILL.md) | A feature branch, parallel workers, validation, independent review, and human-approved integration of each task into that branch. |
 | Explain changes | [summarize](../summarize/SKILL.md) | A brief for each human approval and one for the combined outcome. |
+| Propose the feature | [create-pr](../create-pr/SKILL.md) | One PR from the feature branch to trunk. |
 
 Use `spec` only to clarify intent that needs more structure; do not rewrite settled
 requirements into a mandatory document. Let `graph` use agreed intent directly
@@ -68,14 +71,14 @@ agreed scope.
 
 Delegate execution management to `orchestrate`: it schedules all ready independent
 tasks within available capacity, supplies complete worker prompts, validates and
-independently reviews changes, and serializes approved integrations. Each task
-gets human review before reaching trunk; there is no final feature-branch merge.
+independently reviews changes, and serializes approved integrations. Every graph
+runs on one feature branch: each task gets its own brief and human review before
+it merges into that branch, and the finished branch goes to trunk through one
+PR. The PR reviews the whole; it does not replace the per-task gate.
 
-Use [create-ticket](../create-ticket/SKILL.md) and
-[create-pr](../create-pr/SKILL.md) only when requested. Reuse supplied destinations
-and ask for missing destination details only when that integration is needed.
-An explicitly requested PR may require a source branch; its use does not remove
-the human approval gate.
+Use [create-ticket](../create-ticket/SKILL.md) only when requested. Reuse supplied
+destinations and ask for missing destination details only when that integration
+is needed.
 
 ## Handle changes and interruptions
 
@@ -102,9 +105,11 @@ change before seeking integration approval. Independent correctness review and a
 summary do not themselves grant human approval.
 
 Load `summarize` at the end of work and build its final handoff brief for the
-combined outcome; it defines the brief, so do not write one from memory. Do not
-imply integration means release.
+combined outcome; it defines the brief, so do not write one from memory. Then
+make sure the PR from the feature branch to trunk is open. Do not imply
+integration into the feature branch, or an open PR, means the work is merged or
+released.
 
-Link any requested PRs or tickets alongside the brief as supporting evidence,
-not substitutes for it. Completion requires combined outcome evidence, not just
-completed worker assignments.
+Link the PR and any requested tickets alongside the brief as supporting evidence,
+not substitutes for it. Completion requires combined outcome evidence and an open
+PR, not just completed worker assignments.

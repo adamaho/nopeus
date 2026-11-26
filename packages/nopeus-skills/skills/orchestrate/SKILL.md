@@ -1,37 +1,49 @@
 ---
 name: orchestrate
 description: >-
-  Execute or resume a ready task graph using parallel workers, validation,
-  independent review, and human approval before each change integrates into
-  trunk. Use implement to start from an idea. Tickets, PRs, and planning files
-  are not required.
+  Execute or resume a ready task graph on a feature branch using parallel
+  workers, validation, independent review, and human approval before each task
+  merges, then open one PR to trunk. Use implement to start from an idea.
+  Tickets and planning files are not required.
 ---
 
 # Orchestrate
 
-Carry out the agreed graph through small, validated changes to trunk. Work through
-all ready tasks unless the user limits scope, and obtain explicit human approval
-before integrating each implementation task. Apply [adhd](../adhd/SKILL.md)
+Carry out the agreed graph through small, validated changes to one feature
+branch, then open a PR from that branch to trunk. Work through all ready tasks
+unless the user limits scope, and obtain explicit human approval before
+integrating each implementation task. Apply [adhd](../adhd/SKILL.md)
 throughout.
 
 ## Scope and permissions
 
-An execution request authorizes implementation in isolated checkouts, local
-commits, validation, independent review, and in-context graph updates within the
-agreed scope. It does not authorize integrating unreviewed changes into trunk.
-Human approval applies to the concrete change presented, not all future tasks.
+An execution request authorizes creating the feature branch, implementation in
+isolated checkouts, local commits, validation, independent review, in-context
+graph updates within the agreed scope, and opening the final PR. It does not
+authorize integrating unreviewed changes into the feature branch, or merging
+anything into trunk. Human approval applies to the concrete change presented, not
+all future tasks.
 
-Do not create feature branches, tickets, or PRs by default. Use
-[create-ticket](../create-ticket/SKILL.md) or [create-pr](../create-pr/SKILL.md)
-only when requested; an explicitly requested PR may require a source branch.
+Use [create-ticket](../create-ticket/SKILL.md) only when requested. Never merge
+the PR; the human does that.
 Respect repository protections, user limits, and unrelated work. Deployment and
 release are outside scope. Reading or discussing this skill does not start work.
+
+## Create the feature branch
+
+Every graph runs on one feature branch. Before dispatching the first task, create
+it from current trunk, or reuse the branch the user named or an earlier session
+started. Name it by the repository's conventions and record its name and the trunk
+revision it started from in context. Do not commit task work to trunk.
+
+Tasks reach trunk only through the final PR, so unfinished work never lands
+there, while each task still gets its own review on the way into the branch.
 
 ## Check the handoff
 
 Read the agreed intent and [graph](../graph/SKILL.md) in available conversation
 context, repository instructions, and relevant code. Identify the trunk branch,
-task IDs, prerequisites, shared contracts, acceptance examples, required checks,
+the feature branch, task IDs, prerequisites, shared contracts, acceptance examples, required checks,
 and any existing implementation or approval evidence. A separate spec document
 is not required.
 
@@ -42,8 +54,8 @@ a consequential decision, return the gap to `implement` when called by that work
 directly, explain the gap and use the relevant planning skill within authorized
 scope. Block only affected work rather than inventing requirements.
 
-Before starting or resuming, inspect actual checkouts, trunk, commits, validation,
-and reviews; inspect PRs only when part of the requested workflow. Reconcile the
+Before starting or resuming, inspect actual checkouts, the feature branch, trunk,
+commits, validation, reviews, and any PR already open for the branch. Reconcile the
 graph with evidence and reuse existing work. If context or approval evidence is
 missing, recover it or ask for what is needed before affected work continues.
 Never assume that prior intent or approval survived a session boundary.
@@ -63,14 +75,15 @@ documents, or a separate storage system. Present progress and the updated graph
 in the conversation. Use the environment's existing agent communication.
 
 Continuously select ready tasks: prerequisites are verified integrated into
-trunk, necessary decisions are settled, and required resources are available.
+the feature branch, necessary decisions are settled, and required resources are available.
 Launch workers for all ready, independent tasks up to available tool, environment,
 and user limits. Do not impose an arbitrary agent count or process unrelated
 tasks sequentially. Refill available capacity as workers finish or tasks unblock.
 Use separate reviewers as needed within the same capacity limits.
 
-Use isolated checkouts, such as detached worktrees or isolated agent environments.
-Named task branches are not required. Account for shared resources and semantic
+Use isolated checkouts, such as detached worktrees or isolated agent environments,
+each started from the current feature branch. Named task branches are not
+required. Account for shared resources and semantic
 conflicts; serialize tasks when their interference requires it and explain why.
 If parallel execution is unavailable, proceed sequentially while preserving
 selected model assignments and independent review requirements.
@@ -81,23 +94,27 @@ Construct a complete prompt for each worker, including:
 - Relevant shared intent, exact contracts, settled decisions, and integrated
   prerequisites; do not assume the worker inherits conversation context.
 - Acceptance examples, required checks, and relevant design guidance.
-- Assigned checkout, trunk revision, and relevant code references.
+- Assigned checkout, the feature-branch revision it starts from, and relevant
+  code references.
 - [audit](../audit/SKILL.md) guidance for simplicity and useful test coverage.
 - Instructions to report changes, commits, validation evidence, blockers, and
-  discoveries; do not integrate into trunk or change shared scope independently.
+  discoveries; do not integrate into the feature branch or change shared scope
+  independently.
 - A requirement to load [summarize](../summarize/SKILL.md) and follow it for the
   proposed change's handoff to the orchestrator. Workers do not ask the human for
   approval directly; the orchestrator delivers the verified brief and owns the approval gate.
 
 Workers may make as many checkpoint commits as useful. Each implementation task
-ultimately becomes one coherent proposed trunk commit, including relevant tests
-and documentation. The orchestrator owns shared decisions, graph updates, the
-human review queue, and serialized trunk integration.
+ultimately becomes one coherent proposed commit on the feature branch, including
+relevant tests and documentation. The orchestrator owns shared decisions, graph
+updates, the human review queue, and serialized integration into the feature
+branch.
 
 ## Validate and independently review each task
 
 Verify behavior, contracts, required checks, and relevant regressions. Each change
-must leave trunk working while the larger feature may remain unfinished. Follow
+must leave the feature branch working while the larger feature may remain
+unfinished. Follow
 the graph's exposure, compatibility, migration, and recovery requirements.
 
 Consolidate the task's checkpoint commits into one proposed commit before human
@@ -113,17 +130,18 @@ failed checks or incomplete review ready for human approval.
 
 ## Obtain human approval and integrate
 
-For every proposed trunk integration, build an approval brief with
+For every task proposed for the feature branch, build an approval brief with
 [summarize](../summarize/SKILL.md) before asking for approval. Load `summarize`
 again if it is no longer in context; it defines the brief, so do not write one
-from memory. Give it the task ID, the proposed commit, the compared trunk
-revision, and the current graph with statuses. Verify and refresh the worker's
+from memory. Give it the task ID, the proposed commit, the feature-branch
+revision it is compared with, and the current graph with statuses. Verify and refresh the worker's
 handoff against the final proposed commit, validation, and independent review
 first; unresolved review findings belong in the brief. An internal worker
 summary, passing checks, or a commit link alone does not satisfy this step.
 
-Then ask for explicit approval of that change. A PR is not required. Do not
-defer the brief until the final feature summary or after integration.
+Then ask for explicit approval of that change. Do not defer the brief until the
+final feature summary, the PR, or after integration; the PR reviews the whole,
+not each step.
 
 Mark the task `awaiting-human-review` and wait for explicit approval of that
 change. Review feedback returns the task to implementation and affected checks.
@@ -132,25 +150,26 @@ pending; queue completed changes without treating silence as consent.
 
 After approval, integrate one task at a time:
 
-1. Inspect current trunk and reconcile the proposed commit with any newer changes.
+1. Inspect the current feature branch and reconcile the proposed commit with any
+   tasks integrated since it started.
 2. Refresh affected validation and independent review. If the change or relevant
    context differs materially from what the human approved, refresh and deliver
    the `summarize` brief for the updated change, then obtain renewed approval.
    Pure commit identity changes with an
    equivalent diff and unaffected context do not alone invalidate approval;
    record the mapping and evidence.
-3. Integrate the approved task as one commit on trunk using the repository's
-   permitted workflow. Do not force-push, rewrite trunk history, or bypass checks
-   and protections. If protections require a PR, explain the constraint and ask
-   for that workflow rather than creating one without a request.
-4. Verify the shared trunk update succeeded before marking the task `integrated`.
+3. Integrate the approved task as one commit on the feature branch. Do not
+   rewrite the branch's history once tasks have integrated, and do not bypass
+   checks and protections.
+4. Verify the feature-branch update succeeded before marking the task `integrated`.
    Record the integrated commit and evidence in context, then unblock dependents
-   and dispatch newly ready work. A local commit alone is not shared integration.
+   and dispatch newly ready work. A commit in a worker's checkout alone is not
+   integration.
    Then delete the task's brief page; `summarize` explains why.
 
-If trunk advances during integration, reconcile again rather than overwriting it.
-Later corrections to landed code are new tasks and commits with their own human
-approval. Verification-only tasks report revision-bound evidence and finish as
+If the feature branch advances during integration, reconcile again rather than
+overwriting it. Later corrections to integrated code are new tasks and commits
+with their own human approval. Verification-only tasks report revision-bound evidence and finish as
 `verified`; do not manufacture code changes to give them a commit.
 
 ## Handle discoveries and interruptions
@@ -177,22 +196,31 @@ worker assignments, commits, evidence, blockers, and next ready work in context.
 At interruption, provide a concise conversation handoff; do not persist planning
 files or claim that context will survive. Verify actual state on resume.
 
-## Verify the combined outcome and hand off
+## Verify the combined outcome and open the PR
 
-As tasks integrate, verify their combined behavior against feature acceptance
-examples and relevant regressions. Obtain independent review of the combined
-changes, including `audit` for interactions and complexity across tasks. Scope
-review to this feature's commits and affected current code, accounting for other
-trunk changes. Record the exact revisions covered. New defects become follow-up
-tasks that pass through the same validation and human approval gates.
+As tasks integrate, verify their combined behavior on the feature branch against
+feature acceptance examples and relevant regressions. Obtain independent review
+of the combined changes, including `audit` for interactions and complexity across
+tasks. Record the exact revisions covered. New defects become follow-up tasks
+that pass through the same validation and human approval gates.
+
+When every task is integrated or verified, bring the feature branch up to date
+with trunk by merging trunk in, unless the repository requires a rebase, and
+rerun the checks that the update could affect. If trunk's changes alter behavior a human already approved, say so
+in the final brief.
 
 Load `summarize` again if it is no longer in context, then build its final
-handoff brief for the whole outcome. Give it the trunk revision from before the
-first task, the current trunk revision, and the final graph, so integrated,
-verified, blocked, and awaiting-human-review work stay distinct. Do not imply
-integration means release or that a final brief retroactively approves changes.
+handoff brief for the whole outcome. Give it trunk as the base, the feature
+branch as the head, and the final graph, so integrated, verified, blocked, and
+awaiting-human-review work stay distinct. Do not imply integration means release
+or that a final brief retroactively approves changes.
 
-When called by `implement`, return the brief and evidence for delivery to
-the human; when called directly, deliver them yourself. There is no final feature
-branch or mandatory feature PR. Completion requires evidence for the combined
-outcome, not merely that every worker finished.
+Then open one PR from the feature branch to trunk with
+[create-pr](../create-pr/SKILL.md). If tasks remain blocked or unapproved, ask
+before opening it, and open it as a draft if the human wants it up early. The
+skills never merge the PR.
+
+When called by `implement`, return the brief, the PR link, and evidence for
+delivery to the human; when called directly, deliver them yourself. Completion
+requires evidence for the combined outcome and an open PR, not merely that every
+worker finished.

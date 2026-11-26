@@ -101,4 +101,4 @@ already precise enough for `graph` to plan tasks. Carry relevant decisions and
 acceptance examples into graph context and worker prompts.
 
 Clarifying intent does not itself start implementation, create tickets or PRs,
-or authorize trunk integration. Respect requests to stop at planning.
+or authorize integration. Respect requests to stop at planning.

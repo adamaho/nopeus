@@ -10,8 +10,9 @@ description: >-
 # Graph
 
 Create a task graph that fresh agents can implement and reviewers can
-verify. Plan small changes that integrate directly into trunk after human review.
-Tickets, PRs, and a separate spec document are optional.
+verify. Plan small changes that each merge into one feature branch after human
+review; the finished branch reaches trunk through a single PR. Tickets and a
+separate spec document are optional.
 Apply [adhd](../adhd/SKILL.md) throughout.
 
 ## Ground the plan
@@ -30,7 +31,8 @@ it in the conversation. Do not create planning files, repository artifacts, or a
 separate storage system. No spec document is required; use agreed intent and any
 existing context supplied by the user.
 
-Maintain shared intent once: overall outcome, scope, trunk branch, constraints,
+Maintain shared intent once: overall outcome, scope, trunk branch, feature
+branch, constraints,
 contracts, and labeled feature acceptance examples. Break the outcome into small,
 independently reviewable tasks. Include the relevant shared intent in each worker
 handoff rather than assuming workers inherit the conversation.
@@ -47,7 +49,8 @@ For each task, record:
 - **Acceptance and evidence:** observable outcomes, relevant checks, and the
   feature acceptance examples this task covers.
 - **Execution record:** status, worker and checkout when assigned, planning and
-  trunk revisions used, blockers, validation and review evidence, human approval,
+  feature-branch revisions used, blockers, validation and review evidence, human
+  approval,
   and the integrated commit when available.
 
 Keep records proportional to the task; leave unobserved evidence explicitly
@@ -55,27 +58,35 @@ pending. The orchestrator owns task status and derives summaries from the graph.
 
 Prepare enough context for `orchestrate` to craft each worker prompt: task ID and
 scope, relevant requirements and contracts, integrated prerequisites, acceptance
-criteria, required checks, checkout and trunk revision, and reporting expectations.
+criteria, required checks, checkout and feature-branch revision, and reporting
+expectations.
 Include necessary information directly; use code references as supporting evidence,
 not as a substitute for instructions. This skill plans handoffs without dispatching
 workers.
 
-## Define small trunk changes
+## Define small changes on a feature branch
 
-Make each implementation task suitable for one final commit on trunk. Include its
-relevant tests and documentation. Workers may use any number of checkpoint
+Every graph is built on one feature branch, created from trunk before the first
+task starts. Tasks merge into it one at a time, and trunk sees the feature only
+through the final PR. That keeps unfinished work off trunk while each step still
+gets its own review.
+
+Make each implementation task suitable for one final commit on the feature
+branch. Include its relevant tests and documentation. Workers may use any number of checkpoint
 commits; execution consolidates them into the proposed task commit before human
 review. Split work that cannot be coherently reviewed and integrated this way.
 
-Each integrated change must leave trunk working while the larger feature may be
-unfinished. Record compatibility, exposure, migration, and recovery requirements
-where relevant. Use feature flags or staged compatible changes when needed.
-Do not rely on a feature branch to hide incomplete behavior.
+Each integrated change must leave the feature branch working while the larger
+feature may be unfinished, so later tasks build on a sound base and any task can
+be reviewed in isolation. Record compatibility, exposure, migration, and recovery
+requirements for the feature as it will land on trunk. Use feature flags or
+staged compatible changes when the finished feature needs them, not to hide
+unfinished tasks; the branch already does that.
 
 Include feature-level integration and acceptance verification. A verification-only
 task need not manufacture a code commit; record its evidence against the revisions
-it checked. Later corrections to landed code become new tasks and commits, without
-rewriting trunk history.
+it checked. Later corrections to integrated code become new tasks and commits on
+the feature branch, without rewriting its history.
 
 ## Express dependencies and parallelism
 
@@ -83,7 +94,8 @@ Use prerequisite IDs in the graph as the authoritative dependency edges. Remove
 cycles by revising task boundaries or resolving contracts. Preserve stable IDs
 when splitting or replacing tasks and record the replacement mapping.
 
-A task is ready only when its prerequisites are verified integrated into trunk,
+A task is ready only when its prerequisites are verified integrated into the
+feature branch,
 its required decisions are settled, and its resources are available. Written code,
 passing checks, or human approval alone do not satisfy an integration dependency.
 
@@ -94,8 +106,9 @@ and user limits. Account for shared resources and semantic conflicts, not just
 file overlap; record the reason when work must be sequential.
 
 Require isolated checkouts for parallel workers, such as detached worktrees;
-named task branches are not required. The orchestrator owns shared planning
-updates and serializes trunk integration. Workers report discoveries instead of
+named task branches are not required. Workers start from the current feature
+branch. The orchestrator owns shared planning updates and serializes integration
+into the feature branch. Workers report discoveries instead of
 independently changing shared contracts or overwriting graph status.
 
 ## Define review and completion gates
@@ -114,19 +127,23 @@ Before each implementation task integrates, require:
 - Behavioral evidence and repository checks covering the proposed change.
 - Independent agent correctness review, including relevant regressions.
 - A human-facing explanation and concrete diff or commit for approval.
-- Explicit human approval of that change before it reaches trunk.
+- Explicit human approval of that change before it reaches the feature branch.
 
-Tie approval and evidence to the proposed revision and compared trunk revision.
-Before integration, execution reconciles with current trunk and refreshes affected
+Tie approval and evidence to the proposed revision and the feature-branch
+revision it was compared with. Before integration, execution reconciles with the
+current feature branch and refreshes affected
 validation and independent review. Material changes to the reviewed change or its
 relevant context require renewed human review. Never treat planning approval as
 permission to integrate code, or bypass repository protections.
 
-Mark a task integrated only after verifying the trunk update succeeded. Unblock
+Mark a task integrated only after verifying the feature-branch update succeeded.
+Unblock
 its dependents from that evidence. Completed implementation tasks alone do not
 prove the feature outcome: require combined acceptance and integration evidence,
 independent review, and a human-facing outcome review as the feature comes together.
-There is no final feature-branch merge.
+When every task is integrated and the combined outcome is verified, the feature
+branch goes to trunk through one PR. Per-task approval does not replace review of
+that PR, and nothing in this workflow merges it.
 
 ## Maintain the plan during implementation
 
@@ -144,8 +161,8 @@ updates before integration.
 
 Invalidate affected validation or approval when its basis changes. Reopen
 unintegrated tasks as needed; create follow-up tasks for changes to landed work.
-On resume, reconcile available conversation context with actual checkout, trunk,
-and review evidence. If intent, dependencies, or approval evidence is missing,
+On resume, reconcile available conversation context with actual checkout,
+feature branch, trunk, and review evidence. If intent, dependencies, or approval evidence is missing,
 recover it or ask for what is needed before affected work continues; do not assume
 context survived or invent prior approval. Keep unaffected work progressing.
 
@@ -158,11 +175,11 @@ detail charts. Derive the chart from task dependencies rather than making
 it a second authority. Check acceptance coverage, including combined behavior.
 
 Create tickets only when requested, using [create-ticket](../create-ticket/SKILL.md)
-to publish the requested graph context. PRs are also created only on request through
-[create-pr](../create-pr/SKILL.md); an explicitly requested PR may require a source
-branch. Neither integration is a prerequisite for planning or execution.
+to publish the requested graph context; tickets are not a prerequisite for planning
+or execution. The final PR from the feature branch is part of the workflow and is
+opened through [create-pr](../create-pr/SKILL.md) during execution.
 
 Return the graph, ready work, parallelism constraints, and unresolved blockers
 in the conversation. This skill prepares tasks and execution requirements;
 it does not launch workers, implement tasks, perform reviews, create tickets or
-PRs, or integrate changes into trunk.
+PRs, or integrate changes.

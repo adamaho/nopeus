@@ -327,7 +327,7 @@ opens the same offline, and the code on it goes nowhere.
 A brief is evidence for one approval, not a record to keep. Each run clears
 `.briefs/` of pages whose change has merged into its base, whose commit no
 longer exists, or that are more than two weeks old. When a change integrates
-some other way, as a squash or a new commit on trunk, its page cannot be
+some other way, as a squash or a new commit on another branch, its page cannot be
 recognized as merged: delete that page once integration is verified. `node
 <this skill's folder>/scripts/brief.mjs --prune` runs the cleanup on its own.
 
@@ -367,5 +367,5 @@ question, such as "can I trust this?", and a caller's approval question.
 - Do not publish comments, edit code, or merge because a summary was requested.
   When fixes are authorized, use the established workflow and rebuild the brief.
 - A brief is not approval and never waives the approval gate before
-  integration into trunk. Describe behavior as proposed until integration is
+  integration. Describe behavior as proposed until integration is
   verified.
