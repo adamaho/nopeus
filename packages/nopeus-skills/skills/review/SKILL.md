@@ -128,7 +128,13 @@ used.
 - Does it follow the conventions of the code around it?
 
 Look for names that hide intent, unexplained constants, and knowledge that
-lives only in the author's head. Leave complexity, unnecessary abstraction, and
+lives only in the author's head.
+
+Check every value the change introduces against the constants that already
+exist. The same value written out or derived again in a second place is a
+finding, not a matter of taste: the copies look independent, so one gets changed
+and the other does not. Search for the value and for the concept before
+accepting a new literal, and name the constant to reuse in the fix. Leave complexity, unnecessary abstraction, and
 redundant tests to [audit](../audit/SKILL.md).
 
 ### Then audit
@@ -204,6 +210,7 @@ of these hold:
 - It is in code this change added or modified.
 - No formatter, linter, or type checker would catch it.
 - It is not a matter of taste where the code already matches the repository.
+  A duplicated constant is never taste; report it.
 
 List Notes most valuable first, each with its fix. Drop the rest; do not
 mention that you dropped them.
