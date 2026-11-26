@@ -1,9 +1,10 @@
 ---
 name: summarize
 description: >-
-  Brief a human on a code change as one fixed-format HTML page built by a
-  bundled script: file tree with line counts, production versus test lines,
-  public interface diffs, test summary, validation, and screenshots. Use
+  Brief a human on a code change in one fixed format built by a bundled script,
+  as markdown by default or an HTML page on request: file tree with line counts,
+  production versus test lines, public interface diffs, test summary,
+  validation, and screenshots. Use
   whenever someone asks to summarize, explain, or walk through a diff,
   branch, commit, or PR, and for every approval brief and final handoff in
   implement or orchestrate, even when they only ask "what changed?". Also
@@ -70,10 +71,10 @@ unresolved consequential decision.
 
 ## Brief a code change
 
-Every summary of implemented code is the same page: an approval brief, a final
+Every summary of implemented code is the same brief: an approval brief, a final
 handoff, or an answer to "what changed on this branch?". The human reviews many
 of these and learns where to look; a layout that shifts between briefs costs
-them that. So you do not write the page. A bundled script builds it from Git
+them that. So you do not write the brief. A bundled script builds it from Git
 and from a small data file holding the parts that need your judgement.
 
 The script owns the layout, the file tree, every line count, and every code
@@ -149,9 +150,9 @@ Text fields accept `` `code` `` and `**bold**` only. Keep each to one line.
 | `attention` | Everything the human must act on or know. `[]` renders as "None". |
 | `graph` | Optional. Task graph position. See below. |
 | `classify`, `generated` | Optional corrections to the file tree. See below. |
-| `keep` | Optional. `true` when the page will be read after its change has landed, so cleanup leaves it until it is two weeks old. |
+| `keep` | Optional. `true` when the brief will be read after its change has landed, so cleanup leaves it until it is two weeks old. |
 
-**Interfaces.** Prose about an interface is not reviewable, so the page shows
+**Interfaces.** Prose about an interface is not reviewable, so the brief shows
 the real diff. Point at it; do not retype it.
 
 - `file` and `lines` name the range in the head version, such as `"42-44"` or
@@ -176,7 +177,7 @@ the real diff. Point at it; do not retype it.
   schema. New types count; they show as all-added lines.
 - `title` names the interface the way a caller would: `` `createOrder` ``,
   `` `ReceiptListProps` ``, `DELETE /receipts/:id`. It heads the entry on the
-  page, so the human can scan the list of interfaces without reading code.
+  brief, so the human can scan the list of interfaces without reading code.
 - `note` is one sentence on what the interface is for and what changed for its
   callers.
 - Show few. A reader gets through about ten entries, so on a large change keep
@@ -229,7 +230,7 @@ its reason lets the human decide whether that matters.
 
 - `result` is `Pass`, `Fail`, or `Not run`. `Fail` and `Not run` need `detail`.
 - `command` is the exact command, or a short description for a manual check.
-- `revision` is the commit the checks ran on, or `"working tree"`. The page
+- `revision` is the commit the checks ran on, or `"working tree"`. The brief
   flags checks that ran on a different revision than the brief covers, because
   they do not vouch for it. Rerun them on the covered revision when you can; for
   a commit that is not checked out, a temporary worktree or `git archive` export
@@ -257,7 +258,8 @@ change for each state it adds or alters:
 }
 ```
 
-- Paths are relative to the data file. The script embeds the images.
+- Paths are relative to the data file. The page embeds the images; the markdown
+  brief lists their paths.
 - Mark a Storybook, Compose preview, or other isolated render with
   `"preview": true`. It shows the component, not that the real screen works.
 - When a state cannot be captured, list it in `notCaptured` with the reason and
@@ -278,7 +280,7 @@ else, so one list is enough to read. Tags:
 - `Unverified`: behavior nothing checked.
 
 **Graph.** When the change is a task in a graph, pass the whole graph from
-context and the page ends with a chart of where the work stands:
+context and the brief ends with a chart of where the work stands:
 
 ```json
 "graph": {
@@ -308,57 +310,66 @@ the `P`/`T`/`O` column after the first run and fix mistakes with glob patterns:
 a count and totals. Use it only for generated output; every hand-written file
 and every lockfile keeps its own line.
 
-### 3. Build the page
+### 3. Build the brief
 
 ```sh
 node <this skill's folder>/scripts/brief.mjs <data.json>
 ```
 
-Run it from the repository the session works in. Add `--repo <dir>` when the
-change lives in another checkout, such as a worker's worktree, and `--out
-<file>` to choose where the page goes. By default it is written to
-`.briefs/` in the current repository, ignored through
-`.git/info/exclude` so it never appears in `git status`. That is inside the
-workspace on purpose: built-in browser panes usually cannot open files outside
-it.
+This prints the whole brief as markdown and saves a copy. Markdown is the
+default because it reads anywhere: a terminal, a remote session, a subagent's
+handoff, a PR comment.
 
-The page is one self-contained file. It loads nothing from the network, so it
-opens the same offline, and the code on it goes nowhere.
+Add `--html` only when the human asks for the page, as in "show me the page" or
+"as HTML". It builds the same brief as one self-contained HTML file, with
+screenshots embedded, syntax colouring, and a graph that pans and zooms, and
+prints a short stub in place of the full markdown. The page loads nothing from
+the network, so it opens offline and the code on it goes nowhere.
 
-A brief is evidence for one approval, not a record to keep. Each run clears
-`.briefs/` of pages whose change has merged into its base, whose commit no
-longer exists, or that are more than two weeks old. When a change integrates
-some other way, as a squash or a new commit on another branch, its page cannot be
-recognized as merged: delete that page once integration is verified. `node
-<this skill's folder>/scripts/brief.mjs --prune` runs the cleanup on its own.
+Run the script from the repository the session works in. Add `--repo <dir>` when
+the change lives in another checkout, such as a worker's worktree, and `--out
+<file>` to choose where the brief is saved. By default it goes to `.briefs/` in
+the current repository, ignored through `.git/info/exclude` so it never appears
+in `git status`. That is inside the workspace on purpose: built-in browser panes
+usually cannot open files outside it.
 
 The script stops and lists every problem when the data is incomplete or a range
 matches nothing. Fix the data and rerun; do not work around it by writing the
-page yourself.
+brief yourself.
 
-### 4. Show it
+A brief is evidence for one approval, not a record to keep. Each run clears
+`.briefs/` of briefs whose change has merged into its base, whose commit no
+longer exists, or that are more than two weeks old. When a change integrates
+some other way, as a squash or a new commit on another branch, its brief cannot be
+recognized as merged: delete it once integration is verified. `node
+<this skill's folder>/scripts/brief.mjs --prune` runs the cleanup on its own.
 
-1. Open the page for the human in the harness's built-in browser pane. Look
-   through your tools for one that shows a local file or opens a browser tab;
-   in OpenCode that is `browser.tabs.open({ path })`. Use it without being
-   asked: the page is the deliverable.
-2. Look at the rendered page once. Check that the `P`/`T`/`O` column is right
-   and each excerpt shows the interface you meant.
-3. Reply with the script's output exactly as printed. It is the chat stub:
-   scope, size, and evidence lines, Outcome, Needs attention, the graph when
-   there is one, and the page's path and link. When no browser pane exists, the
-   link is how the human opens it.
+### 4. Deliver it
 
-When you are a subagent, you cannot show the human anything: build the page,
-skip the first step, check the script's output and the page's HTML if you
-cannot render it, and return the stub with the page's path to the agent that
-called you. That agent opens the page and delivers the stub. When you receive a
-brief from a subagent, check it against the final revision, rebuild it if the
-change moved, then show it as above.
+Reply with the script's output exactly as printed. For markdown that is the
+brief itself. Read it once first: check the `P`/`T`/`O` column in the file tree
+and that each excerpt shows the interface you meant, and rerun if not.
 
-Add nothing before the stub and do not restate the page after it. Two things
-may follow it: a direct answer of a sentence or two when the human asked a
-question, such as "can I trust this?", and a caller's approval question.
+When the human asked for the page:
+
+1. Open it in the harness's built-in browser pane. Look through your tools for
+   one that shows a local file or opens a browser tab; in OpenCode that is
+   `browser.tabs.open({ path })`. The pane shows a workspace file even when the
+   session runs on another machine.
+2. Look at the rendered page once, with the same checks as above.
+3. Reply with the stub the script printed. If no pane is available, say so. The
+   printed path and link are on the machine the session runs on, so when that is
+   not the human's own machine, give the markdown brief instead of a link they
+   cannot open.
+
+When you are a subagent, you cannot show the human anything: build the brief,
+check the script's output, and return it with the saved path to the agent that
+called you. That agent delivers it. When you receive a brief from a subagent,
+check it against the final revision and rebuild it if the change moved.
+
+Add nothing before the brief and do not restate it after. Two things may follow
+it: a direct answer of a sentence or two when the human asked a question, such
+as "can I trust this?", and a caller's approval question.
 
 ## Boundaries
 

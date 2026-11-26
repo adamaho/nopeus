@@ -150,8 +150,8 @@ rely on when they come back:
   fail or whose review is `Blocked` does not integrate.
 - Every task still gets its `summarize` brief, built before it integrates. Ask
   for kind `summary`, since no approval is being requested, and ask it to keep
-  the page, because it will be read after the task has landed. Do not delete the
-  pages on integration.
+  the brief, because it will be read after the task has landed. Do not delete
+  the briefs on integration.
 - What `review` would have left for the human to accept, such as a declined
   Warning, goes into that task's brief as a `Known issue`, and the task
   integrates.
@@ -206,7 +206,7 @@ After approval, integrate one task at a time:
    Record the integrated commit and evidence in context, then unblock dependents
    and dispatch newly ready work. A commit in a worker's checkout alone is not
    integration.
-   Then delete the task's brief page, unless the run is unattended; `summarize`
+   Then delete the task's saved brief, unless the run is unattended; `summarize`
    explains why.
 
 If the feature branch advances during integration, reconcile again rather than

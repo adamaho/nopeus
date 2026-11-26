@@ -52,6 +52,9 @@ const flag = (name) => {
   return index === -1 ? undefined : args.splice(index, 2)[1];
 };
 const pruneOnly = args.includes("--prune");
+const htmlIndex = args.indexOf("--html");
+const wantHtml = htmlIndex !== -1;
+if (wantHtml) args.splice(htmlIndex, 1);
 const outFlag = flag("--out");
 const repoFlag = flag("--repo");
 const dataPath = args[0];
@@ -61,7 +64,9 @@ if (pruneOnly) {
   console.log(removed.length === 0 ? "No briefs to remove" : `Removed ${removed.length}:\n${removed.join("\n")}`);
   process.exit(0);
 }
-if (!dataPath) fail(["Usage: node brief.mjs <data.json> [--out <file.html>] [--repo <dir>]\n       node brief.mjs --prune"]);
+if (!dataPath) {
+  fail(["Usage: node brief.mjs <data.json> [--html] [--out <file>] [--repo <dir>]\n       node brief.mjs --prune"]);
+}
 if (!existsSync(dataPath)) fail([`Data file not found: ${dataPath}`]);
 
 let data;
@@ -412,7 +417,8 @@ function treeEntries() {
   return [...entries, ...groups.values()];
 }
 
-function renderTree() {
+// The tree as rows, so the page and the markdown brief draw the same thing.
+function treeRows() {
   const root = { dirs: new Map(), files: [] };
   for (const entry of treeEntries()) {
     const parts = entry.path.split("/");
@@ -444,16 +450,23 @@ function renderTree() {
       const branch = top ? "" : `${prefix}${last ? "└── " : "├── "}`;
       const childPrefix = top ? "" : `${prefix}${last ? "    " : "│   "}`;
       if (item.dir) {
-        rows.push(
-          `<div class="row"><span class="name"><span class="branch">${branch}</span><span class="dir">${esc(item.dir.name)}/</span></span></div>`,
-        );
+        rows.push({ branch, dir: item.dir.name });
         walk(item.dir.child, childPrefix, false);
       } else {
-        rows.push(renderFileRow(item.file, branch));
+        rows.push({ branch, file: item.file });
       }
     });
   };
   walk(root, "", true);
+  return rows;
+}
+
+function renderTree() {
+  const rows = treeRows().map((row) =>
+    row.file
+      ? renderFileRow(row.file, row.branch)
+      : `<div class="row"><span class="name"><span class="branch">${row.branch}</span><span class="dir">${esc(row.dir)}/</span></span></div>`,
+  );
   return `<div class="tree">${rows.join("\n")}</div>`;
 }
 
@@ -1054,7 +1067,7 @@ function prune(dir, keep) {
   const removed = [];
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
-    if (!name.endsWith(".html") || path === keep) continue;
+    if (!/\.(html|md)$/.test(name) || path === keep) continue;
     const head = readFileSync(path, "utf8").slice(0, 4000);
     const meta = (key) => head.match(new RegExp(`<meta name="brief-${key}" content="([^"]*)"`))?.[1];
     const sha = meta("head");
@@ -1143,50 +1156,193 @@ const slots = {
   graph: renderGraph(),
 };
 
-const templatePath = join(dirname(fileURLToPath(import.meta.url)), "..", "assets", "brief.html");
-const page = readFileSync(templatePath, "utf8").replace(/<!--\{\{(\w+)\}\}-->/g, (match, slot) =>
-  slot in slots ? slots[slot] : match,
-);
+// ----------------------------------------------------------------- markdown
 
-const fileName = `${(isText(data.task) ? data.task : data.kind).replace(/[^\w.-]+/g, "-")}-${short(headSha)}${uncommitted ? "-wip" : ""}.html`;
-const outPath = resolve(outFlag ?? join(defaultOutDir(), fileName));
+// The same brief as text. Markdown is the default because it reads anywhere:
+// a terminal, a remote session, a subagent's handoff, a PR comment. It carries
+// every section in the page's order, so the two never disagree.
+const fence = (lang, body) => `\`\`\`\`${lang}\n${body}\n\`\`\`\``;
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+function markdownTree() {
+  const rows = treeRows().map((row) => {
+    if (!row.file) return { name: `${row.branch}${row.dir}/` };
+    const file = row.file;
+    if (file.group) {
+      return { name: `${row.branch}${plural(file.count, "generated file")}`, status: " ", bucket: "O", file };
+    }
+    const from = file.oldPath ? ` ← ${file.oldPath}` : "";
+    return {
+      name: `${row.branch}${file.name}${from}${file.untracked ? " (untracked)" : ""}`,
+      status: file.status,
+      bucket: file.bucket[0].toUpperCase(),
+      file,
+    };
+  });
+  const width = Math.max(...rows.map((row) => row.name.length));
+  return rows
+    .map((row) => {
+      if (!row.file) return row.name;
+      const counts = row.file.binary
+        ? "bin"
+        : `${`+${row.file.added}`.padStart(6)} ${`−${row.file.deleted}`.padStart(6)}`;
+      return `${row.name.padEnd(width)}  ${row.status} ${row.bucket} ${counts}`;
+    })
+    .join("\n");
+}
+
+function markdownExcerpt(entry, { labelled = true } = {}) {
+  const lines = excerpt(entry);
+  const kind = excerptKind(lines);
+  const texts = dedent(lines);
+  const spec = isText(entry.lines) ? entry.lines : entry.oldLines;
+  const diff = kind === "changed";
+  const body = lines.flatMap((line, index) => {
+    const previous = lines[index - 1];
+    const jump =
+      previous !== undefined &&
+      line.newLine - previous.newLine > 1 &&
+      (line.sign === "-" ? line.oldLine - previous.oldLine > 1 : true);
+    return [...(jump ? ["⋯"] : []), `${diff ? line.sign : ""}${texts[index]}`];
+  });
+  const heading = `### ${entry.title ?? "Usage"}${labelled ? ` · ${cap(kind)}` : ""}`;
+  return [
+    heading,
+    `\`${entry.file}:${spec}\``,
+    ...(isText(entry.note) ? ["", entry.note] : []),
+    "",
+    fence(diff ? "diff" : extname(entry.file).slice(1), body.join("\n")),
+  ].join("\n");
+}
+
+function markdownComponents() {
+  if (!data.components) return [];
+  const rows = [];
+  const walk = (nodes, prefix, top) =>
+    nodes.forEach((node, index) => {
+      const last = index === nodes.length - 1;
+      rows.push({ name: `${top ? "" : `${prefix}${last ? "└── " : "├── "}`}${node.name}`, node });
+      walk(list(node.children), top ? "" : `${prefix}${last ? "    " : "│   "}`, false);
+    });
+  walk(data.components.tree, "", true);
+  const width = Math.max(...rows.map((row) => row.name.length));
+  const tree = rows.map((row) => `${row.name.padEnd(width)}  ${row.node.status}  ${row.node.owns}`).join("\n");
+  return ["### Component structure", "", fence("text", tree), "", markdownExcerpt(data.components.usage, { labelled: false })];
+}
+
+function markdownValidation() {
+  const claimed = data.validation.revision.trim();
+  const resolved = git(["rev-parse", "--verify", "--quiet", `${claimed}^{commit}`], { allowFail: true })?.trim();
+  const stale = uncommitted ? claimed.toLowerCase() !== "working tree" : resolved !== headSha;
+  const passed = data.validation.checks.filter((row) => row.result.toLowerCase() === "pass").length;
+  const cell = (text) => String(text).replace(/\|/g, "\\|");
+  const rows = data.validation.checks.map((row) => {
+    const where = isText(row.revision) ? ` (on ${row.revision})` : "";
+    const detail = isText(row.detail) ? ` ${row.detail}` : "";
+    return `| ${cell(row.check)} | ${isText(row.command) ? `\`${cell(row.command)}\`` : "—"} | ${cap(row.result.toLowerCase())}${cell(where)}${cell(detail)} |`;
+  });
+  const shots = !data.ui.visible
+    ? ["No visible UI change"]
+    : [
+        ...list(data.ui.shots).map(
+          (shot) => `- ${shot.caption}${shot.preview ? " (preview, not runtime)" : ""}: ${resolveFrom(dataDir, shot.path)}`,
+        ),
+        ...list(data.ui.notCaptured).map(
+          (entry) => `- **${entry.state}** not captured: ${entry.reason}. Checked instead: ${entry.checked}`,
+        ),
+      ];
+  return [
+    `${passed} of ${data.validation.checks.length} passed · ran on \`${resolved ? short(resolved) : claimed}\`${
+      stale ? ` · **Stale: this brief covers ${uncommitted ? "the working tree" : short(headSha)}**` : ""
+    }`,
+    "",
+    "| Check | Command | Result |",
+    "| --- | --- | --- |",
+    ...rows,
+    "",
+    "### Screenshots",
+    ...shots,
+  ];
+}
+
+function markdownBrief() {
+  const counted = (title, n) => (n > 0 ? `${title} (${n})` : title);
+  const gaps = data.tests.gaps.length;
+  const resultCount = (result) => data.validation.checks.filter((row) => row.result.toLowerCase() === result).length;
+  const evidence = [
+    gaps === 0 ? "no known test gaps" : plural(gaps, "test gap"),
+    `${resultCount("pass")} of ${plural(data.validation.checks.length, "check")} passed`,
+    ...(resultCount("fail") > 0 ? [`${resultCount("fail")} failed`] : []),
+    ...(resultCount("not run") > 0 ? [`${resultCount("not run")} not run`] : []),
+  ].join(" · ");
+  const scope = [...(showBranch ? [`\`${branchName}\``] : []), `\`${range}\``, uncommittedNote].join(" · ");
+
+  return [
+    `# ${heading}`,
+    scope,
+    `Evidence: ${evidence}`,
+    "",
+    "## Outcome",
+    ...data.outcome.map((bullet) => `- ${bullet}`),
+    "",
+    "## Change snapshot",
+    "| | Added | Removed | Files |",
+    "| --- | ---: | ---: | ---: |",
+    ...totals.rows.map((row) => `| ${cap(row.bucket)} | +${row.added} | −${row.deleted} | ${row.count} |`),
+    "",
+    `${totals.summary} · \`${diffCommand}\``,
+    "",
+    fence("text", markdownTree()),
+    "",
+    `## ${counted("Interfaces", data.interfaces.length)}`,
+    ...(data.interfaces.length === 0
+      ? ["No public interface changes"]
+      : data.interfaces.flatMap((entry) => [markdownExcerpt(entry), ""])),
+    ...markdownComponents(),
+    ...(list(data.design).length > 0 ? ["", "### Decisions", ...data.design.map((bullet) => `- ${bullet}`)] : []),
+    "",
+    "## Test coverage",
+    ...data.tests.summary.map((bullet) => `- ${bullet}`),
+    "",
+    `### ${counted("Not covered", gaps)}`,
+    ...(gaps === 0 ? ["No known gaps"] : data.tests.gaps.map((gap) => `- ${gap}`)),
+    "",
+    "## Validation",
+    ...markdownValidation(),
+    "",
+    `## ${counted("Needs attention", data.attention.length)}`,
+    ...(data.attention.length === 0 ? ["None"] : data.attention.map((item) => `- **${item.tag}:** ${item.text}`)),
+    ...(data.graph ? ["", "## Graph position", graphProgress(), "", "```mermaid", mermaid(), "```"] : []),
+  ].join("\n");
+}
+
+// ------------------------------------------------------------------- deliver
+
+// Both forms are saved beside each other, so a brief can be reread later and
+// cleaned up the same way. The markdown file starts with the same meta tags as
+// the page, inside a comment, which is how cleanup recognises it.
+const baseName = `${(isText(data.task) ? data.task : data.kind).replace(/[^\w.-]+/g, "-")}-${short(headSha)}${uncommitted ? "-wip" : ""}`;
+const outPath = resolve(outFlag ?? join(defaultOutDir(), `${baseName}.${wantHtml ? "html" : "md"}`));
+const markdown = markdownBrief();
 mkdirSync(dirname(outPath), { recursive: true });
-writeFileSync(outPath, page);
+
+if (wantHtml) {
+  const templatePath = join(dirname(fileURLToPath(import.meta.url)), "..", "assets", "brief.html");
+  const page = readFileSync(templatePath, "utf8").replace(/<!--\{\{(\w+)\}\}-->/g, (match, slot) =>
+    slot in slots ? slots[slot] : match,
+  );
+  writeFileSync(outPath, page);
+} else {
+  writeFileSync(outPath, `<!-- ${slots.meta} -->\n${markdown}\n`);
+}
 if (!outFlag) prune(dirname(outPath), outPath);
 
-const stubScope = [
-  `**${kindLabel}**`,
-  ...(isText(data.task) ? [`task \`${data.task}\``] : []),
-  ...(showBranch ? [`\`${branchName}\``] : []),
-  `\`${range}\``,
-  uncommittedNote,
-].join(" · ");
-// Two computed lines so the chat alone shows how big the change is and how
-// well it is covered; gaps cannot be left out of the stub by accident.
-const plural = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
-const gaps = data.tests.gaps.length;
-const resultCount = (result) => data.validation.checks.filter((row) => row.result.toLowerCase() === result).length;
-const sizeLine = `Size: ${plural(files.length, "file")} · ${totals.rows.map((row) => `${cap(row.bucket)} +${row.added}`).join(" · ")}`;
-const evidenceLine = [
-  gaps === 0 ? "no known test gaps" : plural(gaps, "test gap"),
-  `${resultCount("pass")} of ${plural(data.validation.checks.length, "check")} passed`,
-  ...(resultCount("fail") > 0 ? [`${resultCount("fail")} failed`] : []),
-  ...(resultCount("not run") > 0 ? [`${resultCount("not run")} not run`] : []),
-].join(" · ");
-
-const stub = [
-  stubScope,
-  sizeLine,
-  `Evidence: ${evidenceLine}`,
-  "",
-  "### Outcome",
-  ...data.outcome.map((bullet) => `- ${bullet}`),
-  "",
-  "### Needs attention",
-  ...(data.attention.length === 0 ? ["None"] : data.attention.map((item) => `- **${item.tag}:** ${item.text}`)),
-  ...(data.graph ? ["", "### Graph position", "```mermaid", mermaid(), "```", graphProgress()] : []),
-  "",
-  `Brief: ${outPath}`,
-  pathToFileURL(outPath).href,
-];
-console.log(stub.join("\n"));
+// What the agent relays. Markdown: the whole brief. Page: a short stub, since
+// the page carries the detail and repeating it in chat would bury the link.
+if (wantHtml) {
+  const stub = markdown.slice(0, markdown.indexOf("\n## Change snapshot"));
+  const attention = markdown.slice(markdown.indexOf(`\n## ${data.attention.length > 0 ? `Needs attention (${data.attention.length})` : "Needs attention"}`));
+  console.log(`${stub}${attention}\n\nPage: ${outPath}\n${pathToFileURL(outPath).href}`);
+} else {
+  console.log(`${markdown}\n\nSaved: ${outPath}`);
+}
