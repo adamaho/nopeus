@@ -107,6 +107,7 @@ check(
 
 check(Array.isArray(data.interfaces), "interfaces is required; use [] when no public interface changed");
 list(data.interfaces).forEach((entry, i) => {
+  check(isText(entry.title), `interfaces[${i}].title is required: the interface's name, e.g. "createOrder"`);
   check(isText(entry.file), `interfaces[${i}].file is required`);
   check(isText(entry.note), `interfaces[${i}].note is required: one sentence on what the interface is for`);
   check(
@@ -612,11 +613,15 @@ function renderExcerpt(entry, label) {
     kind === "changed"
       ? `data-patch="${esc(toPatch(entry.file, lines))}"`
       : `data-name="${esc(basename(entry.file))}" data-code="${esc(dedent(lines).join("\n"))}"`;
-  return `<div class="excerpt">
-  <div class="excerpt-head"><code>${esc(entry.file)}:${esc(spec)}</code> <span class="chip chip-${kind}">${cap(kind)}</span></div>
+  return `<article class="excerpt">
+  <header class="excerpt-head">
+    ${isText(entry.title) ? `<h3 class="excerpt-title">${inline(entry.title)}</h3>` : ""}
+    <span class="chip chip-${kind}">${cap(kind)}</span>
+    <code class="excerpt-path">${esc(entry.file)}:${esc(spec)}</code>
+  </header>
   ${entry.note ? `<p class="excerpt-note">${inline(entry.note)}</p>` : ""}
   <div class="diff" ${source}>${renderCode(lines, kind !== "changed")}</div>
-</div>`;
+</article>`;
 }
 
 function renderComponents() {

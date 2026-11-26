@@ -59,7 +59,7 @@
         margin: 0 auto;
         padding: 24px 20px 64px;
       }
-      header {
+      main > header {
         padding: 12px 16px;
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -205,9 +205,33 @@
 
       .excerpt {
         margin-top: 16px;
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .excerpt-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+      .excerpt-title {
+        margin: 0;
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: none;
+      }
+      .excerpt-path {
+        margin-left: auto;
+        border: 0;
+        background: none;
+        color: var(--dim);
+        font-size: 12px;
       }
       .excerpt-note {
-        margin: 4px 0 8px;
+        margin: 6px 0 12px;
       }
       .code {
         margin: 0;

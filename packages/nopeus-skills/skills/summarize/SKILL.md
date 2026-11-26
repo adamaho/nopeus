@@ -108,6 +108,7 @@ field is not.
   "outcome": ["Users can delete a receipt from the list; the row disappears without a reload."],
   "interfaces": [
     {
+      "title": "`createOrder`",
       "file": "src/orders/service.ts",
       "lines": "42-44",
       "note": "Creates an order; callers must now pass the currency."
@@ -172,6 +173,9 @@ the real diff. Point at it; do not retype it.
   navigation arguments, table definitions, config shape. Leave implementation
   bodies out unless the body is the contract, as in a declarative rule or
   schema. New types count; they show as all-added lines.
+- `title` names the interface the way a caller would: `` `createOrder` ``,
+  `` `ReceiptListProps` ``, `DELETE /receipts/:id`. It heads the entry on the
+  page, so the human can scan the list of interfaces without reading code.
 - `note` is one sentence on what the interface is for and what changed for its
   callers.
 - Use the matching platform reference to decide which contracts matter. When
@@ -195,7 +199,7 @@ human can judge ownership and composition without opening files:
       ]
     }
   ],
-  "usage": { "file": "src/receipts/receipt-page.tsx", "lines": "31-33" }
+  "usage": { "title": "`ReceiptPage` composition", "file": "src/receipts/receipt-page.tsx", "lines": "31-33" }
 }
 ```
 
