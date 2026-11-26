@@ -817,7 +817,8 @@ function renderScreenshots() {
       const path = resolveFrom(dataDir, shot.path);
       const uri = `data:${MIME[extname(path).toLowerCase()]};base64,${readFileSync(path).toString("base64")}`;
       const preview = shot.preview ? ` <span class="chip chip-gap">Preview, not runtime</span>` : "";
-      return `<figure><img src="${uri}" alt="${esc(shot.caption)}"><figcaption>${inline(shot.caption)}${preview}</figcaption></figure>`;
+      // A button, so the screenshot can be enlarged by click or keyboard.
+      return `<figure><button type="button" class="shot" aria-label="Enlarge screenshot: ${esc(shot.caption)}"><img src="${uri}" alt="${esc(shot.caption)}"></button><figcaption>${inline(shot.caption)}${preview}</figcaption></figure>`;
     })
     .join("\n");
   const missing = list(data.ui.notCaptured)

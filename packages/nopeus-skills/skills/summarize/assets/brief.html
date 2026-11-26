@@ -657,10 +657,82 @@
       figure {
         margin: 0;
       }
-      figure img {
+      .shot {
+        display: block;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: zoom-in;
+      }
+      .shot img {
+        display: block;
         max-width: 100%;
         border: 1px solid var(--border);
         border-radius: var(--radius);
+      }
+      .shot:hover img {
+        border-color: var(--border-strong);
+      }
+      /* The enlarged screenshot. A native dialog gives Esc-to-close, a focus
+         trap, and a backdrop; the script only adds zoom and pan. */
+      .lightbox {
+        width: 96vw;
+        height: 96vh;
+        max-width: none;
+        max-height: none;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg);
+        color: var(--text);
+        overflow: hidden;
+      }
+      .lightbox[open] {
+        display: flex;
+        flex-direction: column;
+      }
+      .lightbox::backdrop {
+        background: rgb(0 0 0 / 0.7);
+      }
+      .lightbox-bar {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 6px 6px 14px;
+        border-bottom: 1px solid var(--border);
+        color: var(--dim);
+        font-size: 13px;
+      }
+      .lightbox-bar p {
+        max-width: none;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .lightbox-view {
+        display: grid;
+        /* A bounded track, so a tall screenshot is fitted, not overflowing. */
+        grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+        flex: 1;
+        min-height: 0;
+        place-items: center;
+        background: var(--panel);
+        overflow: hidden;
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+      }
+      .lightbox-view.dragging {
+        cursor: grabbing;
+      }
+      .lightbox-view img {
+        max-width: 100%;
+        max-height: 100%;
+        transform-origin: 0 0;
+        -webkit-user-drag: none;
       }
       figcaption {
         margin-top: 4px;
@@ -858,7 +930,8 @@
           padding: 0;
         }
         .graph-bar,
-        .toc {
+        .toc,
+        .lightbox {
           display: none;
         }
         .tree,
@@ -925,6 +998,99 @@
 
       <!--{{graph}}-->
     </main>
+    <dialog class="lightbox" aria-label="Enlarged screenshot">
+      <div class="lightbox-bar">
+        <p></p>
+        <div class="graph-tools">
+          <button type="button" data-shot="out" aria-label="Zoom out" title="Zoom out">−</button>
+          <button type="button" data-shot="in" aria-label="Zoom in" title="Zoom in">+</button>
+          <button type="button" data-shot="fit" title="Fit the screenshot to the window">Fit</button>
+          <button type="button" data-shot="close" title="Close (Esc)">Close</button>
+        </div>
+      </div>
+      <div class="lightbox-view"><img alt="" draggable="false" /></div>
+    </dialog>
+    <script>
+      // Click a screenshot to see it larger, then zoom in on the detail:
+      // scroll or pinch to zoom at the pointer, drag to pan, double-click to
+      // jump between fitted and 2x. Esc, Close, or a click on the backdrop
+      // closes it.
+      const lightbox = document.querySelector(".lightbox");
+      const view = lightbox.querySelector(".lightbox-view");
+      const big = view.querySelector("img");
+      const zoom = { scale: 1, x: 0, y: 0 };
+      const paint = () => (big.style.transform = `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})`);
+      const fit = () => {
+        Object.assign(zoom, { scale: 1, x: 0, y: 0 });
+        paint();
+      };
+      // Keeps the point under the pointer still while the scale changes.
+      const zoomAt = (factor, clientX, clientY) => {
+        const box = big.getBoundingClientRect();
+        const pointX = clientX ?? box.left + box.width / 2;
+        const pointY = clientY ?? box.top + box.height / 2;
+        const scale = Math.min(8, Math.max(1, zoom.scale * factor));
+        const ratio = scale / zoom.scale;
+        zoom.x += (pointX - box.left) * (1 - ratio);
+        zoom.y += (pointY - box.top) * (1 - ratio);
+        zoom.scale = scale;
+        if (scale === 1) Object.assign(zoom, { x: 0, y: 0 });
+        paint();
+      };
+
+      for (const shot of document.querySelectorAll(".shot")) {
+        shot.addEventListener("click", () => {
+          const image = shot.querySelector("img");
+          big.src = image.src;
+          big.alt = image.alt;
+          lightbox.querySelector("p").textContent = `${image.alt} · scroll to zoom, drag to pan`;
+          fit();
+          lightbox.showModal();
+        });
+      }
+
+      view.addEventListener(
+        "wheel",
+        (event) => {
+          event.preventDefault();
+          zoomAt(event.deltaY > 0 ? 1 / 1.15 : 1.15, event.clientX, event.clientY);
+        },
+        { passive: false },
+      );
+      view.addEventListener("dblclick", (event) => {
+        if (zoom.scale > 1) fit();
+        else zoomAt(2, event.clientX, event.clientY);
+      });
+
+      let grab;
+      view.addEventListener("pointerdown", (event) => {
+        grab = { x: event.clientX, y: event.clientY };
+        view.setPointerCapture(event.pointerId);
+        view.classList.add("dragging");
+      });
+      view.addEventListener("pointermove", (event) => {
+        if (!grab) return;
+        zoom.x += event.clientX - grab.x;
+        zoom.y += event.clientY - grab.y;
+        grab = { x: event.clientX, y: event.clientY };
+        paint();
+      });
+      const drop = () => {
+        grab = undefined;
+        view.classList.remove("dragging");
+      };
+      view.addEventListener("pointerup", drop);
+      view.addEventListener("pointercancel", drop);
+
+      lightbox.querySelector("[data-shot=in]").addEventListener("click", () => zoomAt(1.5));
+      lightbox.querySelector("[data-shot=out]").addEventListener("click", () => zoomAt(1 / 1.5));
+      lightbox.querySelector("[data-shot=fit]").addEventListener("click", fit);
+      lightbox.querySelector("[data-shot=close]").addEventListener("click", () => lightbox.close());
+      // A click that lands on the dialog itself is on the backdrop.
+      lightbox.addEventListener("click", (event) => {
+        if (event.target === lightbox) lightbox.close();
+      });
+    </script>
     <script>
       // Marks the section in view in the sticky links, so the reader always
       // knows where they are in a long brief.
