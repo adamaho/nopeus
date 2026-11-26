@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><!--{{title}}--></title>
+    <!--{{meta}}-->
+    <style>
+      /* Colours are Radix Colors v3 steps, inlined so the page works offline.
+         Each token names its scale and step. Steps follow Radix semantics
+         (1-2 backgrounds, 3-5 component backgrounds, 6-8 borders, 9-10 solid,
+         11-12 text) except where a step misses WCAG contrast; those lines say
+         which step was used instead and why. */
+      :root {
+        color-scheme: light dark;
+        --bg: #fcfcfd; /* slate-1 */
+        --panel: #f9f9fb; /* slate-2 */
+        --hover: #f0f0f3; /* slate-3 */
+        --border: #d9d9e0; /* slate-6 */
+        --border-strong: #b9bbc6; /* slate-8 */
+        --text: #1c2024; /* slate-12 */
+        --dim: #60646c; /* slate-11 */
+        --add: #2a7e3b; /* grass-11; green-11 is 4.49:1 on the panel */
+        --add-bg: #e9f6e9; /* grass-3 */
+        --del: #ce2c31; /* red-11 */
+        --del-bg: #feebec; /* red-3 */
+        --warn: #4f3422; /* amber-12; amber-11 is 4.25:1 on amber-3 */
+        --warn-bg: #fff7c2; /* amber-3 */
+        --accent: #0d74ce; /* blue-11 */
+        --focus: #0090ff; /* blue-9; blue-8 is under 3:1 on slate-1 */
+        --selection: #c2e5ff; /* blue-5 */
+        --edge: #8b8d98; /* slate-9 */
+        --add-mark: #c9e8ca; /* grass-5 */
+        --del-mark: #ffcdce; /* red-5 */
+        /* Syntax colours: step 11 of scales that clear 4.5:1 on the panel
+           and on both tinted diff rows. */
+        --tok-keyword: #6550b9; /* violet-11 */
+        --tok-string: #815e46; /* brown-11 */
+        --tok-number: #3a5bc7; /* indigo-11 */
+        --tok-type: #953ea3; /* plum-11 */
+
+        /* Graph nodes: step 3 fill. Light outlines use step 11 because
+           steps 8 to 10 stay under 3:1 against the panel. */
+        --node-blocked-fill: #f0f0f3; /* slate-3 */
+        --node-blocked-stroke: #8b8d98; /* slate-9 */
+        --node-ready-fill: #fcfcfd; /* slate-1 */
+        --node-ready-stroke: #60646c; /* slate-11 */
+        --node-active-fill: #e6f4fe; /* blue-3 */
+        --node-active-stroke: #0d74ce; /* blue-11 */
+        --node-review-fill: #fff7c2; /* amber-3 */
+        --node-review-stroke: #ab6400; /* amber-11 */
+        --node-approved-fill: #e0f8f3; /* teal-3 */
+        --node-approved-stroke: #008573; /* teal-11 */
+        --node-done-fill: #e9f6e9; /* grass-3 */
+        --node-done-stroke: #2a7e3b; /* grass-11 */
+
+        --radius-sm: 4px;
+        --radius: 8px;
+        /* One column for everything, so text, code and tables share both
+           edges. Narrow enough that running text stays readable without a
+           separate, shorter measure leaving a ragged gap on the right. */
+        --page: 720px;
+        /* Geist when it is installed; nothing is fetched, so system fonts
+           are the fallback. */
+        --sans: "Geist", "Geist Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        scrollbar-color: var(--border-strong) transparent;
+      }
+      /* Screen only, so a printout is always light. */
+      @media screen and (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111113; /* slate-dark-1 */
+          --panel: #18191b; /* slate-dark-2 */
+          --hover: #212225; /* slate-dark-3 */
+          --border: #363a3f; /* slate-dark-6 */
+          --border-strong: #5a6169; /* slate-dark-8 */
+          --text: #edeef0; /* slate-dark-12 */
+          --dim: #b0b4ba; /* slate-dark-11 */
+          --add: #71d083; /* grass-dark-11 */
+          --add-bg: #1b2a1e; /* grass-dark-3 */
+          --del: #ff9592; /* red-dark-11 */
+          --del-bg: #3b1219; /* red-dark-3 */
+          --warn: #ffca16; /* amber-dark-11 */
+          --warn-bg: #302008; /* amber-dark-3 */
+          --accent: #70b8ff; /* blue-dark-11 */
+          --focus: #0090ff; /* blue-dark-9 */
+          --selection: #004074; /* blue-dark-5 */
+          --edge: #696e77; /* slate-dark-9 */
+          --add-mark: #2d5736; /* grass-dark-6 */
+          --del-mark: #72232d; /* red-dark-6 */
+          --tok-keyword: #baa7ff; /* violet-dark-11 */
+          --tok-string: #dbb594; /* brown-dark-11 */
+          --tok-number: #9eb1ff; /* indigo-dark-11 */
+          --tok-type: #e796f3; /* plum-dark-11 */
+
+          /* Dark outlines use the border step 8, which clears 3:1 here. */
+          --node-blocked-fill: #212225; /* slate-dark-3 */
+          --node-blocked-stroke: #696e77; /* slate-dark-9; slate-dark-8 is 2.81:1 */
+          --node-ready-fill: #111113; /* slate-dark-1 */
+          --node-ready-stroke: #777b84; /* slate-dark-10 */
+          --node-active-fill: #0d2847; /* blue-dark-3 */
+          --node-active-stroke: #2870bd; /* blue-dark-8 */
+          --node-review-fill: #302008; /* amber-dark-3 */
+          --node-review-stroke: #8f6424; /* amber-dark-8 */
+          --node-approved-fill: #0d2d2a; /* teal-dark-3 */
+          --node-approved-stroke: #207e73; /* teal-dark-8 */
+          --node-done-fill: #1b2a1e; /* grass-dark-3 */
+          --node-done-stroke: #3e7949; /* grass-dark-8 */
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      ::selection {
+        background: var(--selection);
+        color: var(--text);
+      }
+      :focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+      }
+      a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.2em;
+      }
+      a:hover {
+        text-decoration-thickness: 2px;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 15px/1.55 var(--sans);
+        overflow-wrap: break-word;
+      }
+      main {
+        max-width: var(--page);
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+      }
+      main > header {
+        margin-bottom: 8px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 24px;
+        font-weight: 650;
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+      .scope {
+        margin: 0;
+        color: var(--dim);
+        font-size: 14px;
+      }
+      /* The verdict row: size, checks, test gaps and open items at a glance,
+         each a link to its section. */
+      .glances {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        max-width: none;
+        margin: 16px 0 0;
+      }
+      .glance {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        text-decoration: none;
+      }
+      .glance:hover {
+        border-color: var(--border-strong);
+        background: var(--hover);
+      }
+      .glance::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--edge);
+      }
+      .glance-good::before {
+        background: var(--add);
+      }
+      .glance-warn::before {
+        background: var(--node-review-stroke);
+      }
+      .glance-bad::before {
+        background: var(--del);
+      }
+
+      /* Section links stay in reach while scrolling a long brief. */
+      .toc {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        gap: 4px;
+        margin: 20px -8px 0;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .toc a {
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+        color: var(--dim);
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .toc a:hover,
+      .toc a[aria-current] {
+        background: var(--hover);
+        color: var(--text);
+      }
+      .count {
+        display: inline-block;
+        min-width: 1.6em;
+        margin-left: 8px;
+        padding: 0 6px;
+        border-radius: var(--radius-sm);
+        background: var(--hover);
+        color: var(--dim);
+        font-size: 12px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.6;
+        text-align: center;
+        vertical-align: 0.1em;
+      }
+      .toc .count {
+        margin-left: 6px;
+        background: none;
+        padding: 0;
+        min-width: 0;
+      }
+      section {
+        margin-top: 40px;
+        /* Clears the sticky section links when jumping to an anchor. */
+        scroll-margin-top: 52px;
+      }
+      /* The outcome is the lead; it reads a size up from the evidence. */
+      #outcome ul {
+        font-size: 16px;
+      }
+      #outcome li + li {
+        margin-top: 8px;
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+      }
+      h3 {
+        margin: 28px 0 8px;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.4;
+        text-wrap: balance;
+      }
+      main :is(p, ul) {
+        text-wrap: pretty;
+      }
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+      li + li {
+        margin-top: 4px;
+      }
+      code,
+      pre,
+      .tree {
+        font-family: var(--mono);
+        font-size: 13px;
+      }
+      code {
+        padding: 1px 4px;
+        border-radius: var(--radius-sm);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        overflow-wrap: anywhere;
+      }
+      .dim,
+      .ran,
+      .none {
+        color: var(--dim);
+      }
+      .ran {
+        margin: 10px 0;
+        font-size: 13px;
+      }
+      .add {
+        color: var(--add);
+      }
+      .del {
+        color: var(--del);
+      }
+      .totals,
+      .tree,
+      table,
+      .ran,
+      .legend {
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Three small boxes: bucket name, lines added, then what was removed
+         and how many files, so the sizes compare at a glance. */
+      .totals {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin: 0;
+      }
+      .total {
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+      .total dt {
+        color: var(--dim);
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .total dd {
+        margin: 0;
+      }
+      .total-added {
+        margin-top: 2px;
+        color: var(--add);
+        font: 600 24px/1.25 var(--mono);
+        letter-spacing: -0.02em;
+      }
+      .total-meta {
+        color: var(--dim);
+        font-size: 13px;
+      }
+      .share {
+        display: flex;
+        gap: 2px;
+        height: 6px;
+        margin-top: 10px;
+      }
+      .share span {
+        min-width: 3px;
+        border-radius: 2px;
+      }
+      .share-key {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin-right: 8px;
+        border-radius: 2px;
+      }
+      .share-production {
+        background: var(--accent);
+      }
+      .share-tests {
+        background: var(--add);
+      }
+      .share-other {
+        background: var(--edge);
+      }
+
+      /* Tag in a fixed column, text beside it: scan down the tags, then read. */
+      .tagged {
+        max-width: none;
+        padding: 0;
+        list-style: none;
+      }
+      .tagged li {
+        display: grid;
+        grid-template-columns: 7rem minmax(0, 1fr);
+        gap: 12px;
+        align-items: baseline;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .tagged li + li {
+        margin-top: 0;
+      }
+      .tagged li:last-child,
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+      .tagged .chip {
+        justify-self: start;
+      }
+      .tag-breaking,
+      .tag-known-issue {
+        background: var(--del-bg);
+        color: var(--del);
+      }
+      .tag-decision,
+      .tag-scope {
+        background: var(--warn-bg);
+        color: var(--warn);
+      }
+      .tag-deferred,
+      .tag-unverified {
+        background: var(--hover);
+        color: var(--dim);
+      }
+
+      .tree {
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--panel);
+        overflow-x: auto;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 2ch 2ch 7ch 7ch;
+        gap: 8px;
+        align-items: baseline;
+        line-height: 1.6;
+      }
+      .row:hover {
+        background: var(--hover);
+      }
+      .row-component {
+        grid-template-columns: var(--name-col, 14rem) 2ch minmax(0, 1fr);
+      }
+      .name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: pre;
+      }
+      .branch {
+        color: var(--dim);
+      }
+      .dir {
+        font-weight: 600;
+      }
+      .row .add,
+      .row .del {
+        text-align: right;
+      }
+      .st {
+        font-weight: 700;
+        text-align: center;
+      }
+      .st-A {
+        color: var(--add);
+      }
+      .st-M,
+      .st-R,
+      .st-C {
+        color: var(--warn);
+      }
+      .st-D {
+        color: var(--del);
+      }
+      .bucket {
+        color: var(--dim);
+        font-size: 11px;
+        text-align: center;
+      }
+      .bucket-production {
+        color: var(--accent);
+      }
+      .owns {
+        color: var(--dim);
+        font-family: var(--sans);
+      }
+
+      /* Entries are separated by space alone; each ends in its code box,
+         which already closes it off. */
+      .excerpt {
+        margin-top: 16px;
+      }
+      .excerpt + .excerpt {
+        margin-top: 32px;
+      }
+      .excerpt-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 4px 8px;
+      }
+      .excerpt-title {
+        margin: 0;
+      }
+      .excerpt-path {
+        margin-left: auto;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--dim);
+        font-size: 12px;
+      }
+      .excerpt-note {
+        margin: 4px 0 10px;
+      }
+      .code {
+        margin: 0;
+        padding: 8px 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--panel);
+        overflow-x: auto;
+      }
+      .chip-unchanged {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        color: var(--dim);
+      }
+      .ln {
+        display: flex;
+        padding: 0 12px 0 0;
+        white-space: pre;
+      }
+      .ln-gap {
+        color: var(--dim);
+        user-select: none;
+      }
+      .no {
+        flex: none;
+        width: 7ch;
+        padding-right: 1.5ch;
+        color: var(--dim);
+        text-align: right;
+        user-select: none;
+        font-variant-numeric: tabular-nums;
+      }
+      .sign {
+        flex: none;
+        width: 2ch;
+        user-select: none;
+      }
+      /* Changed lines are marked by a tinted row and a coloured sign; the
+         code keeps its syntax colours so it stays readable. */
+      .ln-plus {
+        background: var(--add-bg);
+      }
+      .ln-plus .sign,
+      .ln-plus .no {
+        color: var(--add);
+      }
+      .ln-minus {
+        background: var(--del-bg);
+      }
+      .ln-minus .sign,
+      .ln-minus .no {
+        color: var(--del);
+      }
+      /* The part of a changed line that actually changed. */
+      mark {
+        border-radius: 2px;
+        color: inherit;
+      }
+      .ln-plus mark {
+        background: var(--add-mark);
+      }
+      .ln-minus mark {
+        background: var(--del-mark);
+      }
+      .tok-comment {
+        color: var(--dim);
+        font-style: italic;
+      }
+      .tok-keyword {
+        color: var(--tok-keyword);
+      }
+      .tok-string {
+        color: var(--tok-string);
+      }
+      .tok-number,
+      .tok-property {
+        color: var(--tok-number);
+      }
+      .tok-type {
+        color: var(--tok-type);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+      }
+      th:first-child,
+      td:first-child {
+        padding-left: 0;
+      }
+      /* A command broken at a hyphen reads as two arguments; the table
+         scrolls in its wrapper instead. */
+      td code {
+        overflow-wrap: normal;
+      }
+      th {
+        color: var(--dim);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .chip {
+        display: inline-block;
+        padding: 0 6px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .chip-new,
+      .chip-pass,
+      .chip-added,
+      .chip-modified,
+      .chip-existing {
+        background: var(--add-bg);
+        color: var(--add);
+      }
+      .chip-removed,
+      .chip-fail,
+      .chip-gap {
+        background: var(--del-bg);
+        color: var(--del);
+      }
+      .chip-changed,
+      .chip-not-run,
+      .chip-manual,
+      .chip-unrelated {
+        background: var(--warn-bg);
+        color: var(--warn);
+      }
+
+      .shots {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+        gap: 16px;
+      }
+      figure {
+        margin: 0;
+      }
+      figure img {
+        max-width: 100%;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+      figcaption {
+        margin-top: 4px;
+        color: var(--dim);
+        font-size: 13px;
+      }
+
+      .graph {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--panel);
+        overflow: hidden;
+      }
+      .graph-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px 12px;
+        padding: 6px 6px 6px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .graph-hint {
+        margin: 0;
+        color: var(--dim);
+        font-size: 12px;
+      }
+      .graph-tools {
+        display: flex;
+        gap: 4px;
+      }
+      .graph-tools button {
+        display: inline-grid;
+        place-items: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--bg);
+        color: var(--text);
+        font: 500 13px var(--sans);
+        cursor: pointer;
+      }
+      .graph-tools button:hover {
+        border-color: var(--border-strong);
+        background: var(--hover);
+      }
+      .graph-tools svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+      }
+      .graph > svg {
+        display: block;
+        width: 100%;
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+      }
+      /* The panel clips its children, so the ring sits inside the edge. */
+      .graph > svg:focus-visible {
+        outline-offset: -3px;
+      }
+      .graph > svg.dragging {
+        cursor: grabbing;
+      }
+      .edge {
+        fill: none;
+        stroke: var(--edge);
+        stroke-width: 1.5;
+      }
+      .arrowhead {
+        fill: var(--edge);
+      }
+      .status-blocked {
+        --node-fill: var(--node-blocked-fill);
+        --node-stroke: var(--node-blocked-stroke);
+      }
+      .status-ready {
+        --node-fill: var(--node-ready-fill);
+        --node-stroke: var(--node-ready-stroke);
+      }
+      .status-implementing,
+      .status-validating {
+        --node-fill: var(--node-active-fill);
+        --node-stroke: var(--node-active-stroke);
+      }
+      .status-awaiting-human-review {
+        --node-fill: var(--node-review-fill);
+        --node-stroke: var(--node-review-stroke);
+      }
+      .status-approved {
+        --node-fill: var(--node-approved-fill);
+        --node-stroke: var(--node-approved-stroke);
+      }
+      .status-integrated,
+      .status-verified {
+        --node-fill: var(--node-done-fill);
+        --node-stroke: var(--node-done-stroke);
+      }
+      .node rect {
+        fill: var(--node-fill);
+        stroke: var(--node-stroke);
+        stroke-width: 1.5;
+      }
+      /* Blocked and ready are both neutral; the dash tells them apart
+         without relying on the fill. */
+      .node.status-blocked rect {
+        stroke-dasharray: 5 3;
+      }
+      .node-current rect {
+        stroke-width: 3;
+      }
+      .node-id {
+        fill: var(--text);
+        font: 700 13px var(--mono);
+      }
+      .node-status {
+        fill: var(--dim);
+        font: 500 11px var(--sans);
+      }
+      .node-title {
+        fill: var(--dim);
+        font: 12px var(--sans);
+      }
+      .node .badge rect {
+        fill: var(--accent);
+        stroke: none;
+      }
+      .node .badge text {
+        fill: var(--bg);
+        font: 600 11px var(--sans);
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+        margin-top: 8px;
+        color: var(--dim);
+        font-size: 13px;
+      }
+      .swatch {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 6px;
+        border: 1.5px solid var(--node-stroke);
+        border-radius: var(--radius-sm);
+        background: var(--node-fill);
+        vertical-align: -1px;
+      }
+      .swatch.status-blocked {
+        border-style: dashed;
+      }
+
+      @media (max-width: 600px) {
+        main {
+          padding: 24px 14px 48px;
+        }
+        .totals {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .tree {
+          padding: 10px 12px;
+        }
+        .row {
+          grid-template-columns: minmax(0, 1fr) 1.5ch 1.5ch 6ch 6ch;
+          gap: 6px;
+        }
+        .row-component {
+          grid-template-columns: minmax(0, 1fr) 1.5ch;
+        }
+        .row-component .owns {
+          grid-column: 1 / -1;
+          padding-left: 2ch;
+        }
+        .tagged li {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 4px;
+        }
+      }
+
+      @media print {
+        :root {
+          color-scheme: light;
+        }
+        body {
+          font-size: 10.5pt;
+        }
+        main {
+          max-width: none;
+          padding: 0;
+        }
+        .graph-bar,
+        .toc {
+          display: none;
+        }
+        .tree,
+        .code,
+        .table-wrap {
+          overflow: visible;
+        }
+        .ln,
+        .name {
+          white-space: pre-wrap;
+        }
+        .row:hover {
+          background: none;
+        }
+        .excerpt,
+        .total,
+        tr,
+        figure,
+        .graph {
+          break-inside: avoid;
+        }
+        h2,
+        h3,
+        .excerpt-head {
+          break-after: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header><!--{{scope}}--></header>
+      <!--{{nav}}-->
+
+      <section id="outcome">
+        <h2>Outcome</h2>
+        <!--{{outcome}}-->
+      </section>
+
+      <section id="snapshot">
+        <h2>Change snapshot</h2>
+        <!--{{snapshot}}-->
+      </section>
+
+      <section id="interfaces">
+        <h2>Interfaces<!--{{n_interfaces}}--></h2>
+        <!--{{interfaces}}-->
+      </section>
+
+      <section id="tests">
+        <h2>Test coverage</h2>
+        <!--{{tests}}-->
+      </section>
+
+      <section id="validation">
+        <h2>Validation</h2>
+        <!--{{validation}}-->
+      </section>
+
+      <section id="attention">
+        <h2>Needs attention<!--{{n_attention}}--></h2>
+        <!--{{attention}}-->
+      </section>
+
+      <!--{{graph}}-->
+    </main>
+    <script>
+      // Marks the section in view in the sticky links, so the reader always
+      // knows where they are in a long brief.
+      const links = new Map(
+        [...document.querySelectorAll(".toc a")].map((link) => [link.getAttribute("href").slice(1), link]),
+      );
+      const watcher = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            for (const link of links.values()) link.removeAttribute("aria-current");
+            links.get(entry.target.id)?.setAttribute("aria-current", "true");
+          }
+        },
+        { rootMargin: "-15% 0px -75% 0px" },
+      );
+      for (const id of links.keys()) watcher.observe(document.getElementById(id));
+    </script>
+    <script>
+      // Pan and zoom for the task graph: drag or arrow keys to pan; Ctrl or
+      // Cmd with the wheel, a pinch, or + and - to zoom. A plain wheel is left
+      // to the page so scrolling past the graph never gets stuck on it. The
+      // chart is SVG, so it stays sharp at any zoom and needs no library.
+      for (const svg of document.querySelectorAll(".graph > svg")) {
+        const full = svg.viewBox.baseVal;
+        const home = { x: full.x, y: full.y, width: full.width, height: full.height };
+        const view = { ...home };
+        const apply = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.width} ${view.height}`);
+        const reset = () => {
+          Object.assign(view, home);
+          apply();
+        };
+        const zoom = (factor, clientX, clientY) => {
+          const box = svg.getBoundingClientRect();
+          const width = Math.min(home.width * 4, Math.max(home.width / 8, view.width * factor));
+          const scale = width / view.width;
+          const fx = clientX === undefined ? 0.5 : (clientX - box.left) / box.width;
+          const fy = clientY === undefined ? 0.5 : (clientY - box.top) / box.height;
+          view.x += view.width * fx * (1 - scale);
+          view.y += view.height * fy * (1 - scale);
+          view.width = width;
+          view.height *= scale;
+          apply();
+        };
+
+        svg.addEventListener(
+          "wheel",
+          (event) => {
+            // Browsers report a trackpad pinch as a wheel event with ctrlKey.
+            if (!event.ctrlKey && !event.metaKey) return;
+            event.preventDefault();
+            zoom(event.deltaY > 0 ? 1.1 : 1 / 1.1, event.clientX, event.clientY);
+          },
+          { passive: false },
+        );
+
+        const PAN = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+        svg.addEventListener("keydown", (event) => {
+          if (event.ctrlKey || event.metaKey || event.altKey) return;
+          const pan = PAN[event.key];
+          if (pan) {
+            view.x += pan[0] * view.width * 0.1;
+            view.y += pan[1] * view.height * 0.1;
+            apply();
+          } else if (event.key === "+" || event.key === "=") zoom(1 / 1.3);
+          else if (event.key === "-" || event.key === "_") zoom(1.3);
+          else if (event.key === "0") reset();
+          else return;
+          event.preventDefault();
+        });
+
+        let drag;
+        svg.addEventListener("pointerdown", (event) => {
+          drag = { x: event.clientX, y: event.clientY };
+          svg.setPointerCapture(event.pointerId);
+          svg.classList.add("dragging");
+        });
+        svg.addEventListener("pointermove", (event) => {
+          if (!drag) return;
+          const box = svg.getBoundingClientRect();
+          view.x -= ((event.clientX - drag.x) * view.width) / box.width;
+          view.y -= ((event.clientY - drag.y) * view.height) / box.height;
+          drag = { x: event.clientX, y: event.clientY };
+          apply();
+        });
+        const release = () => {
+          drag = undefined;
+          svg.classList.remove("dragging");
+        };
+        svg.addEventListener("pointerup", release);
+        svg.addEventListener("pointercancel", release);
+
+        const tools = svg.parentElement.querySelector(".graph-tools");
+        tools.querySelector("[data-zoom=in]").addEventListener("click", () => zoom(1 / 1.3));
+        tools.querySelector("[data-zoom=out]").addEventListener("click", () => zoom(1.3));
+        tools.querySelector("[data-zoom=fit]").addEventListener("click", reset);
+      }
+    </script>
+  </body>
+</html>

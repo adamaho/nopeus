@@ -37,7 +37,7 @@ is not required.
 
 Load [summarize](../summarize/SKILL.md), using the agent's skill tool or by reading
 the linked `SKILL.md` when no such tool exists. Use its shared design guidance and
-relevant references for implementation and human walkthroughs. If the graph lacks
+relevant references for implementation and human briefs. If the graph lacks
 a consequential decision, return the gap to `implement` when called by that workflow; when called
 directly, explain the gap and use the relevant planning skill within authorized
 scope. Block only affected work rather than inventing requirements.
@@ -113,18 +113,17 @@ failed checks or incomplete review ready for human approval.
 
 ## Obtain human approval and integrate
 
-For every proposed trunk integration, apply
-[summarize](../summarize/SKILL.md)'s approval brief before asking for approval.
-Load `summarize` again if it is no longer in context; do not write the brief from
-memory. Verify and refresh the worker's handoff against the final proposed commit,
-validation, and independent review. Deliver the brief to the human; an internal
-worker summary, passing checks, or a commit link alone does not satisfy this step.
+For every proposed trunk integration, build an approval brief with
+[summarize](../summarize/SKILL.md) before asking for approval. Load `summarize`
+again if it is no longer in context; it defines the brief, so do not write one
+from memory. Give it the task ID, the proposed commit, the compared trunk
+revision, and the current graph with statuses. Verify and refresh the worker's
+handoff against the final proposed commit, validation, and independent review
+first; unresolved review findings belong in the brief. An internal worker
+summary, passing checks, or a commit link alone does not satisfy this step.
 
-Explain the outcome, consequential design decisions, concrete diff or commit,
-validation, independent review results, and remaining limitations. Identify the
-task ID, proposed commit, and compared trunk revision. Then ask for explicit
-approval of that change. A PR is not required. Keep the brief proportional to the
-change, but do not defer it until the final feature summary or after integration.
+Then ask for explicit approval of that change. A PR is not required. Do not
+defer the brief until the final feature summary or after integration.
 
 Mark the task `awaiting-human-review` and wait for explicit approval of that
 change. Review feedback returns the task to implementation and affected checks.
@@ -147,6 +146,7 @@ After approval, integrate one task at a time:
 4. Verify the shared trunk update succeeded before marking the task `integrated`.
    Record the integrated commit and evidence in context, then unblock dependents
    and dispatch newly ready work. A local commit alone is not shared integration.
+   Then delete the task's brief page; `summarize` explains why.
 
 If trunk advances during integration, reconcile again rather than overwriting it.
 Later corrections to landed code are new tasks and commits with their own human
@@ -186,14 +186,13 @@ review to this feature's commits and affected current code, accounting for other
 trunk changes. Record the exact revisions covered. New defects become follow-up
 tasks that pass through the same validation and human approval gates.
 
-Load `summarize` again if it is no longer in context, then apply its written handoff
-to the whole outcome. Explain what works, how
-components fit together, consequential decisions, acceptance coverage, independent
-review results, integrated commits, and remaining limits. Distinguish integrated,
-verified, blocked, and awaiting-human-review work; do not imply integration means
-release or that a final summary retroactively approves changes.
+Load `summarize` again if it is no longer in context, then build its final
+handoff brief for the whole outcome. Give it the trunk revision from before the
+first task, the current trunk revision, and the final graph, so integrated,
+verified, blocked, and awaiting-human-review work stay distinct. Do not imply
+integration means release or that a final brief retroactively approves changes.
 
-When called by `implement`, return the walkthrough and evidence for delivery to
+When called by `implement`, return the brief and evidence for delivery to
 the human; when called directly, deliver them yourself. There is no final feature
 branch or mandatory feature PR. Completion requires evidence for the combined
 outcome, not merely that every worker finished.

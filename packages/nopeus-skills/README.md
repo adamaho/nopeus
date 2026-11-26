@@ -8,7 +8,7 @@ The canonical collection of shared agent skills, organized as the workspace pack
 - `adhd`: clear, concise communication on any topic.
 - `refine`: explore software ideas and resolve decisions with the human.
 - `spec`: clarify behavior, architecture, contracts, and acceptance in conversation context.
-- `summarize`: explain designs, proposed changes, and completed outcomes for human evaluation.
+- `summarize`: brief the human on each code change as one fixed-format HTML page, and guide design in specs.
 - `audit`: simplify specs and code changes, reusing test coverage and removing redundancy.
 - `graph`: maintain tasks, dependencies, parallelism constraints, and completion evidence in context.
 - `implement`: take an idea through planning and human-approved trunk integration in one conversation.
@@ -28,8 +28,10 @@ Install the whole collection so references between skills, such as
 conversation context; workers receive complete task prompts. No planning files
 are persisted. Ready independent tasks run in parallel within available capacity.
 
-`summarize` supplies shared design guidance, explains each proposed task change
-before human approval, and presents the combined outcome. `audit` simplifies
+`summarize` supplies shared design guidance, builds a brief for each proposed
+task change before human approval, and builds one for the combined outcome. A
+bundled Node script renders every brief from Git and a small data file, so the
+layout and the numbers never vary. `audit` simplifies
 plans and code. `orchestrate` requires independent correctness review and explicit
 human approval before integrating each task as one commit on trunk. Workers may
 make any number of checkpoint commits. Tickets and PRs are created only when

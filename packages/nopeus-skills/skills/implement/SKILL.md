@@ -58,7 +58,7 @@ independent work when another part is blocked.
 | Clarify contracts | [spec](../spec/SKILL.md), when useful | Concise architecture, public contracts, and acceptance examples in context. |
 | Plan tasks | [graph](../graph/SKILL.md) | In-context tasks, dependencies, parallelism constraints, completion requirements, and a flowchart. |
 | Coordinate implementation | [orchestrate](../orchestrate/SKILL.md) | Parallel workers, validation, independent review, and human-approved task integration into trunk. |
-| Explain changes | [summarize](../summarize/SKILL.md) | A clear brief for each human approval and a combined outcome summary. |
+| Explain changes | [summarize](../summarize/SKILL.md) | A brief for each human approval and one for the combined outcome. |
 
 Use `spec` only to clarify intent that needs more structure; do not rewrite settled
 requirements into a mandatory document. Let `graph` use agreed intent directly
@@ -97,18 +97,14 @@ assuming the previous context survived. Keep incomplete stages open.
 
 ## Hand off to the human
 
-Ensure `orchestrate` delivers `summarize`'s written brief for each proposed task
+Ensure `orchestrate` delivers `summarize`'s brief for each proposed task
 change before seeking integration approval. Independent correctness review and a
 summary do not themselves grant human approval.
 
-Load `summarize` before writing the combined outcome at the end of work, and follow
-it rather than writing the handoff from memory. Explain what changed,
-how the pieces fit, consequential decisions, acceptance coverage, exact validated
-and integrated revisions, independent review results, and remaining limitations.
-Distinguish integrated work from blocked, unfinished, or awaiting-review tasks.
-Do not imply integration means release.
+Load `summarize` at the end of work and build its final handoff brief for the
+combined outcome; it defines the brief, so do not write one from memory. Do not
+imply integration means release.
 
-Make the result understandable without opening code or earlier messages. Reuse
-already delivered walkthroughs with a concise recap. Link commits and any requested
-PRs or tickets as supporting evidence, not substitutes for explanation. Completion
-requires combined outcome evidence, not just completed worker assignments.
+Link any requested PRs or tickets alongside the brief as supporting evidence,
+not substitutes for it. Completion requires combined outcome evidence, not just
+completed worker assignments.
