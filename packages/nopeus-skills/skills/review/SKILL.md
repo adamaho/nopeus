@@ -54,12 +54,14 @@ say so and stop.
 
 ## Read the context
 
-- Read each changed file in full, not only the changed lines. Defects live where
-  new code meets old.
+- Read the whole diff, and read each changed file in full where its logic
+  lives, not only the changed lines. Defects live where new code meets old. On a
+  change too large to read every file whole, spend the reading where behavior
+  changed and say in `Examined` what you only skimmed.
 - Find what the change is meant to do: the task and its acceptance examples, a
   spec, a ticket, the PR description, or the commit message. If nothing states
   the intent, say intent is missing; do not invent requirements to review
-  against.
+  against. If a source exists but you could not read it, say which.
 - Read the callers and consumers of anything the change alters.
 - Note the project's conventions from its agent instructions, lint and format
   configuration, and neighbouring code.
@@ -78,7 +80,11 @@ read-through agrees its way past.
   ones are met, partly met, or missing?
 - Look for behavior the request did not ask for: extra scope, changed defaults,
   removed features, or altered contracts for existing callers.
-- Check that what was removed was meant to be removed.
+- Check that what was removed was meant to be removed. Behavior that
+  disappeared without the stated intent mentioning it is a Warning even when it
+  looks deliberate, with its tests deleted alongside it: you cannot know it was
+  intended, and the human would want to. The author closes it by restoring the
+  behavior or by saying it was intended.
 
 ### Saboteur
 
@@ -127,9 +133,14 @@ redundant tests to [audit](../audit/SKILL.md).
 
 ### Then audit
 
-Load [audit](../audit/SKILL.md) and apply it in its review-only role, so it
-reports and does not edit. Fold its findings into the same report. Anything
-`audit` covers is reported once, from `audit`.
+Load [audit](../audit/SKILL.md) and apply it in its review-only role: wherever
+it says to apply a simplification or edit a test, report the finding instead.
+Keep it to this change. Its search for redundant tests covers the tests this
+change adds, not the whole suite.
+
+Fold its findings into the same report, ranked by the same severities, with
+`Audit` where a lens name would go. Anything `audit` covers is reported once,
+from `audit`.
 
 ### When to split the lenses
 
@@ -138,7 +149,9 @@ enough for most changes. Give each lens its own subagent when a deep review is
 asked for, when the change is over about 400 changed production lines, or when
 it touches authentication, payments, or data access, and the harness can start
 subagents. Separate reviewers cannot anchor on each other's conclusions. Merge
-their findings into one report yourself.
+their findings into one report yourself. When a split was called for and you
+could not make one, as a reviewer that is itself a subagent usually cannot, run
+the lenses in order and say so in `Examined`.
 
 ## Read against your own assumptions
 
@@ -159,7 +172,8 @@ exist, so say how you know.
 - **Confirmed:** you reproduced it by running something, or traced the code to
   a specific input that fails. Give the input or the command.
 - **Suspected:** plausible from reading, not confirmed. Say what would confirm
-  it.
+  it. A trace that depends on timing or on the order a framework schedules work
+  is Suspected until something runs it.
 
 Run what helps: the project's own tests and checks, a focused script, or a
 throwaway test. Keep anything you write for this out of the change. A Critical
@@ -224,7 +238,9 @@ authoring agent reads it.
   the first line; then `file:line` with the failure and when it happens; then a
   fix concrete enough to apply. Notes carry no Confirmed or Suspected label.
 - **Examined:** always present. List what you traced, what you ran and its
-  result, and the single most fragile assumption the change rests on.
+  result, anything you could not read or run, and the single most fragile
+  assumption the change rests on. Keep it to what a reader needs to trust the
+  verdict; group related traces into one line.
 
 `Examined` is what makes a clean review worth believing. You may conclude there
 are no issues, but only by showing what you looked at. Never invent a finding
@@ -235,6 +251,9 @@ to avoid a clean verdict, and never give one without the evidence.
 | Blocked | One or more Critical | Each Critical is fixed, or withdrawn on the author's evidence. Re-review. |
 | Changes requested | No Critical, one or more Warning | Each Warning is fixed, or declined with a reason for the human to accept. Re-review what was fixed. |
 | Clean | Notes only, or nothing | No re-review. |
+
+The verdict follows severity alone. A Suspected Warning still asks for changes:
+the author confirms it and fixes it, or shows why it cannot happen.
 
 ## Stay out of the code
 
