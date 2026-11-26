@@ -217,6 +217,13 @@
         background: var(--panel);
         overflow-x: auto;
       }
+      .diff-rich {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        --diffs-font-family: var(--mono);
+        --diffs-font-size: 13px;
+      }
       .ln {
         display: block;
         padding: 0 12px;
@@ -404,6 +411,37 @@
 
       <!--{{graph}}-->
     </main>
+    <script type="module">
+      // Upgrades each excerpt to a syntax-highlighted diff with @pierre/diffs,
+      // loaded from a CDN. The plain coloured excerpt already on the page stays
+      // when the library cannot load, so the brief still reads offline.
+      const excerpts = [...document.querySelectorAll(".diff[data-patch]")];
+      if (excerpts.length > 0) {
+        try {
+          const { FileDiff, getSingularPatch } = await import("https://esm.sh/@pierre/diffs@1.7.2");
+          for (const excerpt of excerpts) {
+            const mount = document.createElement("div");
+            mount.className = "diff-rich";
+            try {
+              new FileDiff({
+                diffStyle: "unified",
+                disableFileHeader: true,
+                diffIndicators: "classic",
+                hunkSeparators: "simple",
+                overflow: "scroll",
+                theme: { dark: "pierre-dark", light: "pierre-light" },
+                themeType: "system",
+              }).render({ fileDiff: getSingularPatch(excerpt.dataset.patch), containerWrapper: mount });
+              excerpt.replaceChildren(mount);
+            } catch (error) {
+              console.warn("brief: kept the plain excerpt", error);
+            }
+          }
+        } catch (error) {
+          console.warn("brief: syntax highlighting unavailable", error);
+        }
+      }
+    </script>
     <script>
       // Pan and zoom for the task graph: drag to pan, scroll or pinch to zoom.
       // The chart is SVG, so it stays sharp at any zoom and needs no library.

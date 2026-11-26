@@ -481,8 +481,8 @@ function excerpt(entry) {
     const sign = file?.untracked ? "+" : " ";
     return text
       .split("\n")
-      .map((line, index) => ({ sign, text: line, line: index + 1 }))
-      .filter((line) => inRanges(ranges, line.line));
+      .map((line, index) => ({ sign, text: line, oldLine: file?.untracked ? 1 : index + 1, newLine: index + 1 }))
+      .filter((line) => inRanges(ranges, line.newLine));
   }
 
   const paths = file.oldPath ? [file.oldPath, file.path] : [file.path];
@@ -503,14 +503,14 @@ function excerpt(entry) {
     const sign = raw[0];
     const text = raw.slice(1);
     if (sign === "+") {
-      if (!useOld && inRanges(ranges, newLine)) lines.push({ sign, text, line: newLine });
+      if (!useOld && inRanges(ranges, newLine)) lines.push({ sign, text, oldLine, newLine });
       newLine += 1;
     } else if (sign === "-") {
       // A removed line belongs to the new-side range it was removed from.
-      if (useOld ? inRanges(ranges, oldLine) : inRanges(ranges, newLine)) lines.push({ sign, text, line: oldLine });
+      if (useOld ? inRanges(ranges, oldLine) : inRanges(ranges, newLine)) lines.push({ sign, text, oldLine, newLine });
       oldLine += 1;
     } else if (sign === " ") {
-      if (inRanges(ranges, useOld ? oldLine : newLine)) lines.push({ sign, text, line: useOld ? oldLine : newLine });
+      if (inRanges(ranges, useOld ? oldLine : newLine)) lines.push({ sign, text, oldLine, newLine });
       oldLine += 1;
       newLine += 1;
     }
@@ -532,6 +532,33 @@ function renderCode(lines) {
     .join("")}</pre>`;
 }
 
+// Rebuilds a unified patch from the selected lines. Each line carries the old
+// and new position it sits at, so hunks keep their real line numbers and a
+// gap between selected ranges starts a new hunk.
+function toPatch(file, lines) {
+  const hunks = [];
+  let hunk;
+  for (const line of lines) {
+    const fits =
+      hunk !== undefined &&
+      (line.sign === "+" || line.oldLine === hunk.oldStart + hunk.oldCount) &&
+      (line.sign === "-" || line.newLine === hunk.newStart + hunk.newCount);
+    if (!fits) {
+      hunk = { oldStart: line.oldLine, newStart: line.newLine, oldCount: 0, newCount: 0, body: [] };
+      hunks.push(hunk);
+    }
+    if (line.sign !== "+") hunk.oldCount += 1;
+    if (line.sign !== "-") hunk.newCount += 1;
+    hunk.body.push(`${line.sign}${line.text}`);
+  }
+  const start = (first, count) => (count === 0 ? Math.max(0, first - 1) : first);
+  const body = hunks.map(
+    (h) =>
+      `@@ -${start(h.oldStart, h.oldCount)},${h.oldCount} +${start(h.newStart, h.newCount)},${h.newCount} @@\n${h.body.join("\n")}`,
+  );
+  return `diff --git a/${file} b/${file}\n--- a/${file}\n+++ b/${file}\n${body.join("\n")}\n`;
+}
+
 function renderExcerpt(entry, label) {
   const lines = excerpt(entry);
   const spec = isText(entry.lines) ? entry.lines : entry.oldLines;
@@ -542,7 +569,7 @@ function renderExcerpt(entry, label) {
   return `<div class="excerpt">
   <div class="excerpt-head"><code>${esc(entry.file)}:${esc(spec)}</code></div>
   ${entry.note ? `<p class="excerpt-note">${inline(entry.note)}</p>` : ""}
-  ${renderCode(lines)}
+  <div class="diff" data-patch="${esc(toPatch(entry.file, lines))}">${renderCode(lines)}</div>
 </div>`;
 }
 
