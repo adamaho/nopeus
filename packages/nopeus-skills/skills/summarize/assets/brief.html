@@ -56,8 +56,10 @@
 
         --radius-sm: 4px;
         --radius: 8px;
-        /* About 75 characters of Geist; ch is the wide "0", so 70ch ran to 95. */
-        --measure: 34em;
+        /* One column for everything, so text, code and tables share both
+           edges. Narrow enough that running text stays readable without a
+           separate, shorter measure leaving a ragged gap on the right. */
+        --page: 720px;
         /* Geist when it is installed; nothing is fetched, so system fonts
            are the fallback. */
         --sans: "Geist", "Geist Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -133,7 +135,7 @@
         overflow-wrap: break-word;
       }
       main {
-        max-width: 960px;
+        max-width: var(--page);
         margin: 0 auto;
         padding: 32px 20px 64px;
       }
@@ -274,10 +276,7 @@
         line-height: 1.4;
         text-wrap: balance;
       }
-      /* Running text keeps a readable measure; trees, code, tables and the
-         graph still use the full page width. */
       main :is(p, ul) {
-        max-width: var(--measure);
         text-wrap: pretty;
       }
       ul {
@@ -394,7 +393,7 @@
       }
       .tagged li {
         display: grid;
-        grid-template-columns: 7rem minmax(0, var(--measure));
+        grid-template-columns: 7rem minmax(0, 1fr);
         gap: 12px;
         align-items: baseline;
         padding: 10px 0;
