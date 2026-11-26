@@ -4,11 +4,11 @@ description: >-
   Brief a human on a code change as one fixed-format HTML page built by a
   bundled script: file tree with line counts, production versus test lines,
   public interface diffs, test summary, validation, and screenshots. Use
-  whenever someone asks to summarize, review, explain, or walk through a diff,
+  whenever someone asks to summarize, explain, or walk through a diff,
   branch, commit, or PR, and for every approval brief and final handoff in
   implement or orchestrate, even when they only ask "what changed?". Also
-  supplies design guidance when shaping specs. Does not replace independent
-  correctness review.
+  supplies design guidance when shaping specs. To find defects in a change, use
+  review.
 ---
 
 # Summarize

@@ -118,14 +118,17 @@ unfinished. Follow
 the graph's exposure, compatibility, migration, and recovery requirements.
 
 Consolidate the task's checkpoint commits into one proposed commit before human
-review. Preserve unrelated work. Give the independent reviewer the task context,
-relevant code, concrete diff against its base, and validation evidence. Apply
-`audit` for unnecessary complexity and duplicated coverage. If no independent
-reviewer is available, mark review blocked and explain why.
+review. Preserve unrelated work. Have the independent reviewer load
+[review](../review/SKILL.md) and follow it; it defines the review, its report,
+and how findings close. Give the reviewer the task, its acceptance examples, the
+proposed commit, the feature-branch revision it is compared with, and the
+validation evidence. If no independent reviewer is available, mark review
+blocked and explain why.
 
-Fix clear defects within scope, rerun affected checks, and obtain renewed review.
-Address findings or explain with evidence why no change is needed. Stop affected
-work and report the blocker when repeated repairs make no progress. Do not call
+Send the reviewer's report to the worker that wrote the task, in its existing
+session, to fix within scope and rerun affected checks, then return the result to
+the same reviewer for re-review. Stop affected work and bring it to the human
+when `review` says to. Do not call
 failed checks or incomplete review ready for human approval.
 
 ## Obtain human approval and integrate
@@ -136,7 +139,7 @@ again if it is no longer in context; it defines the brief, so do not write one
 from memory. Give it the task ID, the proposed commit, the feature-branch
 revision it is compared with, and the current graph with statuses. Verify and refresh the worker's
 handoff against the final proposed commit, validation, and independent review
-first; unresolved review findings belong in the brief. An internal worker
+first; findings `review` leaves for the human belong in the brief. An internal worker
 summary, passing checks, or a commit link alone does not satisfy this step.
 
 Then ask for explicit approval of that change. Do not defer the brief until the
@@ -199,9 +202,9 @@ files or claim that context will survive. Verify actual state on resume.
 ## Verify the combined outcome and open the PR
 
 As tasks integrate, verify their combined behavior on the feature branch against
-feature acceptance examples and relevant regressions. Obtain independent review
-of the combined changes, including `audit` for interactions and complexity across
-tasks. Record the exact revisions covered. New defects become follow-up tasks
+feature acceptance examples and relevant regressions. Obtain an independent
+[review](../review/SKILL.md) of the combined changes, with the whole feature
+branch against trunk as its scope, so interactions across tasks are covered. Record the exact revisions covered. New defects become follow-up tasks
 that pass through the same validation and human approval gates.
 
 When every task is integrated or verified, bring the feature branch up to date
