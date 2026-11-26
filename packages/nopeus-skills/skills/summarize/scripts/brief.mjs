@@ -9,7 +9,7 @@
 // Usage: node brief.mjs <data.json> [--out <file.html>] [--repo <dir>]
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -33,8 +33,8 @@ const STATUSES = {
 const NODE_TEXT = "#1c2024"; // slate-12
 const DONE = new Set(["integrated", "verified"]);
 const BUCKETS = ["production", "tests", "other"];
-const OUT_DIR = "briefs";
-const GIT_STATUS = { A: "added", M: "modified", D: "deleted", R: "renamed", C: "added" };
+const OUT_DIR = ".briefs";
+const MAX_AGE_DAYS = 14;
 const MIME = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
@@ -51,11 +51,17 @@ const flag = (name) => {
   const index = args.indexOf(name);
   return index === -1 ? undefined : args.splice(index, 2)[1];
 };
+const pruneOnly = args.includes("--prune");
 const outFlag = flag("--out");
 const repoFlag = flag("--repo");
 const dataPath = args[0];
 
-if (!dataPath) fail(["Usage: node brief.mjs <data.json> [--out <file.html>] [--repo <dir>]"]);
+if (pruneOnly) {
+  const removed = prune(defaultOutDir());
+  console.log(removed.length === 0 ? "No briefs to remove" : `Removed ${removed.length}:\n${removed.join("\n")}`);
+  process.exit(0);
+}
+if (!dataPath) fail(["Usage: node brief.mjs <data.json> [--out <file.html>] [--repo <dir>]\n       node brief.mjs --prune"]);
 if (!existsSync(dataPath)) fail([`Data file not found: ${dataPath}`]);
 
 let data;
@@ -448,30 +454,7 @@ function renderTree() {
     });
   };
   walk(root, "", true);
-  // The same tree as data, for the interactive file tree that replaces this
-  // plain one when its library loads.
-  const payload = {
-    rows: rows.length,
-    files: treeEntries().map((entry) =>
-      entry.group
-        ? {
-            path: entry.path.replace("\u0000", `${entry.count} generated ${entry.count === 1 ? "file" : "files"}`),
-            bucket: "other",
-            added: entry.added,
-            deleted: entry.deleted,
-          }
-        : {
-            path: entry.path,
-            status: entry.untracked ? "untracked" : GIT_STATUS[entry.status],
-            bucket: entry.bucket,
-            added: entry.added,
-            deleted: entry.deleted,
-            binary: entry.binary,
-            from: entry.oldPath,
-          },
-    ),
-  };
-  return `<div class="tree" data-tree="${esc(JSON.stringify(payload))}">${rows.join("\n")}</div>`;
+  return `<div class="tree">${rows.join("\n")}</div>`;
 }
 
 function renderFileRow(file, branch) {
@@ -574,46 +557,134 @@ function dedent(lines) {
   return lines.map((line) => line.text.slice(Number.isFinite(indent) ? indent : 0));
 }
 
-function renderCode(lines, plain) {
-  // Strip shared indentation so nested signatures stay readable.
-  const indent = Math.min(
-    ...lines.filter((line) => line.text.trim() !== "").map((line) => line.text.match(/^[ \t]*/)[0].length),
-  );
-  const strip = Number.isFinite(indent) ? indent : 0;
-  return `<pre class="code">${lines
-    .map((line) => {
-      if (plain) return `<span class="ln">${esc(line.text.slice(strip)) || " "}</span>`;
-      const kind = line.sign === "+" ? "plus" : line.sign === "-" ? "minus" : "ctx";
-      return `<span class="ln ln-${kind}"><span class="sign">${line.sign === " " ? " " : line.sign}</span>${esc(line.text.slice(strip)) || " "}</span>`;
-    })
-    .join("")}</pre>`;
+// Syntax colouring without a library, so the page needs no network and the
+// skill no install. It works a line at a time on strings, comments, numbers,
+// keywords and capitalised names, which is enough to make a signature easy to
+// read. It is deliberately not a parser: a construct spanning several lines,
+// such as a template string, is coloured as plain code.
+const KEYWORDS = new Set(
+  (
+    "abstract as async await break case catch class const continue declare def default defer delete do elif else " +
+    "enum export extends false final finally fn for from func function get if impl implements import in instanceof " +
+    "interface internal is lambda let match module mut namespace new nil null of open override package pass private " +
+    "protected pub public readonly return sealed self set static struct super suspend switch this throw trait true " +
+    "try type typeof undefined use val var void when where while with yield None True False"
+  ).split(" "),
+);
+const C_LIKE = new Set(
+  "ts tsx mts cts js jsx mjs cjs json jsonc java kt kts swift go rs c h cc cpp hpp cs php scala dart css scss".split(" "),
+);
+const HASH_COMMENTS = new Set("py rb sh bash zsh yaml yml toml ini conf tf".split(" "));
+const STRING = "\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'|`(?:\\\\.|[^`\\\\])*`";
+const NUMBER = "\\b(?:0x[\\da-fA-F]+|\\d[\\d_]*(?:\\.\\d+)?)\\b";
+const WORD = "[A-Za-z_$][\\w$]*";
+const TOKENS = {
+  c: new RegExp(`(${STRING})|(//.*$|/\\*.*?(?:\\*/|$))|(${NUMBER})|(${WORD})`, "g"),
+  hash: new RegExp(`(${STRING})|(#.*$)|(${NUMBER})|(${WORD})`, "g"),
+};
+
+function tokenize(text, file) {
+  const extension = extname(file).slice(1).toLowerCase();
+  const family = C_LIKE.has(extension) ? "c" : HASH_COMMENTS.has(extension) ? "hash" : undefined;
+  if (!family) return [{ text }];
+  // A line inside a block comment starts with its continuation star.
+  if (family === "c" && /^\s*\*(\s|\/|$)/.test(text)) return [{ text, kind: "comment" }];
+
+  const tokens = [];
+  let last = 0;
+  for (const match of text.matchAll(TOKENS[family])) {
+    if (match.index > last) tokens.push({ text: text.slice(last, match.index) });
+    const [value, string, comment, number, word] = match;
+    const after = text.slice(match.index + value.length);
+    let kind;
+    if (string !== undefined) kind = /^\s*:/.test(after) ? "property" : "string";
+    else if (comment !== undefined) kind = "comment";
+    else if (number !== undefined) kind = "number";
+    else if (KEYWORDS.has(word)) kind = "keyword";
+    else if (/^[A-Z]/.test(word)) kind = "type";
+    else if (family === "hash" && /^:(\s|$)/.test(after) && /^\s*(-\s+)?$/.test(text.slice(0, match.index))) {
+      kind = "property";
+    }
+    tokens.push({ text: value, kind });
+    last = match.index + value.length;
+  }
+  if (last < text.length) tokens.push({ text: text.slice(last) });
+  return tokens;
 }
 
-// Rebuilds a unified patch from the selected lines. Each line carries the old
-// and new position it sits at, so hunks keep their real line numbers and a
-// gap between selected ranges starts a new hunk.
-function toPatch(file, lines) {
-  const hunks = [];
-  let hunk;
-  for (const line of lines) {
-    const fits =
-      hunk !== undefined &&
-      (line.sign === "+" || line.oldLine === hunk.oldStart + hunk.oldCount) &&
-      (line.sign === "-" || line.newLine === hunk.newStart + hunk.newCount);
-    if (!fits) {
-      hunk = { oldStart: line.oldLine, newStart: line.newLine, oldCount: 0, newCount: 0, body: [] };
-      hunks.push(hunk);
+// Renders one line's tokens, wrapping the characters in [mark.start, mark.end)
+// so a changed line shows exactly which part of it changed.
+function renderTokens(tokens, mark) {
+  let offset = 0;
+  return tokens
+    .map((token) => {
+      const start = offset;
+      offset += token.text.length;
+      const pieces = [];
+      const cut = mark ? [Math.max(mark.start, start), Math.min(mark.end, offset)] : [0, 0];
+      if (cut[0] < cut[1]) {
+        pieces.push(esc(token.text.slice(0, cut[0] - start)));
+        pieces.push(`<mark>${esc(token.text.slice(cut[0] - start, cut[1] - start))}</mark>`);
+        pieces.push(esc(token.text.slice(cut[1] - start)));
+      } else {
+        pieces.push(esc(token.text));
+      }
+      return token.kind ? `<span class="tok-${token.kind}">${pieces.join("")}</span>` : pieces.join("");
+    })
+    .join("");
+}
+
+// When a run of removed lines is replaced by the same number of added lines,
+// pairs them and finds the span that differs, by trimming what they share at
+// both ends. Lines that share too little are left unmarked: highlighting most
+// of a line says nothing.
+function changedSpans(lines, texts) {
+  const spans = new Map();
+  for (let i = 0; i < lines.length; ) {
+    let removed = i;
+    while (removed < lines.length && lines[removed].sign === "-") removed += 1;
+    let added = removed;
+    while (added < lines.length && lines[added].sign === "+") added += 1;
+    const count = removed - i;
+    if (count > 0 && added - removed === count) {
+      for (let k = 0; k < count; k += 1) {
+        const before = texts[i + k];
+        const after = texts[removed + k];
+        let head = 0;
+        while (head < before.length && head < after.length && before[head] === after[head]) head += 1;
+        let tail = 0;
+        while (
+          tail < before.length - head &&
+          tail < after.length - head &&
+          before[before.length - 1 - tail] === after[after.length - 1 - tail]
+        ) {
+          tail += 1;
+        }
+        if (head + tail >= Math.min(before.length, after.length) / 2) {
+          spans.set(i + k, { start: head, end: before.length - tail });
+          spans.set(removed + k, { start: head, end: after.length - tail });
+        }
+      }
     }
-    if (line.sign !== "+") hunk.oldCount += 1;
-    if (line.sign !== "-") hunk.newCount += 1;
-    hunk.body.push(`${line.sign}${line.text}`);
+    i = Math.max(added, i + 1);
   }
-  const start = (first, count) => (count === 0 ? Math.max(0, first - 1) : first);
-  const body = hunks.map(
-    (h) =>
-      `@@ -${start(h.oldStart, h.oldCount)},${h.oldCount} +${start(h.newStart, h.newCount)},${h.newCount} @@\n${h.body.join("\n")}`,
-  );
-  return `diff --git a/${file} b/${file}\n--- a/${file}\n+++ b/${file}\n${body.join("\n")}\n`;
+  return spans;
+}
+
+function renderCode(lines, kind, file) {
+  // Strip shared indentation so nested signatures stay readable.
+  const texts = dedent(lines);
+  const diff = kind === "changed";
+  const spans = diff ? changedSpans(lines, texts) : new Map();
+  return `<pre class="code">${lines
+    .map((line, index) => {
+      const tone = !diff ? "ctx" : line.sign === "+" ? "plus" : line.sign === "-" ? "minus" : "ctx";
+      const number = line.sign === "-" ? line.oldLine : line.newLine;
+      const sign = diff ? `<span class="sign">${line.sign === " " ? " " : line.sign === "-" ? "−" : "+"}</span>` : "";
+      const source = renderTokens(tokenize(texts[index], file), spans.get(index)) || " ";
+      return `<span class="ln ln-${tone}"><span class="no">${number}</span>${sign}<span class="src">${source}</span></span>`;
+    })
+    .join("")}</pre>`;
 }
 
 function renderExcerpt(entry, label) {
@@ -624,10 +695,6 @@ function renderExcerpt(entry, label) {
     console.error(`brief: warning: ${entry.file}:${spec} is ${lines.length} lines; show signatures and types only`);
   }
   const kind = excerptKind(lines);
-  const source =
-    kind === "changed"
-      ? `data-patch="${esc(toPatch(entry.file, lines))}"`
-      : `data-name="${esc(basename(entry.file))}" data-code="${esc(dedent(lines).join("\n"))}"`;
   return `<article class="excerpt">
   <header class="excerpt-head">
     ${isText(entry.title) ? `<h3 class="excerpt-title">${inline(entry.title)}</h3>` : ""}
@@ -635,7 +702,7 @@ function renderExcerpt(entry, label) {
     <code class="excerpt-path">${esc(entry.file)}:${esc(spec)}</code>
   </header>
   ${entry.note ? `<p class="excerpt-note">${inline(entry.note)}</p>` : ""}
-  <div class="diff" ${source}>${renderCode(lines, kind !== "changed")}</div>
+  ${renderCode(lines, kind, entry.file)}
 </article>`;
 }
 
@@ -930,7 +997,8 @@ function mermaid() {
 // Built-in browser panes generally open only files inside the session's
 // workspace, so the page defaults to a folder in the repository the command
 // runs from. The folder is ignored through .git/info/exclude, which is local
-// to this clone: nothing is committed and no tracked file changes.
+// to this clone: nothing is committed and no tracked file changes, in any
+// repository the skill runs in.
 function defaultOutDir() {
   const here = { cwd: process.cwd(), encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] };
   try {
@@ -944,8 +1012,43 @@ function defaultOutDir() {
     }
     return join(root, OUT_DIR);
   } catch {
-    return join(tmpdir(), OUT_DIR, repoName);
+    return join(tmpdir(), OUT_DIR, basename(process.cwd()));
   }
+}
+
+// A brief is evidence for one approval and is stale once the change lands, so
+// every run clears the folder of pages whose change has merged into its base,
+// whose commit no longer exists, or that are older than MAX_AGE_DAYS. Pages
+// that include uncommitted work record a head that is already on the base, so
+// only their age counts. A page that cannot be read as a brief is left alone.
+function prune(dir, keep) {
+  if (!existsSync(dir)) return [];
+  const here = { cwd: process.cwd(), stdio: "ignore" };
+  const ok = (gitArgs) => {
+    try {
+      execFileSync("git", gitArgs, here);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const removed = [];
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    if (!name.endsWith(".html") || path === keep) continue;
+    const head = readFileSync(path, "utf8").slice(0, 2000);
+    const meta = (key) => head.match(new RegExp(`<meta name="brief-${key}" content="([^"]*)"`))?.[1];
+    const sha = meta("head");
+    if (!sha) continue;
+    const old = Date.now() - statSync(path).mtimeMs > MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+    const gone = !ok(["cat-file", "-e", `${sha}^{commit}`]);
+    const merged = meta("wip") !== "true" && !gone && ok(["merge-base", "--is-ancestor", sha, meta("base")]);
+    if (old || gone || merged) {
+      rmSync(path);
+      removed.push(path);
+    }
+  }
+  return removed;
 }
 
 const kindLabel = KINDS[data.kind];
@@ -996,6 +1099,7 @@ const navItems = [
 
 const slots = {
   title: esc(`${heading} · ${repoName}`),
+  meta: `<meta name="brief-head" content="${headSha}" /><meta name="brief-base" content="${esc(data.base)}" /><meta name="brief-wip" content="${uncommitted}" />`,
   scope: `<h1>${esc(heading)}</h1><p class="scope">${scopeParts.join(" · ")}</p><p class="glances">${glance}</p>`,
   nav: `<nav class="toc" aria-label="Sections">${navItems}</nav>`,
   n_interfaces: count(data.interfaces.length),
@@ -1018,6 +1122,7 @@ const fileName = `${(isText(data.task) ? data.task : data.kind).replace(/[^\w.-]
 const outPath = resolve(outFlag ?? join(defaultOutDir(), fileName));
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, page);
+if (!outFlag) prune(dirname(outPath), outPath);
 
 const stubScope = [
   `**${kindLabel}**`,

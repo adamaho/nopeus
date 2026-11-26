@@ -4,13 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><!--{{title}}--></title>
-    <!-- Geist loads from the network when it is not installed; system fonts are the fallback. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&display=swap"
-    />
+    <!--{{meta}}-->
     <style>
       /* Colours are Radix Colors v3 steps, inlined so the page works offline.
          Each token names its scale and step. Steps follow Radix semantics
@@ -36,6 +30,14 @@
         --focus: #0090ff; /* blue-9; blue-8 is under 3:1 on slate-1 */
         --selection: #c2e5ff; /* blue-5 */
         --edge: #8b8d98; /* slate-9 */
+        --add-mark: #c9e8ca; /* grass-5 */
+        --del-mark: #ffcdce; /* red-5 */
+        /* Syntax colours: step 11 of scales that clear 4.5:1 on the panel
+           and on both tinted diff rows. */
+        --tok-keyword: #6550b9; /* violet-11 */
+        --tok-string: #815e46; /* brown-11 */
+        --tok-number: #3a5bc7; /* indigo-11 */
+        --tok-type: #953ea3; /* plum-11 */
 
         /* Graph nodes: step 3 fill. Light outlines use step 11 because
            steps 8 to 10 stay under 3:1 against the panel. */
@@ -56,6 +58,8 @@
         --radius: 8px;
         /* About 75 characters of Geist; ch is the wide "0", so 70ch ran to 95. */
         --measure: 34em;
+        /* Geist when it is installed; nothing is fetched, so system fonts
+           are the fallback. */
         --sans: "Geist", "Geist Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
         --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
         scrollbar-color: var(--border-strong) transparent;
@@ -80,6 +84,12 @@
           --focus: #0090ff; /* blue-dark-9 */
           --selection: #004074; /* blue-dark-5 */
           --edge: #696e77; /* slate-dark-9 */
+          --add-mark: #2d5736; /* grass-dark-6 */
+          --del-mark: #72232d; /* red-dark-6 */
+          --tok-keyword: #baa7ff; /* violet-dark-11 */
+          --tok-string: #dbb594; /* brown-dark-11 */
+          --tok-number: #9eb1ff; /* indigo-dark-11 */
+          --tok-type: #e796f3; /* plum-dark-11 */
 
           /* Dark outlines use the border step 8, which clears 3:1 here. */
           --node-blocked-fill: #212225; /* slate-dark-3 */
@@ -307,7 +317,6 @@
       }
       .totals,
       .tree,
-      .tree-rich,
       table,
       .ran,
       .legend {
@@ -519,35 +528,68 @@
         border: 1px solid var(--border);
         color: var(--dim);
       }
-      .tree-rich {
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        overflow: hidden;
-      }
-      .diff-rich {
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        overflow: hidden;
-        --diffs-font-family: var(--mono);
-        --diffs-font-size: 13px;
-      }
       .ln {
-        display: block;
-        padding: 0 12px;
+        display: flex;
+        padding: 0 12px 0 0;
         white-space: pre;
       }
+      .no {
+        flex: none;
+        width: 5ch;
+        padding-right: 1.5ch;
+        color: var(--dim);
+        text-align: right;
+        user-select: none;
+        font-variant-numeric: tabular-nums;
+      }
       .sign {
-        display: inline-block;
-        width: 16px;
+        flex: none;
+        width: 2ch;
         user-select: none;
       }
+      /* Changed lines are marked by a tinted row and a coloured sign; the
+         code keeps its syntax colours so it stays readable. */
       .ln-plus {
         background: var(--add-bg);
+      }
+      .ln-plus .sign,
+      .ln-plus .no {
         color: var(--add);
       }
       .ln-minus {
         background: var(--del-bg);
+      }
+      .ln-minus .sign,
+      .ln-minus .no {
         color: var(--del);
+      }
+      /* The part of a changed line that actually changed. */
+      mark {
+        border-radius: 2px;
+        color: inherit;
+      }
+      .ln-plus mark {
+        background: var(--add-mark);
+      }
+      .ln-minus mark {
+        background: var(--del-mark);
+      }
+      .tok-comment {
+        color: var(--dim);
+        font-style: italic;
+      }
+      .tok-keyword {
+        color: var(--tok-keyword);
+      }
+      .tok-string {
+        color: var(--tok-string);
+      }
+      .tok-number,
+      .tok-property {
+        color: var(--tok-number);
+      }
+      .tok-type {
+        color: var(--tok-type);
       }
 
       .table-wrap {
@@ -852,18 +894,6 @@
           break-after: avoid;
         }
       }
-      /* Pierre follows the system theme even on paper, so a dark system
-         prints the plain light versions kept on the page instead. */
-      @media print and (prefers-color-scheme: dark) {
-        .tree-rich,
-        .diff-rich {
-          display: none;
-        }
-        .tree[hidden],
-        .diff > .code[hidden] {
-          display: block;
-        }
-      }
     </style>
   </head>
   <body>
@@ -920,90 +950,6 @@
         { rootMargin: "-15% 0px -75% 0px" },
       );
       for (const id of links.keys()) watcher.observe(document.getElementById(id));
-    </script>
-    <script type="module">
-      // Upgrades the plain file tree and code excerpts with Pierre's open
-      // source components, loaded from a CDN. Everything is already on the
-      // page in plain form and stays that way when a library cannot load, so
-      // the brief still reads offline. The plain versions are hidden, not
-      // removed, so a dark-system printout can fall back to them.
-      const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-
-      const treeMount = document.querySelector(".tree[data-tree]");
-      if (treeMount) {
-        try {
-          const { FileTree, FILE_TREE_DEFAULT_ITEM_HEIGHT } = await import("https://esm.sh/@pierre/trees@1.0.0");
-          const { files, rows } = JSON.parse(treeMount.dataset.tree);
-          const byPath = new Map(files.map((file) => [file.path, file]));
-          const mount = document.createElement("div");
-          mount.className = "tree-rich";
-          mount.style.height = `${rows * FILE_TREE_DEFAULT_ITEM_HEIGHT + 16}px`;
-          new FileTree({
-            paths: files.map((file) => file.path),
-            gitStatus: files.filter((file) => file.status).map((file) => ({ path: file.path, status: file.status })),
-            initialExpansion: "open",
-            flattenEmptyDirectories: true,
-            renderRowDecoration: ({ item }) => {
-              const file = byPath.get(item.path);
-              if (!file) return null;
-              const counts = file.binary
-                ? [{ text: "bin" }]
-                : [
-                    { text: `+${file.added}`, color: css("--add") },
-                    { text: `  −${file.deleted}`, color: css("--del") },
-                  ];
-              return {
-                text: "",
-                title: `${file.bucket}${file.from ? `, renamed from ${file.from}` : ""}`,
-                parts: [{ text: `${file.bucket[0].toUpperCase()}   `, color: css("--dim") }, ...counts],
-              };
-            },
-          }).render({ containerWrapper: mount });
-          treeMount.after(mount);
-          treeMount.hidden = true;
-        } catch (error) {
-          console.warn("brief: kept the plain file tree", error);
-        }
-      }
-
-      const excerpts = [...document.querySelectorAll(".diff")];
-      if (excerpts.length > 0) {
-        try {
-          const { File, FileDiff, getSingularPatch } = await import("https://esm.sh/@pierre/diffs@1.7.2");
-          const shared = {
-            disableFileHeader: true,
-            overflow: "scroll",
-            theme: { dark: "pierre-dark", light: "pierre-light" },
-            themeType: "system",
-          };
-          for (const excerpt of excerpts) {
-            const mount = document.createElement("div");
-            mount.className = "diff-rich";
-            try {
-              if (excerpt.dataset.patch) {
-                // Only a range that mixes changed and surviving lines is a diff.
-                new FileDiff({
-                  ...shared,
-                  diffStyle: "unified",
-                  diffIndicators: "classic",
-                  hunkSeparators: "simple",
-                }).render({ fileDiff: getSingularPatch(excerpt.dataset.patch), containerWrapper: mount });
-              } else {
-                new File({ ...shared, disableLineNumbers: true }).render({
-                  file: { name: excerpt.dataset.name, contents: excerpt.dataset.code },
-                  containerWrapper: mount,
-                });
-              }
-              for (const plain of excerpt.children) plain.hidden = true;
-              excerpt.append(mount);
-            } catch (error) {
-              console.warn("brief: kept the plain excerpt", error);
-            }
-          }
-        } catch (error) {
-          console.warn("brief: syntax highlighting unavailable", error);
-        }
-      }
     </script>
     <script>
       // Pan and zoom for the task graph: drag or arrow keys to pan; Ctrl or

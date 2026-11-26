@@ -146,6 +146,7 @@ After approval, integrate one task at a time:
 4. Verify the shared trunk update succeeded before marking the task `integrated`.
    Record the integrated commit and evidence in context, then unblock dependents
    and dispatch newly ready work. A local commit alone is not shared integration.
+   Then delete the task's brief page; `summarize` explains why.
 
 If trunk advances during integration, reconcile again rather than overwriting it.
 Later corrections to landed code are new tasks and commits with their own human

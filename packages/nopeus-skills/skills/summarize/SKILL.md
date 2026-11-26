@@ -311,10 +311,20 @@ node <this skill's folder>/scripts/brief.mjs <data.json>
 Run it from the repository the session works in. Add `--repo <dir>` when the
 change lives in another checkout, such as a worker's worktree, and `--out
 <file>` to choose where the page goes. By default it is written to
-`briefs/` in the current repository, ignored through
+`.briefs/` in the current repository, ignored through
 `.git/info/exclude` so it never appears in `git status`. That is inside the
 workspace on purpose: built-in browser panes usually cannot open files outside
 it.
+
+The page is one self-contained file. It loads nothing from the network, so it
+opens the same offline, and the code on it goes nowhere.
+
+A brief is evidence for one approval, not a record to keep. Each run clears
+`.briefs/` of pages whose change has merged into its base, whose commit no
+longer exists, or that are more than two weeks old. When a change integrates
+some other way, as a squash or a new commit on trunk, its page cannot be
+recognized as merged: delete that page once integration is verified. `node
+<this skill's folder>/scripts/brief.mjs --prune` runs the cleanup on its own.
 
 The script stops and lists every problem when the data is incomplete or a range
 matches nothing. Fix the data and rerun; do not work around it by writing the
