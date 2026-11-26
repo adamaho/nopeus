@@ -3,7 +3,8 @@ name: orchestrate
 description: >-
   Execute or resume a ready task graph on a feature branch using parallel
   workers, validation, independent review, and human approval before each task
-  merges, then open one PR to trunk. Use implement to start from an idea.
+  merges, or unattended to the end when the human asks, then open one PR to
+  trunk. Use implement to start from an idea.
   Tickets and planning files are not required.
 ---
 
@@ -11,8 +12,9 @@ description: >-
 
 Carry out the agreed graph through small, validated changes to one feature
 branch, then open a PR from that branch to trunk. Work through all ready tasks
-unless the user limits scope, and obtain explicit human approval before
-integrating each implementation task. Apply [adhd](../adhd/SKILL.md)
+unless the user limits scope. By default, obtain explicit human approval before
+integrating each implementation task; when the human asks for an unattended run,
+integrate reviewed tasks without waiting and leave the approval to the PR. Apply [adhd](../adhd/SKILL.md)
 throughout.
 
 ## Scope and permissions
@@ -22,7 +24,8 @@ isolated checkouts, local commits, validation, independent review, in-context
 graph updates within the agreed scope, and opening the final PR. It does not
 authorize integrating unreviewed changes into the feature branch, or merging
 anything into trunk. Human approval applies to the concrete change presented, not
-all future tasks.
+all future tasks, unless the human has asked for an
+[unattended run](#run-unattended-when-asked).
 
 Use [create-ticket](../create-ticket/SKILL.md) only when requested. Never merge
 the PR; the human does that.
@@ -131,7 +134,42 @@ the same reviewer for re-review. Stop affected work and bring it to the human
 when `review` says to. Do not call
 failed checks or incomplete review ready for human approval.
 
+## Run unattended when asked
+
+Per-task approval is the default. The human can switch it off for a graph by
+saying so plainly: "run it to the end", "don't wait for me", "set and forget".
+Agreeing to a plan, or going quiet, is not that request. If you cannot tell, ask
+once before starting. The human can turn it on or off partway through, and the
+change applies to tasks not yet integrated.
+
+An unattended run removes one thing: the wait for the human before each task
+integrates. Everything else still happens, because it is what the human will
+rely on when they come back:
+
+- Every task is validated and independently reviewed, and a task whose checks
+  fail or whose review is `Blocked` does not integrate.
+- Every task still gets its `summarize` brief, built before it integrates. Ask
+  for kind `summary`, since no approval is being requested, and ask it to keep
+  the page, because it will be read after the task has landed. Do not delete the
+  pages on integration.
+- What `review` would have left for the human to accept, such as a declined
+  Warning, goes into that task's brief as a `Known issue`, and the task
+  integrates.
+
+Stop a task, and everything that depends on it, when it needs the human: a
+decision that changes agreed behavior, scope, architecture, or contracts; a
+Critical still open after `review`'s rounds; checks that will not pass. Record
+why, keep every other task moving, and do not guess to stay unblocked.
+
+The PR is the approval gate for an unattended run. In the final handoff, say
+that tasks were integrated without per-task approval, list each task with its
+brief, and gather every `Known issue`, stopped task, and open decision in one
+place, so the human can review the whole in the order that matters.
+
 ## Obtain human approval and integrate
+
+This section describes the default. In an unattended run, build the brief, skip
+the wait, and integrate as below.
 
 For every task proposed for the feature branch, build an approval brief with
 [summarize](../summarize/SKILL.md) before asking for approval. Load `summarize`
@@ -168,7 +206,8 @@ After approval, integrate one task at a time:
    Record the integrated commit and evidence in context, then unblock dependents
    and dispatch newly ready work. A commit in a worker's checkout alone is not
    integration.
-   Then delete the task's brief page; `summarize` explains why.
+   Then delete the task's brief page, unless the run is unattended; `summarize`
+   explains why.
 
 If the feature branch advances during integration, reconcile again rather than
 overwriting it. Later corrections to integrated code are new tasks and commits
@@ -220,7 +259,9 @@ or that a final brief retroactively approves changes.
 
 Then open one PR from the feature branch to trunk with
 [create-pr](../create-pr/SKILL.md). If tasks remain blocked or unapproved, ask
-before opening it, and open it as a draft if the human wants it up early. The
+before opening it, and open it as a draft if the human wants it up early. An
+unattended run that ends with stopped tasks opens a draft without asking, so the
+finished part is ready to read. The
 skills never merge the PR.
 
 When called by `implement`, return the brief, the PR link, and evidence for

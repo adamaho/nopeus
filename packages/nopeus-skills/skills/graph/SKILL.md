@@ -127,7 +127,9 @@ Before each implementation task integrates, require:
 - Behavioral evidence and repository checks covering the proposed change.
 - Independent agent correctness review, including relevant regressions.
 - A human-facing explanation and concrete diff or commit for approval.
-- Explicit human approval of that change before it reaches the feature branch.
+- Explicit human approval of that change before it reaches the feature branch,
+  unless the human asked for an unattended run. Then the task moves from
+  `validating` to `integrated`, and the final PR is the approval.
 
 Tie approval and evidence to the proposed revision and the feature-branch
 revision it was compared with. Before integration, execution reconciles with the
