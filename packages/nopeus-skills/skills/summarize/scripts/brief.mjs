@@ -1065,8 +1065,14 @@ function prune(dir, keep) {
     const repo = meta("repo");
     const known = repo !== undefined && existsSync(repo);
     const gone = known && !ok(repo, ["cat-file", "-e", `${sha}^{commit}`]);
+    // A kept page is still wanted after its change lands, as when tasks
+    // integrate unattended and are read later; only its age removes it.
     const merged =
-      known && !gone && meta("wip") !== "true" && ok(repo, ["merge-base", "--is-ancestor", sha, meta("base")]);
+      known &&
+      !gone &&
+      meta("wip") !== "true" &&
+      meta("keep") !== "true" &&
+      ok(repo, ["merge-base", "--is-ancestor", sha, meta("base")]);
     if (old || gone || merged) {
       rmSync(path);
       removed.push(path);
@@ -1123,7 +1129,7 @@ const navItems = [
 
 const slots = {
   title: esc(`${heading} · ${repoName}`),
-  meta: `<meta name="brief-head" content="${headSha}" /><meta name="brief-base" content="${esc(data.base)}" /><meta name="brief-wip" content="${uncommitted}" /><meta name="brief-repo" content="${esc(repoRoot)}" />`,
+  meta: `<meta name="brief-head" content="${headSha}" /><meta name="brief-base" content="${esc(data.base)}" /><meta name="brief-wip" content="${uncommitted}" /><meta name="brief-keep" content="${data.keep === true}" /><meta name="brief-repo" content="${esc(repoRoot)}" />`,
   scope: `<h1>${esc(heading)}</h1><p class="scope">${scopeParts.join(" · ")}</p><p class="glances">${glance}</p>`,
   nav: `<nav class="toc" aria-label="Sections">${navItems}</nav>`,
   n_interfaces: count(data.interfaces.length),

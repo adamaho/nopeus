@@ -35,7 +35,8 @@ bundled Node script renders every brief from Git and a small data file, so the
 layout and the numbers never vary. `audit` simplifies
 plans and code. `review` is the independent check on each task: it reports
 findings to the task's author and never edits the change. Every graph runs on one
-feature branch: `orchestrate` requires that review and explicit human approval before integrating
+feature branch: `orchestrate` requires that review and, unless you ask it to run
+unattended, explicit human approval before integrating
 each task as one commit on that branch, then opens one PR from the branch to
 trunk. Workers may make any number of checkpoint commits. Tickets are created
 only when requested. `adhd` applies throughout.

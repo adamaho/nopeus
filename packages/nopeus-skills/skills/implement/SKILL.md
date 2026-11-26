@@ -3,7 +3,7 @@ name: implement
 description: >-
   Coordinate a software change from idea through agreed intent, a task graph,
   parallel implementation on a feature branch with human approval of each task,
-  and a final PR to trunk. Use for the full workflow. Use orchestrate for a ready graph, or individual skills for
+  or unattended to the end on request, and a final PR to trunk. Use for the full workflow. Use orchestrate for a ready graph, or individual skills for
   focused planning, summaries, ticket, and PR requests.
 ---
 
@@ -18,9 +18,12 @@ Apply [adhd](../adhd/SKILL.md) throughout.
 
 An end-to-end request authorizes planning in context, a feature branch, isolated
 implementation, local commits, validation, independent agent review, progress
-updates within agreed scope, and opening the final PR. Obtain explicit human
-approval of each concrete change before it integrates into the feature branch.
-Agreement on a plan does not authorize future integrations. Merging the PR,
+updates within agreed scope, and opening the final PR. By default, obtain
+explicit human approval of each concrete change before it integrates into the
+feature branch; agreement on a plan does not authorize future integrations. When
+the human asks to run the graph to the end without them, pass that to
+`orchestrate`, which defines the unattended run: tasks still get reviewed and
+briefed, and the PR becomes the approval. Merging the PR,
 deployment, and release are outside scope.
 
 Do not create planning files or tickets by default. Tickets are an optional,
@@ -75,7 +78,7 @@ tasks within available capacity, supplies complete worker prompts, validates and
 independently reviews changes, and serializes approved integrations. Every graph
 runs on one feature branch: each task gets its own brief and human review before
 it merges into that branch, and the finished branch goes to trunk through one
-PR. The PR reviews the whole; it does not replace the per-task gate.
+PR. By default the PR reviews the whole and does not replace the per-task gate.
 
 Use [create-ticket](../create-ticket/SKILL.md) only when requested. Reuse supplied
 destinations and ask for missing destination details only when that integration
@@ -102,8 +105,9 @@ assuming the previous context survived. Keep incomplete stages open.
 ## Hand off to the human
 
 Ensure `orchestrate` delivers `summarize`'s brief for each proposed task
-change before seeking integration approval. Independent correctness review and a
-summary do not themselves grant human approval.
+change before seeking integration approval, or builds and keeps it in an
+unattended run. Independent correctness review and a summary do not themselves
+grant human approval.
 
 Load `summarize` at the end of work and build its final handoff brief for the
 combined outcome; it defines the brief, so do not write one from memory. Then

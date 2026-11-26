@@ -149,6 +149,7 @@ Text fields accept `` `code` `` and `**bold**` only. Keep each to one line.
 | `attention` | Everything the human must act on or know. `[]` renders as "None". |
 | `graph` | Optional. Task graph position. See below. |
 | `classify`, `generated` | Optional corrections to the file tree. See below. |
+| `keep` | Optional. `true` when the page will be read after its change has landed, so cleanup leaves it until it is two weeks old. |
 
 **Interfaces.** Prose about an interface is not reviewable, so the page shows
 the real diff. Point at it; do not retype it.
