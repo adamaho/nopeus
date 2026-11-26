@@ -437,7 +437,7 @@
         background: var(--hover);
       }
       .row-component {
-        grid-template-columns: minmax(12rem, auto) 2ch minmax(0, 1fr);
+        grid-template-columns: var(--name-col, 14rem) 2ch minmax(0, 1fr);
       }
       .name {
         overflow: hidden;
@@ -528,9 +528,13 @@
         padding: 0 12px 0 0;
         white-space: pre;
       }
+      .ln-gap {
+        color: var(--dim);
+        user-select: none;
+      }
       .no {
         flex: none;
-        width: 5ch;
+        width: 7ch;
         padding-right: 1.5ch;
         color: var(--dim);
         text-align: right;

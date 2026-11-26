@@ -571,6 +571,7 @@ const KEYWORDS = new Set(
     "try type typeof undefined use val var void when where while with yield None True False"
   ).split(" "),
 );
+const PRIMITIVES = new Set("any bigint bool boolean double float int never number object str string unknown".split(" "));
 const C_LIKE = new Set(
   "ts tsx mts cts js jsx mjs cjs json jsonc java kt kts swift go rs c h cc cpp hpp cs php scala dart css scss".split(" "),
 );
@@ -597,12 +598,15 @@ function tokenize(text, file) {
     const [value, string, comment, number, word] = match;
     const after = text.slice(match.index + value.length);
     let kind;
-    if (string !== undefined) kind = /^\s*:/.test(after) ? "property" : "string";
+    const before = text.slice(0, match.index);
+    // A quoted object key opens its line; `case "x":` and a ternary do not.
+    if (string !== undefined) kind = /^\s*:/.test(after) && /^[\s{,]*$/.test(before) ? "property" : "string";
     else if (comment !== undefined) kind = "comment";
     else if (number !== undefined) kind = "number";
-    else if (KEYWORDS.has(word)) kind = "keyword";
-    else if (/^[A-Z]/.test(word)) kind = "type";
-    else if (family === "hash" && /^:(\s|$)/.test(after) && /^\s*(-\s+)?$/.test(text.slice(0, match.index))) {
+    // A word used as a name (`fn: () => void`, `x.type`) is not a keyword.
+    else if (KEYWORDS.has(word) && !/^\??:/.test(after) && !before.endsWith(".")) kind = "keyword";
+    else if (/^[A-Z]/.test(word) || (PRIMITIVES.has(word) && /[:<|&,(]\s*$/.test(before))) kind = "type";
+    else if (family === "hash" && /^:(\s|$)/.test(after) && /^\s*(-\s+)?$/.test(before)) {
       kind = "property";
     }
     tokens.push({ text: value, kind });
@@ -680,14 +684,21 @@ function renderCode(lines, kind, file) {
     .map((line, index) => {
       const tone = !diff ? "ctx" : line.sign === "+" ? "plus" : line.sign === "-" ? "minus" : "ctx";
       const number = line.sign === "-" ? line.oldLine : line.newLine;
+      // Lines from separate ranges are not neighbours in the file; say so.
+      const previous = lines[index - 1];
+      const jump =
+        previous !== undefined &&
+        line.newLine - previous.newLine > 1 &&
+        (line.sign === "-" ? line.oldLine - previous.oldLine > 1 : true);
+      const gap = jump ? `<span class="ln ln-gap"><span class="no">⋯</span></span>` : "";
       const sign = diff ? `<span class="sign">${line.sign === " " ? " " : line.sign === "-" ? "−" : "+"}</span>` : "";
       const source = renderTokens(tokenize(texts[index], file), spans.get(index)) || " ";
-      return `<span class="ln ln-${tone}"><span class="no">${number}</span>${sign}<span class="src">${source}</span></span>`;
+      return `${gap}<span class="ln ln-${tone}"><span class="no">${number}</span>${sign}<span class="src">${source}</span></span>`;
     })
     .join("")}</pre>`;
 }
 
-function renderExcerpt(entry, label) {
+function renderExcerpt(entry, label, { labelled = true } = {}) {
   const lines = excerpt(entry);
   const spec = isText(entry.lines) ? entry.lines : entry.oldLines;
   if (lines.length === 0) fail([`${label}: ${entry.file}:${spec} matches no lines at the compared revision`]);
@@ -698,7 +709,7 @@ function renderExcerpt(entry, label) {
   return `<article class="excerpt">
   <header class="excerpt-head">
     ${isText(entry.title) ? `<h3 class="excerpt-title">${inline(entry.title)}</h3>` : ""}
-    <span class="chip chip-${kind}">${cap(kind)}</span>
+    ${labelled ? `<span class="chip chip-${kind}">${cap(kind)}</span>` : ""}
     <code class="excerpt-path">${esc(entry.file)}:${esc(spec)}</code>
   </header>
   ${entry.note ? `<p class="excerpt-note">${inline(entry.note)}</p>` : ""}
@@ -709,10 +720,14 @@ function renderExcerpt(entry, label) {
 function renderComponents() {
   if (!data.components) return "";
   const rows = [];
+  // Every row shares one name column, sized to the longest entry, so the
+  // status letters and ownership notes line up down the tree.
+  let widest = 0;
   const walk = (nodes, prefix, top) =>
     nodes.forEach((node, index) => {
       const last = index === nodes.length - 1;
       const branch = top ? "" : `${prefix}${last ? "└── " : "├── "}`;
+      widest = Math.max(widest, branch.length + node.name.length);
       const status = node.status === "·" ? `<span class="st dim">·</span>` : `<span class="st st-${node.status}">${node.status}</span>`;
       rows.push(
         `<div class="row row-component"><span class="name"><span class="branch">${branch}</span>${esc(node.name)}</span>${status}<span class="owns">${inline(node.owns)}</span></div>`,
@@ -721,11 +736,16 @@ function renderComponents() {
     });
   walk(data.components.tree, "", true);
   return `<h3>Component structure</h3>
-<div class="tree">${rows.join("\n")}</div>
-${renderExcerpt(data.components.usage, "components.usage")}`;
+<div class="tree" style="--name-col:${widest + 1}ch">${rows.join("\n")}</div>
+${renderExcerpt(data.components.usage, "components.usage", { labelled: false })}`;
 }
 
 function renderInterfaces() {
+  if (data.interfaces.length > 10) {
+    console.error(
+      `brief: warning: ${data.interfaces.length} interfaces; a reader will not get through them. Keep the ones a caller would feel and name the rest in one design bullet`,
+    );
+  }
   const blocks =
     data.interfaces.length === 0
       ? `<p class="none">No public interface changes</p>`
@@ -1023,10 +1043,9 @@ function defaultOutDir() {
 // only their age counts. A page that cannot be read as a brief is left alone.
 function prune(dir, keep) {
   if (!existsSync(dir)) return [];
-  const here = { cwd: process.cwd(), stdio: "ignore" };
-  const ok = (gitArgs) => {
+  const ok = (repo, gitArgs) => {
     try {
-      execFileSync("git", gitArgs, here);
+      execFileSync("git", gitArgs, { cwd: repo, stdio: "ignore" });
       return true;
     } catch {
       return false;
@@ -1036,13 +1055,18 @@ function prune(dir, keep) {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
     if (!name.endsWith(".html") || path === keep) continue;
-    const head = readFileSync(path, "utf8").slice(0, 2000);
+    const head = readFileSync(path, "utf8").slice(0, 4000);
     const meta = (key) => head.match(new RegExp(`<meta name="brief-${key}" content="([^"]*)"`))?.[1];
     const sha = meta("head");
     if (!sha) continue;
     const old = Date.now() - statSync(path).mtimeMs > MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-    const gone = !ok(["cat-file", "-e", `${sha}^{commit}`]);
-    const merged = meta("wip") !== "true" && !gone && ok(["merge-base", "--is-ancestor", sha, meta("base")]);
+    // A page can describe another checkout (--repo), so its commit is looked
+    // up there. When that checkout is gone, only the page's age counts.
+    const repo = meta("repo");
+    const known = repo !== undefined && existsSync(repo);
+    const gone = known && !ok(repo, ["cat-file", "-e", `${sha}^{commit}`]);
+    const merged =
+      known && !gone && meta("wip") !== "true" && ok(repo, ["merge-base", "--is-ancestor", sha, meta("base")]);
     if (old || gone || merged) {
       rmSync(path);
       removed.push(path);
@@ -1099,7 +1123,7 @@ const navItems = [
 
 const slots = {
   title: esc(`${heading} · ${repoName}`),
-  meta: `<meta name="brief-head" content="${headSha}" /><meta name="brief-base" content="${esc(data.base)}" /><meta name="brief-wip" content="${uncommitted}" />`,
+  meta: `<meta name="brief-head" content="${headSha}" /><meta name="brief-base" content="${esc(data.base)}" /><meta name="brief-wip" content="${uncommitted}" /><meta name="brief-repo" content="${esc(repoRoot)}" />`,
   scope: `<h1>${esc(heading)}</h1><p class="scope">${scopeParts.join(" · ")}</p><p class="glances">${glance}</p>`,
   nav: `<nav class="toc" aria-label="Sections">${navItems}</nav>`,
   n_interfaces: count(data.interfaces.length),

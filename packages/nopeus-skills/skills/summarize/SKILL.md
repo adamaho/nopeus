@@ -88,8 +88,8 @@ matter, what the tests protect, and what needs attention.
   commit.
 - Read the full diff, surrounding code, and consumers. Trace the affected
   request or data flow across layers.
-- Compare with the agreed design. Without a spec, say intent is missing; do not
-  invent requirements.
+- Compare with the agreed design. Without a spec, say intent is missing in a
+  `design` bullet; do not invent requirements.
 - Reuse [audit](../audit/SKILL.md) findings.
 
 ### 2. Write the data file
@@ -178,6 +178,9 @@ the real diff. Point at it; do not retype it.
   page, so the human can scan the list of interfaces without reading code.
 - `note` is one sentence on what the interface is for and what changed for its
   callers.
+- Show few. A reader gets through about ten entries, so on a large change keep
+  the interfaces a caller would feel and name the rest in one `design` bullet.
+  Twenty entries of equal weight hide the three that matter.
 - Use the matching platform reference to decide which contracts matter. When
   none fits, as with a library, CLI, lint rule, or config package, the contract
   is whatever a consumer depends on: exported names, rule or command IDs,
@@ -231,7 +234,9 @@ its reason lets the human decide whether that matters.
   a commit that is not checked out, a temporary worktree or `git archive` export
   works without touching the working tree.
 - A check that ran somewhere else, such as CI on a PR head, takes its own
-  `"revision"` on that row.
+  `"revision"` on that row. CI that ran on the exact commit the brief covers is
+  the strongest evidence there is: record it as a normal row, and do not add a
+  duplicate `Not run` row for the same check run locally.
 - Do not present ad hoc checks from the session as a test suite.
 
 **Screenshots.** For a change to what users see, a screenshot is the fastest
@@ -255,7 +260,7 @@ change for each state it adds or alters:
 - Mark a Storybook, Compose preview, or other isolated render with
   `"preview": true`. It shows the component, not that the real screen works.
 - When a state cannot be captured, list it in `notCaptured` with the reason and
-  what you checked instead. A missing screenshot does not block the brief, but
+  what you checked instead. `shots` may be empty when nothing could be captured. A missing screenshot does not block the brief, but
   it must never be silently missing.
 - A "before" shot is optional; add one when you already have it or are asked.
 
@@ -344,7 +349,8 @@ page yourself.
    link is how the human opens it.
 
 When you are a subagent, you cannot show the human anything: build the page,
-skip the first step, and return the stub with the page's path to the agent that
+skip the first step, check the script's output and the page's HTML if you
+cannot render it, and return the stub with the page's path to the agent that
 called you. That agent opens the page and delivers the stub. When you receive a
 brief from a subagent, check it against the final revision, rebuild it if the
 change moved, then show it as above.
