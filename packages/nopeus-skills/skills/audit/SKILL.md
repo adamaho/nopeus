@@ -25,8 +25,7 @@ agreed decision.
 ## Simplify The Solution
 
 - Require a current need for each new abstraction, dependency, option, or fallback.
-- Reuse existing capabilities and conventions. That includes constants: a value
-  already defined is reused, not written out or derived again somewhere else.
+- Reuse existing capabilities and conventions.
 - Remove wrappers, speculative flexibility, and extra scope that add no needed
   behavior or useful boundary.
 - Prefer readable code. Keep complexity that protects contracts, permissions,
