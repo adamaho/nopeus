@@ -657,10 +657,49 @@
       figure {
         margin: 0;
       }
-      figure img {
+      .shot {
+        display: block;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: zoom-in;
+      }
+      .shot img {
+        display: block;
         max-width: 100%;
         border: 1px solid var(--border);
         border-radius: var(--radius);
+      }
+      .shot:hover img {
+        border-color: var(--border-strong);
+      }
+      /* The enlarged screenshot. A native dialog gives Esc-to-close, a focus
+         trap, and a backdrop without any script beyond opening it. */
+      .lightbox {
+        max-width: 96vw;
+        max-height: 96vh;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg);
+        color: var(--text);
+        cursor: zoom-out;
+      }
+      .lightbox::backdrop {
+        background: rgb(0 0 0 / 0.7);
+      }
+      .lightbox img {
+        display: block;
+        max-width: 96vw;
+        max-height: calc(96vh - 44px);
+        object-fit: contain;
+      }
+      .lightbox p {
+        max-width: none;
+        margin: 0;
+        padding: 10px 14px;
+        color: var(--dim);
+        font-size: 13px;
       }
       figcaption {
         margin-top: 4px;
@@ -858,7 +897,8 @@
           padding: 0;
         }
         .graph-bar,
-        .toc {
+        .toc,
+        .lightbox {
           display: none;
         }
         .tree,
@@ -925,6 +965,25 @@
 
       <!--{{graph}}-->
     </main>
+    <dialog class="lightbox" aria-label="Enlarged screenshot">
+      <img alt="" />
+      <p></p>
+    </dialog>
+    <script>
+      // Click a screenshot to see it at full size. Clicking anywhere on the
+      // enlarged view, or pressing Esc, closes it.
+      const lightbox = document.querySelector(".lightbox");
+      for (const shot of document.querySelectorAll(".shot")) {
+        shot.addEventListener("click", () => {
+          const image = shot.querySelector("img");
+          lightbox.querySelector("img").src = image.src;
+          lightbox.querySelector("img").alt = image.alt;
+          lightbox.querySelector("p").textContent = `${image.alt} · click or press Esc to close`;
+          lightbox.showModal();
+        });
+      }
+      lightbox.addEventListener("click", () => lightbox.close());
+    </script>
     <script>
       // Marks the section in view in the sticky links, so the reader always
       // knows where they are in a long brief.
