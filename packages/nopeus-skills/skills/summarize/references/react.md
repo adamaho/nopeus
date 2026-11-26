@@ -65,9 +65,17 @@ the actual interfaces and relevant folders when reviewing an implementation.
 
 Show the actual changed props and callback types, route param handling, data
 layer hooks or query keys, and context provider/consumer pairs that matter to
-the change. Include one consumer usage of the main changed component.
+the change.
 
-Evidence: unit or component tests with explicit props, and Storybook or browser
-checks for visual and interaction behavior. A passing type check is not proof of
+Show component structure for every change that adds, removes, or rearranges
+components: a tree of the changed components, each tagged with what it owns
+(route params, data, state, or render only), plus one real usage of the main
+composition. Include an unchanged component only when it connects changed ones.
+This is where the human judges ownership and composition patterns, so tag
+honestly: a "render only" component that reads the router is a finding.
+
+Evidence: unit or component tests with explicit props, and screenshots of each
+changed state from the running app. A Storybook capture is a preview, not
+runtime evidence; label it as one. A passing type check is not proof of
 rendering, loading, or error behavior. Noise: snapshot churn and formatting-only
 JSX changes; call them out rather than walking through them.

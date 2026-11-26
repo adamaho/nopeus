@@ -72,14 +72,17 @@ Receipt destination reads receiptId
 
 `ReceiptScreen` can be previewed or tested with state and callbacks without a live
 database or navigation controller. Explain where state is collected and how
-actions reach the state holder. Show the actual affected packages, resources,
-tests, and Gradle modules in the change snapshot.
+actions reach the state holder. For a change to screens or composables, show the
+same structure as a component tree: each node tagged with what it owns, plus one
+real usage of the main composition.
 
 ## Evidence and limits
 
 Distinguish compilation, local unit tests, instrumented/UI tests, and manual
 device or emulator checks. State the variant and device/API level when known and
-relevant. Do not treat a successful build or Compose preview as proof of runtime,
-navigation, lifecycle, or accessibility behavior. Call out unverified behavior
+relevant. Capture screenshots of each changed state from a device or emulator;
+label a Compose preview capture as a preview. Do not treat a successful build or
+Compose preview as proof of runtime, navigation, lifecycle, or accessibility
+behavior. Call out unverified behavior
 such as rotation, process recreation, permission denial, or offline handling only
 where the change makes it material.
