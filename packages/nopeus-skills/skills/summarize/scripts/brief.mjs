@@ -104,13 +104,13 @@ check(
   "outcome must be 1 to 3 bullets, each something a user or caller can now do",
 );
 
-check(Array.isArray(data.contracts), "contracts is required; use [] when no public interface changed");
-list(data.contracts).forEach((entry, i) => {
-  check(isText(entry.file), `contracts[${i}].file is required`);
-  check(isText(entry.note), `contracts[${i}].note is required: one sentence on what the interface is for`);
+check(Array.isArray(data.interfaces), "interfaces is required; use [] when no public interface changed");
+list(data.interfaces).forEach((entry, i) => {
+  check(isText(entry.file), `interfaces[${i}].file is required`);
+  check(isText(entry.note), `interfaces[${i}].note is required: one sentence on what the interface is for`);
   check(
     isText(entry.lines) || isText(entry.oldLines),
-    `contracts[${i}] needs lines (new side) or oldLines (removed interface), e.g. "42-44"`,
+    `interfaces[${i}] needs lines (new side) or oldLines (removed interface), e.g. "42-44"`,
   );
 });
 check(list(data.design).every(isText), "design must be a list of one-line bullets");
@@ -477,7 +477,7 @@ function excerpt(entry) {
 
   if (!file || file.untracked) {
     const text = readAtHead(entry.file);
-    if (text === undefined) fail([`contracts: ${entry.file} does not exist at the compared revision`]);
+    if (text === undefined) fail([`interfaces: ${entry.file} does not exist at the compared revision`]);
     const sign = file?.untracked ? "+" : " ";
     return text
       .split("\n")
@@ -565,16 +565,16 @@ function renderComponents() {
 ${renderExcerpt(data.components.usage, "components.usage")}`;
 }
 
-function renderContracts() {
-  const contracts =
-    data.contracts.length === 0
+function renderInterfaces() {
+  const blocks =
+    data.interfaces.length === 0
       ? `<p class="none">No public interface changes</p>`
-      : data.contracts.map((entry, i) => renderExcerpt(entry, `contracts[${i}]`)).join("\n");
+      : data.interfaces.map((entry, i) => renderExcerpt(entry, `interfaces[${i}]`)).join("\n");
   const design =
     list(data.design).length === 0
       ? ""
       : `<h3>Decisions</h3><ul>${data.design.map((bullet) => `<li>${inline(bullet)}</li>`).join("")}</ul>`;
-  return `${contracts}\n${renderComponents()}\n${design}`;
+  return `${blocks}\n${renderComponents()}\n${design}`;
 }
 
 // ------------------------------------------------------- tests & validation
@@ -586,7 +586,7 @@ function renderTests() {
   const gaps =
     data.tests.gaps.length === 0
       ? `<p class="none">No known gaps</p>`
-      : `<ul class="attention">${data.tests.gaps.map((gap) => `<li>${inline(gap)}</li>`).join("")}</ul>`;
+      : `<ul>${data.tests.gaps.map((gap) => `<li>${inline(gap)}</li>`).join("")}</ul>`;
   return `${summary}<h3>Not covered</h3>${gaps}`;
 }
 
@@ -632,7 +632,7 @@ function renderScreenshots() {
 
 function renderAttention() {
   if (data.attention.length === 0) return `<p class="none">None</p>`;
-  return `<ul class="attention">${data.attention
+  return `<ul>${data.attention
     .map((item) => `<li><strong>${esc(item.tag)}:</strong> ${inline(item.text)}</li>`)
     .join("")}</ul>`;
 }
@@ -784,7 +784,7 @@ function renderGraph() {
   return `<section id="graph">
 <h2>Graph position</h2>
 <p class="ran">${esc(graphProgress())}</p>
-<div class="graph"><svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="Task graph">
+<div class="graph"><div class="graph-tools"><button type="button" data-zoom="out" title="Zoom out">−</button><button type="button" data-zoom="in" title="Zoom in">+</button><button type="button" data-zoom="fit" title="Show the whole graph">Fit</button></div><svg viewBox="0 0 ${width} ${height}" style="height:${Math.min(height, 560)}px" role="img" aria-label="Task graph">
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
 ${edges}${nodes}
 </svg></div>
@@ -848,7 +848,7 @@ const slots = {
   scope: scopeParts.join(" · "),
   outcome: `<ul>${data.outcome.map((bullet) => `<li>${inline(bullet)}</li>`).join("")}</ul>`,
   snapshot: `${totals.html}<p class="ran">${esc(totals.summary)} · <code>${esc(diffCommand)}</code></p>${renderTree()}`,
-  contracts: renderContracts(),
+  interfaces: renderInterfaces(),
   tests: renderTests(),
   validation: renderValidation(),
   attention: renderAttention(),

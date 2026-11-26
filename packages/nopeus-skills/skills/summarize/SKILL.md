@@ -106,7 +106,7 @@ field is not.
   "head": "HEAD",
   "uncommitted": false,
   "outcome": ["Users can delete a receipt from the list; the row disappears without a reload."],
-  "contracts": [
+  "interfaces": [
     {
       "file": "src/orders/service.ts",
       "lines": "42-44",
@@ -139,7 +139,7 @@ Text fields accept `` `code` `` and `**bold**` only. Keep each to one line.
 | `base`, `head` | Revisions to compare. `head` defaults to `HEAD`. The script compares from their merge base. |
 | `uncommitted` | `true` to include staged, unstaged, and untracked work. Only with `head` at `HEAD`. |
 | `outcome` | One to three bullets, each something a user or caller can now do. Not how it works. |
-| `contracts` | Every new or changed public interface. See below. `[]` when none changed. |
+| `interfaces` | Every new or changed public interface. See below. `[]` when none changed. |
 | `design` | Optional. One-line bullets for consequential decisions and departures from the plan. |
 | `components` | Optional. React and other UI trees. See below. |
 | `tests` | What the tests protect, and what they do not. See below. |
@@ -149,7 +149,7 @@ Text fields accept `` `code` `` and `**bold**` only. Keep each to one line.
 | `graph` | Optional. Task graph position. See below. |
 | `classify`, `generated` | Optional corrections to the file tree. See below. |
 
-**Contracts.** Prose about an interface is not reviewable, so the page shows
+**Interfaces.** Prose about an interface is not reviewable, so the page shows
 the real diff. Point at it; do not retype it.
 
 - `file` and `lines` name the range in the head version, such as `"42-44"` or

@@ -4,6 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><!--{{title}}--></title>
+    <!-- Geist loads from the network when it is not installed; system fonts are the fallback. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&display=swap"
+    />
     <style>
       :root {
         color-scheme: light dark;
@@ -19,7 +26,8 @@
         --warn: #b54708;
         --warn-bg: #fffaeb;
         --accent: #175cd3;
-        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+        --sans: "Geist", "Geist Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -44,11 +52,7 @@
         margin: 0;
         background: var(--bg);
         color: var(--text);
-        font:
-          15px/1.5 system-ui,
-          -apple-system,
-          "Segoe UI",
-          sans-serif;
+        font: 15px/1.5 var(--sans);
       }
       main {
         max-width: 960px;
@@ -196,7 +200,7 @@
       }
       .owns {
         color: var(--dim);
-        font-family: system-ui, sans-serif;
+        font-family: var(--sans);
       }
 
       .excerpt {
@@ -294,27 +298,40 @@
         font-size: 13px;
       }
 
-      .attention li {
-        padding: 6px 10px;
-        border-left: 3px solid var(--warn);
-        background: var(--warn-bg);
-        list-style: none;
-      }
-      .attention {
-        padding-left: 0;
-      }
-
       .graph {
-        padding: 8px;
+        position: relative;
         border: 1px solid var(--border);
         border-radius: 8px;
         background: var(--panel);
-        overflow-x: auto;
-        text-align: center;
+        overflow: hidden;
       }
       .graph svg {
-        max-width: 100%;
-        height: auto;
+        display: block;
+        width: 100%;
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+      }
+      .graph svg.dragging {
+        cursor: grabbing;
+      }
+      .graph-tools {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: flex;
+        gap: 4px;
+      }
+      .graph-tools button {
+        min-width: 28px;
+        height: 28px;
+        padding: 0 8px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+        font: 13px var(--sans);
+        cursor: pointer;
       }
       .edge {
         fill: none;
@@ -330,9 +347,7 @@
       }
       .node-title {
         fill: #344054;
-        font:
-          12px system-ui,
-          sans-serif;
+        font: 12px var(--sans);
       }
       .legend {
         display: flex;
@@ -367,9 +382,9 @@
         <!--{{snapshot}}-->
       </section>
 
-      <section id="contracts">
-        <h2>Contracts &amp; design</h2>
-        <!--{{contracts}}-->
+      <section id="interfaces">
+        <h2>Interfaces</h2>
+        <!--{{interfaces}}-->
       </section>
 
       <section id="tests">
@@ -389,5 +404,65 @@
 
       <!--{{graph}}-->
     </main>
+    <script>
+      // Pan and zoom for the task graph: drag to pan, scroll or pinch to zoom.
+      // The chart is SVG, so it stays sharp at any zoom and needs no library.
+      for (const svg of document.querySelectorAll(".graph svg")) {
+        const full = svg.viewBox.baseVal;
+        const home = { x: full.x, y: full.y, width: full.width, height: full.height };
+        const view = { ...home };
+        const apply = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.width} ${view.height}`);
+        const zoom = (factor, clientX, clientY) => {
+          const box = svg.getBoundingClientRect();
+          const width = Math.min(home.width * 4, Math.max(home.width / 8, view.width * factor));
+          const scale = width / view.width;
+          const fx = clientX === undefined ? 0.5 : (clientX - box.left) / box.width;
+          const fy = clientY === undefined ? 0.5 : (clientY - box.top) / box.height;
+          view.x += view.width * fx * (1 - scale);
+          view.y += view.height * fy * (1 - scale);
+          view.width = width;
+          view.height *= scale;
+          apply();
+        };
+
+        svg.addEventListener(
+          "wheel",
+          (event) => {
+            event.preventDefault();
+            zoom(event.deltaY > 0 ? 1.1 : 1 / 1.1, event.clientX, event.clientY);
+          },
+          { passive: false },
+        );
+
+        let drag;
+        svg.addEventListener("pointerdown", (event) => {
+          drag = { x: event.clientX, y: event.clientY };
+          svg.setPointerCapture(event.pointerId);
+          svg.classList.add("dragging");
+        });
+        svg.addEventListener("pointermove", (event) => {
+          if (!drag) return;
+          const box = svg.getBoundingClientRect();
+          view.x -= ((event.clientX - drag.x) * view.width) / box.width;
+          view.y -= ((event.clientY - drag.y) * view.height) / box.height;
+          drag = { x: event.clientX, y: event.clientY };
+          apply();
+        });
+        const release = () => {
+          drag = undefined;
+          svg.classList.remove("dragging");
+        };
+        svg.addEventListener("pointerup", release);
+        svg.addEventListener("pointercancel", release);
+
+        const tools = svg.parentElement.querySelector(".graph-tools");
+        tools.querySelector("[data-zoom=in]").addEventListener("click", () => zoom(1 / 1.3));
+        tools.querySelector("[data-zoom=out]").addEventListener("click", () => zoom(1.3));
+        tools.querySelector("[data-zoom=fit]").addEventListener("click", () => {
+          Object.assign(view, home);
+          apply();
+        });
+      }
+    </script>
   </body>
 </html>
