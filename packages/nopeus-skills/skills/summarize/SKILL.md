@@ -3,7 +3,7 @@ name: summarize
 description: >-
   Brief a human on a code change as one fixed-format HTML page built by a
   bundled script: file tree with line counts, production versus test lines,
-  public interface diffs, test coverage table, validation, and screenshots. Use
+  public interface diffs, test summary, validation, and screenshots. Use
   whenever someone asks to summarize, review, explain, or walk through a diff,
   branch, commit, or PR, and for every approval brief and final handoff in
   implement or orchestrate, even when they only ask "what changed?". Also
@@ -79,7 +79,7 @@ and from a small data file holding the parts that need your judgement.
 The script owns the layout, the file tree, every line count, and every code
 excerpt, which it cuts from the real diff. That is what lets the human trust
 the numbers without checking them. You own the outcome, which interfaces
-matter, what each test protects, and what needs attention.
+matter, what the tests protect, and what needs attention.
 
 ### 1. Understand the change
 
@@ -114,14 +114,10 @@ field is not.
     }
   ],
   "design": ["**Departure:** spec defaulted currency to USD; made it required to avoid silent mispricing."],
-  "tests": [
-    {
-      "behavior": "Rejects negative quantity",
-      "evidence": "`orders.test.ts` asserts HTTP 400",
-      "coverage": "added"
-    },
-    { "behavior": "Returns 404 for an unknown order", "coverage": "gap" }
-  ],
+  "tests": {
+    "summary": ["New unit tests cover quantity validation and tax recalculation on update."],
+    "gaps": ["Unknown order returning 404 has no test."]
+  },
   "validation": {
     "revision": "a1b2c3d",
     "checks": [
@@ -146,7 +142,7 @@ Text fields accept `` `code` `` and `**bold**` only. Keep each to one line.
 | `contracts` | Every new or changed public interface. See below. `[]` when none changed. |
 | `design` | Optional. One-line bullets for consequential decisions and departures from the plan. |
 | `components` | Optional. React and other UI trees. See below. |
-| `tests` | One row per changed behavior. See below. |
+| `tests` | What the tests protect, and what they do not. See below. |
 | `validation` | What ran and on which revision. See below. |
 | `ui` | Screenshots for visible changes. See below. |
 | `attention` | Everything the human must act on or know. `[]` renders as "None". |
@@ -196,18 +192,16 @@ connect changed ones. `owns` says what the component is responsible for: route
 params, data, state, or render only. `usage` points at one real snippet showing
 the main composition.
 
-**Tests.** The table answers two questions at a glance: is each changed
-behavior protected, and does each changed test protect something? "Tests
-added" answers neither.
+**Tests.** Keep this high level; the human wants to know what is protected and
+what is not, not a list of test cases.
 
-- List the behaviors the change adds or alters, including error paths and edge
-  cases, from the spec, ticket, acceptance examples, or diff. One row each.
-- `evidence` names the test and what it asserts.
-- `coverage` is `added`, `modified`, `existing` (an untouched test already
-  covers it), `manual`, or `gap`.
-- A changed test that protects no changed behavior gets its own row with
-  `coverage: "unrelated"`; say in `evidence` why it changed.
-- When no behavior changed, use `"tests": []` and explain in `testsNote`.
+- `summary` is one to three bullets on what the tests protect, grouped by
+  behavior, such as "covers validation and the error responses". When no
+  behavior changed, say that instead.
+- `gaps` lists each changed behavior that no test covers, one line each. Check
+  error paths and edge cases before writing `[]`; it renders as "No known gaps".
+- Mention changed tests that protect nothing in this change only when they are
+  worth removing.
 
 **Validation.** List every check the repository expects, including the ones
 you did not run. A missing row reads as "not applicable"; a `Not run` row with

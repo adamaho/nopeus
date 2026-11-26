@@ -15,7 +15,6 @@ import { basename, dirname, extname, isAbsolute, join, resolve } from "node:path
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const KINDS = { approval: "Approval brief", handoff: "Final handoff", summary: "Change summary" };
-const COVERAGE = ["added", "modified", "existing", "manual", "gap", "unrelated"];
 const RESULTS = ["pass", "fail", "not run"];
 const TAGS = ["Breaking", "Scope", "Deferred", "Decision", "Known issue", "Unverified"];
 const STATUSES = {
@@ -138,16 +137,17 @@ if (data.components !== undefined) {
   );
 }
 
-check(Array.isArray(data.tests), "tests is required; use [] with testsNote when no behavior changed");
-if (Array.isArray(data.tests) && data.tests.length === 0) {
-  check(isText(data.testsNote), "testsNote is required when tests is empty: say why no behavior needs a test");
-}
-list(data.tests).forEach((row, i) => {
-  const coverage = String(row.coverage).toLowerCase();
-  check(isText(row.behavior), `tests[${i}].behavior is required`);
-  check(COVERAGE.includes(coverage), `tests[${i}].coverage must be one of: ${COVERAGE.join(", ")}`);
-  check(coverage === "gap" || isText(row.evidence), `tests[${i}].evidence is required unless coverage is gap`);
-});
+check(
+  Array.isArray(data.tests?.summary) &&
+    data.tests.summary.length >= 1 &&
+    data.tests.summary.length <= 3 &&
+    data.tests.summary.every(isText),
+  "tests.summary must be 1 to 3 bullets on what the tests protect, or why none are needed",
+);
+check(
+  Array.isArray(data.tests?.gaps) && data.tests.gaps.every(isText),
+  "tests.gaps is required: changed behaviors with no test; use [] when there are none",
+);
 
 check(
   data.validation && Array.isArray(data.validation.checks) && data.validation.checks.length > 0,
@@ -582,14 +582,12 @@ function renderContracts() {
 const cap = (value) => `${value[0].toUpperCase()}${value.slice(1)}`;
 
 function renderTests() {
-  if (data.tests.length === 0) return `<p class="none">${inline(data.testsNote)}</p>`;
-  const rows = data.tests
-    .map((row) => {
-      const coverage = row.coverage.toLowerCase();
-      return `<tr><td>${inline(row.behavior)}</td><td>${isText(row.evidence) ? inline(row.evidence) : "—"}</td><td><span class="chip chip-${coverage}">${cap(coverage)}</span></td></tr>`;
-    })
-    .join("\n");
-  return `<table><thead><tr><th>Behavior</th><th>Test evidence</th><th>Coverage</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const summary = `<ul>${data.tests.summary.map((bullet) => `<li>${inline(bullet)}</li>`).join("")}</ul>`;
+  const gaps =
+    data.tests.gaps.length === 0
+      ? `<p class="none">No known gaps</p>`
+      : `<ul class="attention">${data.tests.gaps.map((gap) => `<li>${inline(gap)}</li>`).join("")}</ul>`;
+  return `${summary}<h3>Not covered</h3>${gaps}`;
 }
 
 function renderValidation() {
@@ -877,15 +875,11 @@ const stubScope = [
 // Two computed lines so the chat alone shows how big the change is and how
 // well it is covered; gaps cannot be left out of the stub by accident.
 const plural = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
-const coverageOf = (row) => row.coverage.toLowerCase();
-const behaviors = data.tests.filter((row) => coverageOf(row) !== "unrelated");
-const gaps = behaviors.filter((row) => coverageOf(row) === "gap").length;
+const gaps = data.tests.gaps.length;
 const resultCount = (result) => data.validation.checks.filter((row) => row.result.toLowerCase() === result).length;
 const sizeLine = `Size: ${plural(files.length, "file")} · ${totals.rows.map((row) => `${cap(row.bucket)} +${row.added}`).join(" · ")}`;
 const evidenceLine = [
-  behaviors.length === 0
-    ? "no behavior rows"
-    : `${behaviors.length - gaps} of ${plural(behaviors.length, "behavior")} covered${gaps > 0 ? ` (${plural(gaps, "gap")})` : ""}`,
+  gaps === 0 ? "no known test gaps" : plural(gaps, "test gap"),
   `${resultCount("pass")} of ${plural(data.validation.checks.length, "check")} passed`,
   ...(resultCount("fail") > 0 ? [`${resultCount("fail")} failed`] : []),
   ...(resultCount("not run") > 0 ? [`${resultCount("not run")} not run`] : []),
