@@ -17,16 +17,20 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const KINDS = { approval: "Approval brief", handoff: "Final handoff", summary: "Change summary" };
 const RESULTS = ["pass", "fail", "not run"];
 const TAGS = ["Breaking", "Scope", "Deferred", "Decision", "Known issue", "Unverified"];
+// The page colours nodes from theme-aware CSS tokens in brief.html. Mermaid in
+// the chat stub needs literal colours, so these repeat the light-theme Radix
+// values those tokens use: step 3 fills, and outlines that clear 3:1.
 const STATUSES = {
-  blocked: { label: "blocked", fill: "#f2f4f7", stroke: "#98a2b3" },
-  ready: { label: "ready", fill: "#ffffff", stroke: "#475467" },
-  implementing: { label: "implementing", fill: "#d1e9ff", stroke: "#2e90fa" },
-  validating: { label: "validating", fill: "#d1e9ff", stroke: "#2e90fa" },
-  "awaiting-human-review": { label: "awaiting review", fill: "#fef0c7", stroke: "#f79009" },
-  approved: { label: "approved", fill: "#ccfbef", stroke: "#15b79e" },
-  integrated: { label: "integrated", fill: "#d1fadf", stroke: "#12b76a" },
-  verified: { label: "verified", fill: "#d1fadf", stroke: "#12b76a" },
+  blocked: { label: "blocked", fill: "#f0f0f3", stroke: "#8b8d98" }, // slate-3, slate-9
+  ready: { label: "ready", fill: "#fcfcfd", stroke: "#60646c" }, // slate-1, slate-11
+  implementing: { label: "implementing", fill: "#e6f4fe", stroke: "#0d74ce" }, // blue-3, blue-11
+  validating: { label: "validating", fill: "#e6f4fe", stroke: "#0d74ce" }, // blue-3, blue-11
+  "awaiting-human-review": { label: "awaiting review", fill: "#fff7c2", stroke: "#ab6400" }, // amber-3, amber-11
+  approved: { label: "approved", fill: "#e0f8f3", stroke: "#008573" }, // teal-3, teal-11
+  integrated: { label: "integrated", fill: "#e9f6e9", stroke: "#2a7e3b" }, // grass-3, grass-11
+  verified: { label: "verified", fill: "#e9f6e9", stroke: "#2a7e3b" }, // grass-3, grass-11
 };
+const NODE_TEXT = "#1c2024"; // slate-12
 const DONE = new Set(["integrated", "verified"]);
 const BUCKETS = ["production", "tests", "other"];
 const OUT_DIR = "briefs";
@@ -351,9 +355,9 @@ function renderTotals() {
   const cells = rows
     .map(
       (row) => `<div class="total total-${row.bucket}">
-  <div class="total-label">${row.bucket[0].toUpperCase()}${row.bucket.slice(1)}</div>
-  <div class="total-added">${signed(row.added, "+")}</div>
-  <div class="total-meta"><span class="del">${signed(row.deleted, "−")}</span> · ${row.count} ${row.count === 1 ? "file" : "files"}</div>
+  <dt>${row.bucket[0].toUpperCase()}${row.bucket.slice(1)}</dt>
+  <dd class="total-added">${signed(row.added, "+")}</dd>
+  <dd class="total-meta"><span class="del">${signed(row.deleted, "−")}</span> · ${row.count} ${row.count === 1 ? "file" : "files"}</dd>
 </div>`,
     )
     .join("\n");
@@ -366,7 +370,7 @@ function renderTotals() {
     .map(([status, count]) => `${count} ${labels[status]}`)
     .join(", ");
 
-  return { html: `<div class="totals">${cells}</div>`, summary: `${files.length} files: ${summary}`, rows };
+  return { html: `<dl class="totals">${cells}</dl>`, summary: `${files.length} files: ${summary}`, rows };
 }
 
 function treeEntries() {
@@ -686,7 +690,7 @@ function renderValidation() {
       return `<tr><td>${inline(row.check)}</td><td>${command}</td><td><span class="chip chip-${result.replace(" ", "-")}">${cap(result)}</span>${detail}</td></tr>`;
     })
     .join("\n");
-  return `${ran}<table><thead><tr><th>Check</th><th>Command</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table>${renderScreenshots()}`;
+  return `${ran}<div class="table-wrap"><table><thead><tr><th scope="col">Check</th><th scope="col">Command</th><th scope="col">Result</th></tr></thead><tbody>${rows}</tbody></table></div>${renderScreenshots()}`;
 }
 
 function renderScreenshots() {
@@ -818,7 +822,7 @@ function graphProgress() {
 function renderGraph() {
   if (!data.graph) return "";
   const { tasks, current } = data.graph;
-  const box = { width: 220, height: 64, lane: 16, gapX: 28, gapY: 52, pad: 16 };
+  const box = { width: 220, height: 70, lane: 16, gapX: 28, gapY: 52, pad: 16 };
   const { width, height, place, chains } = graphLayout(tasks, box);
 
   const edges = chains
@@ -841,12 +845,18 @@ function renderGraph() {
   const nodes = tasks
     .map((task) => {
       const { x, y } = place.get(task.id);
-      const style = STATUSES[task.status];
+      const { label } = STATUSES[task.status];
       const isCurrent = task.id === current;
       const title = wrap(task.title, 30, 2)
-        .map((line, index) => `<text x="${x + 12}" y="${y + 40 + index * 15}" class="node-title">${esc(line)}</text>`)
+        .map((line, index) => `<text x="${x + 12}" y="${y + 44 + index * 15}" class="node-title">${esc(line)}</text>`)
         .join("");
-      return `<g><rect x="${x}" y="${y}" width="${box.width}" height="${box.height}" rx="8" fill="${style.fill}" stroke="${style.stroke}" stroke-width="${isCurrent ? 4 : 1.5}"/><text x="${x + 12}" y="${y + 22}" class="node-id">${esc(task.id)}${isCurrent ? " ◀ this brief" : ""}</text>${title}</g>`;
+      // The badge straddles the top edge so it marks the box without taking
+      // a line from the title.
+      const badge = isCurrent
+        ? `<g class="badge"><rect x="${x + 12}" y="${y - 9}" width="68" height="18" rx="4"/><text x="${x + 46}" y="${y + 4}" text-anchor="middle">This brief</text></g>`
+        : "";
+      const name = `${task.id}, ${label}: ${task.title}${isCurrent ? " (this brief)" : ""}`;
+      return `<g class="node status-${task.status}${isCurrent ? " node-current" : ""}" role="img" aria-label="${esc(name)}"><rect x="${x}" y="${y}" width="${box.width}" height="${box.height}" rx="8"/><text x="${x + 12}" y="${y + 25}" class="node-id">${esc(task.id)}</text><text x="${x + box.width - 12}" y="${y + 25}" text-anchor="end" class="node-status">${esc(label)}</text>${title}${badge}</g>`;
     })
     .join("");
 
@@ -855,14 +865,22 @@ function renderGraph() {
     .filter((status) => used.includes(status))
     .map(
       (status) =>
-        `<span class="legend-item"><span class="swatch" style="background:${STATUSES[status].fill};border-color:${STATUSES[status].stroke}"></span>${STATUSES[status].label}</span>`,
+        `<span class="legend-item"><span class="swatch status-${status}"></span>${STATUSES[status].label}</span>`,
     )
     .join("");
+
+  const icon = (d) => `<svg viewBox="0 0 14 14" aria-hidden="true"><path d="${d}"/></svg>`;
+  const tools = [
+    `<button type="button" data-zoom="out" aria-label="Zoom out" title="Zoom out">${icon("M3 7h8")}</button>`,
+    `<button type="button" data-zoom="in" aria-label="Zoom in" title="Zoom in">${icon("M3 7h8M7 3v8")}</button>`,
+    `<button type="button" data-zoom="fit" aria-label="Fit the whole graph" title="Fit the whole graph">Fit</button>`,
+  ].join("");
+  const hint = "Drag or use arrow keys to pan · Ctrl/Cmd + scroll, pinch, or + and − to zoom · 0 resets";
 
   return `<section id="graph">
 <h2>Graph position</h2>
 <p class="ran">${esc(graphProgress())}</p>
-<div class="graph"><div class="graph-tools"><button type="button" data-zoom="out" title="Zoom out">−</button><button type="button" data-zoom="in" title="Zoom in">+</button><button type="button" data-zoom="fit" title="Show the whole graph">Fit</button></div><svg viewBox="0 0 ${width} ${height}" style="height:${Math.min(height, 560)}px" role="img" aria-label="Task graph">
+<div class="graph"><div class="graph-bar"><p class="graph-hint" id="graph-hint">${hint}</p><div class="graph-tools" role="group" aria-label="Graph zoom">${tools}</div></div><svg viewBox="0 0 ${width} ${height}" style="height:${Math.min(height, 560)}px" tabindex="0" role="group" aria-label="Task graph, ${tasks.length} tasks. Arrow keys pan, plus and minus zoom, 0 resets the view." aria-describedby="graph-hint">
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
 ${edges}${nodes}
 </svg></div>
@@ -880,7 +898,7 @@ function mermaid() {
   }
   for (const task of tasks) for (const need of list(task.needs)) lines.push(`  ${need} --> ${task.id}`);
   for (const status of new Set(tasks.map((task) => task.status))) {
-    lines.push(`  classDef ${name(status)} fill:${STATUSES[status].fill},stroke:${STATUSES[status].stroke},color:#101828`);
+    lines.push(`  classDef ${name(status)} fill:${STATUSES[status].fill},stroke:${STATUSES[status].stroke},color:${NODE_TEXT}`);
   }
   if (current) lines.push(`  style ${current} stroke-width:4px`);
   return lines.join("\n");
@@ -911,9 +929,8 @@ function defaultOutDir() {
 
 const kindLabel = KINDS[data.kind];
 const range = uncommitted ? `${short(baseSha)}..working tree` : `${short(baseSha)}..${short(headSha)}`;
+const heading = `${kindLabel}${isText(data.task) ? ` ${data.task}` : ""}`;
 const scopeParts = [
-  `<strong>${kindLabel}</strong>`,
-  ...(isText(data.task) ? [`task <code>${esc(data.task)}</code>`] : []),
   ...(showBranch ? [`<code>${esc(branchName)}</code>`] : []),
   `<code>${esc(range)}</code>`,
   esc(uncommittedNote),
@@ -922,8 +939,8 @@ const totals = renderTotals();
 const diffCommand = `git diff ${diffRange.map(short).join(" ")}`;
 
 const slots = {
-  title: esc(`${kindLabel}${isText(data.task) ? ` ${data.task}` : ""} · ${repoName}`),
-  scope: scopeParts.join(" · "),
+  title: esc(`${heading} · ${repoName}`),
+  scope: `<h1>${esc(heading)}</h1><p class="scope">${scopeParts.join(" · ")}</p>`,
   outcome: `<ul>${data.outcome.map((bullet) => `<li>${inline(bullet)}</li>`).join("")}</ul>`,
   snapshot: `${totals.html}<p class="ran">${esc(totals.summary)} · <code>${esc(diffCommand)}</code></p>${renderTree()}`,
   interfaces: renderInterfaces(),

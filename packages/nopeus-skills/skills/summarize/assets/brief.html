@@ -12,74 +12,162 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&display=swap"
     />
     <style>
+      /* Colours are Radix Colors v3 steps, inlined so the page works offline.
+         Each token names its scale and step. Steps follow Radix semantics
+         (1-2 backgrounds, 3-5 component backgrounds, 6-8 borders, 9-10 solid,
+         11-12 text) except where a step misses WCAG contrast; those lines say
+         which step was used instead and why. */
       :root {
         color-scheme: light dark;
-        --bg: #ffffff;
-        --panel: #f9fafb;
-        --border: #e4e7ec;
-        --text: #101828;
-        --dim: #667085;
-        --add: #067647;
-        --del: #b42318;
-        --add-bg: #ecfdf3;
-        --del-bg: #fef3f2;
-        --warn: #b54708;
-        --warn-bg: #fffaeb;
-        --accent: #175cd3;
+        --bg: #fcfcfd; /* slate-1 */
+        --panel: #f9f9fb; /* slate-2 */
+        --hover: #f0f0f3; /* slate-3 */
+        --border: #d9d9e0; /* slate-6 */
+        --border-strong: #b9bbc6; /* slate-8 */
+        --text: #1c2024; /* slate-12 */
+        --dim: #60646c; /* slate-11 */
+        --add: #2a7e3b; /* grass-11; green-11 is 4.49:1 on the panel */
+        --add-bg: #e9f6e9; /* grass-3 */
+        --del: #ce2c31; /* red-11 */
+        --del-bg: #feebec; /* red-3 */
+        --warn: #4f3422; /* amber-12; amber-11 is 4.25:1 on amber-3 */
+        --warn-bg: #fff7c2; /* amber-3 */
+        --accent: #0d74ce; /* blue-11 */
+        --focus: #0090ff; /* blue-9; blue-8 is under 3:1 on slate-1 */
+        --selection: #c2e5ff; /* blue-5 */
+        --edge: #8b8d98; /* slate-9 */
+
+        /* Graph nodes: step 3 fill. Light outlines use step 11 because
+           steps 8 to 10 stay under 3:1 against the panel. */
+        --node-blocked-fill: #f0f0f3; /* slate-3 */
+        --node-blocked-stroke: #8b8d98; /* slate-9 */
+        --node-ready-fill: #fcfcfd; /* slate-1 */
+        --node-ready-stroke: #60646c; /* slate-11 */
+        --node-active-fill: #e6f4fe; /* blue-3 */
+        --node-active-stroke: #0d74ce; /* blue-11 */
+        --node-review-fill: #fff7c2; /* amber-3 */
+        --node-review-stroke: #ab6400; /* amber-11 */
+        --node-approved-fill: #e0f8f3; /* teal-3 */
+        --node-approved-stroke: #008573; /* teal-11 */
+        --node-done-fill: #e9f6e9; /* grass-3 */
+        --node-done-stroke: #2a7e3b; /* grass-11 */
+
+        --radius-sm: 4px;
+        --radius: 8px;
+        /* About 75 characters of Geist; ch is the wide "0", so 70ch ran to 95. */
+        --measure: 34em;
         --sans: "Geist", "Geist Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
         --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        scrollbar-color: var(--border-strong) transparent;
       }
-      @media (prefers-color-scheme: dark) {
+      /* Screen only, so a printout is always light. */
+      @media screen and (prefers-color-scheme: dark) {
         :root {
-          --bg: #0c111d;
-          --panel: #161b26;
-          --border: #333741;
-          --text: #f5f5f6;
-          --dim: #94969c;
-          --add: #47cd89;
-          --del: #f97066;
-          --add-bg: #0b2a1c;
-          --del-bg: #32110e;
-          --warn: #fdb022;
-          --warn-bg: #2e1f05;
-          --accent: #84caff;
+          --bg: #111113; /* slate-dark-1 */
+          --panel: #18191b; /* slate-dark-2 */
+          --hover: #212225; /* slate-dark-3 */
+          --border: #363a3f; /* slate-dark-6 */
+          --border-strong: #5a6169; /* slate-dark-8 */
+          --text: #edeef0; /* slate-dark-12 */
+          --dim: #b0b4ba; /* slate-dark-11 */
+          --add: #71d083; /* grass-dark-11 */
+          --add-bg: #1b2a1e; /* grass-dark-3 */
+          --del: #ff9592; /* red-dark-11 */
+          --del-bg: #3b1219; /* red-dark-3 */
+          --warn: #ffca16; /* amber-dark-11 */
+          --warn-bg: #302008; /* amber-dark-3 */
+          --accent: #70b8ff; /* blue-dark-11 */
+          --focus: #0090ff; /* blue-dark-9 */
+          --selection: #004074; /* blue-dark-5 */
+          --edge: #696e77; /* slate-dark-9 */
+
+          /* Dark outlines use the border step 8, which clears 3:1 here. */
+          --node-blocked-fill: #212225; /* slate-dark-3 */
+          --node-blocked-stroke: #696e77; /* slate-dark-9; slate-dark-8 is 2.81:1 */
+          --node-ready-fill: #111113; /* slate-dark-1 */
+          --node-ready-stroke: #777b84; /* slate-dark-10 */
+          --node-active-fill: #0d2847; /* blue-dark-3 */
+          --node-active-stroke: #2870bd; /* blue-dark-8 */
+          --node-review-fill: #302008; /* amber-dark-3 */
+          --node-review-stroke: #8f6424; /* amber-dark-8 */
+          --node-approved-fill: #0d2d2a; /* teal-dark-3 */
+          --node-approved-stroke: #207e73; /* teal-dark-8 */
+          --node-done-fill: #1b2a1e; /* grass-dark-3 */
+          --node-done-stroke: #3e7949; /* grass-dark-8 */
         }
       }
       * {
         box-sizing: border-box;
       }
+      ::selection {
+        background: var(--selection);
+        color: var(--text);
+      }
+      :focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+      }
+      a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.2em;
+      }
+      a:hover {
+        text-decoration-thickness: 2px;
+      }
       body {
         margin: 0;
         background: var(--bg);
         color: var(--text);
-        font: 15px/1.5 var(--sans);
+        font: 15px/1.55 var(--sans);
+        overflow-wrap: break-word;
       }
       main {
         max-width: 960px;
         margin: 0 auto;
-        padding: 24px 20px 64px;
+        padding: 32px 20px 64px;
       }
       main > header {
-        padding: 12px 16px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: var(--panel);
+        margin-bottom: 8px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 24px;
+        font-weight: 650;
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+      .scope {
+        margin: 0;
+        color: var(--dim);
+        font-size: 14px;
       }
       section {
-        margin-top: 32px;
+        margin-top: 40px;
       }
       h2 {
-        margin: 0 0 12px;
-        padding-bottom: 6px;
+        margin: 0 0 14px;
+        padding-bottom: 8px;
         border-bottom: 1px solid var(--border);
         font-size: 18px;
+        font-weight: 600;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
       }
       h3 {
-        margin: 20px 0 8px;
-        color: var(--dim);
-        font-size: 13px;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
+        margin: 28px 0 8px;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.4;
+        text-wrap: balance;
+      }
+      /* Running text keeps a readable measure; trees, code, tables and the
+         graph still use the full page width. */
+      main :is(p, ul) {
+        max-width: var(--measure);
+        text-wrap: pretty;
       }
       ul {
         margin: 0;
@@ -95,10 +183,11 @@
         font-size: 13px;
       }
       code {
-        padding: 1px 5px;
-        border-radius: 4px;
+        padding: 1px 4px;
+        border-radius: var(--radius-sm);
         background: var(--panel);
         border: 1px solid var(--border);
+        overflow-wrap: anywhere;
       }
       .dim,
       .ran,
@@ -106,7 +195,7 @@
         color: var(--dim);
       }
       .ran {
-        margin: 8px 0;
+        margin: 10px 0;
         font-size: 13px;
       }
       .add {
@@ -115,25 +204,46 @@
       .del {
         color: var(--del);
       }
+      .totals,
+      .tree,
+      .tree-rich,
+      table,
+      .ran,
+      .legend {
+        font-variant-numeric: tabular-nums;
+      }
 
+      /* One ruled strip rather than three cards: each bucket reads as a line,
+         label then the added count, so the sizes compare at a glance. */
       .totals {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin: 0;
+        border-block: 1px solid var(--border);
       }
       .total {
-        padding: 12px 16px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: var(--panel);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 2px 10px;
+        padding: 10px 16px;
       }
-      .total-label {
-        color: var(--dim);
-        font-size: 13px;
+      .total:first-child {
+        padding-left: 0;
+      }
+      .total + .total {
+        border-left: 1px solid var(--border);
+      }
+      .total dt {
+        font-weight: 600;
+      }
+      .total dd {
+        margin: 0;
       }
       .total-added {
         color: var(--add);
-        font: 600 28px/1.2 var(--mono);
+        font: 600 22px/1.2 var(--mono);
+        letter-spacing: -0.02em;
       }
       .total-meta {
         color: var(--dim);
@@ -143,22 +253,22 @@
       .tree {
         padding: 12px 16px;
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius);
         background: var(--panel);
         overflow-x: auto;
       }
       .row {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 20px 20px 64px 64px;
+        grid-template-columns: minmax(0, 1fr) 2ch 2ch 7ch 7ch;
         gap: 8px;
         align-items: baseline;
         line-height: 1.6;
       }
       .row:hover {
-        background: var(--border);
+        background: var(--hover);
       }
       .row-component {
-        grid-template-columns: minmax(200px, auto) 20px minmax(0, 1fr);
+        grid-template-columns: minmax(12rem, auto) 2ch minmax(0, 1fr);
       }
       .name {
         overflow: hidden;
@@ -203,41 +313,41 @@
         font-family: var(--sans);
       }
 
+      /* Entries are separated by a rule, not a box, so the code box inside
+         is the only container. */
       .excerpt {
         margin-top: 16px;
-        padding: 16px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
+      }
+      .excerpt + .excerpt {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
       }
       .excerpt-head {
         display: flex;
         flex-wrap: wrap;
-        align-items: center;
-        gap: 8px;
+        align-items: baseline;
+        gap: 4px 8px;
       }
       .excerpt-title {
         margin: 0;
-        color: var(--text);
-        font-size: 15px;
-        font-weight: 600;
-        letter-spacing: 0;
-        text-transform: none;
       }
       .excerpt-path {
         margin-left: auto;
+        padding: 0;
         border: 0;
         background: none;
         color: var(--dim);
         font-size: 12px;
       }
       .excerpt-note {
-        margin: 6px 0 12px;
+        margin: 4px 0 10px;
       }
       .code {
         margin: 0;
         padding: 8px 0;
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius);
         background: var(--panel);
         overflow-x: auto;
       }
@@ -248,12 +358,12 @@
       }
       .tree-rich {
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius);
         overflow: hidden;
       }
       .diff-rich {
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius);
         overflow: hidden;
         --diffs-font-family: var(--mono);
         --diffs-font-size: 13px;
@@ -277,6 +387,9 @@
         color: var(--del);
       }
 
+      .table-wrap {
+        overflow-x: auto;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -288,6 +401,15 @@
         text-align: left;
         vertical-align: top;
       }
+      th:first-child,
+      td:first-child {
+        padding-left: 0;
+      }
+      /* A command broken at a hyphen reads as two arguments; the table
+         scrolls in its wrapper instead. */
+      td code {
+        overflow-wrap: normal;
+      }
       th {
         color: var(--dim);
         font-size: 13px;
@@ -295,8 +417,8 @@
       }
       .chip {
         display: inline-block;
-        padding: 0 8px;
-        border-radius: 999px;
+        padding: 0 6px;
+        border-radius: var(--radius-sm);
         font-size: 12px;
         font-weight: 600;
         white-space: nowrap;
@@ -325,7 +447,7 @@
 
       .shots {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
         gap: 16px;
       }
       figure {
@@ -334,7 +456,7 @@
       figure img {
         max-width: 100%;
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius);
       }
       figcaption {
         margin-top: 4px;
@@ -343,60 +465,138 @@
       }
 
       .graph {
-        position: relative;
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius);
         background: var(--panel);
         overflow: hidden;
       }
-      .graph svg {
+      .graph-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px 12px;
+        padding: 6px 6px 6px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .graph-hint {
+        margin: 0;
+        color: var(--dim);
+        font-size: 12px;
+      }
+      .graph-tools {
+        display: flex;
+        gap: 4px;
+      }
+      .graph-tools button {
+        display: inline-grid;
+        place-items: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--bg);
+        color: var(--text);
+        font: 500 13px var(--sans);
+        cursor: pointer;
+      }
+      .graph-tools button:hover {
+        border-color: var(--border-strong);
+        background: var(--hover);
+      }
+      .graph-tools svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+      }
+      .graph > svg {
         display: block;
         width: 100%;
         cursor: grab;
         touch-action: none;
         user-select: none;
       }
-      .graph svg.dragging {
+      /* The panel clips its children, so the ring sits inside the edge. */
+      .graph > svg:focus-visible {
+        outline-offset: -3px;
+      }
+      .graph > svg.dragging {
         cursor: grabbing;
-      }
-      .graph-tools {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        display: flex;
-        gap: 4px;
-      }
-      .graph-tools button {
-        min-width: 28px;
-        height: 28px;
-        padding: 0 8px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        background: var(--bg);
-        color: var(--text);
-        font: 13px var(--sans);
-        cursor: pointer;
       }
       .edge {
         fill: none;
-        stroke: var(--dim);
+        stroke: var(--edge);
         stroke-width: 1.5;
       }
       .arrowhead {
-        fill: var(--dim);
+        fill: var(--edge);
+      }
+      .status-blocked {
+        --node-fill: var(--node-blocked-fill);
+        --node-stroke: var(--node-blocked-stroke);
+      }
+      .status-ready {
+        --node-fill: var(--node-ready-fill);
+        --node-stroke: var(--node-ready-stroke);
+      }
+      .status-implementing,
+      .status-validating {
+        --node-fill: var(--node-active-fill);
+        --node-stroke: var(--node-active-stroke);
+      }
+      .status-awaiting-human-review {
+        --node-fill: var(--node-review-fill);
+        --node-stroke: var(--node-review-stroke);
+      }
+      .status-approved {
+        --node-fill: var(--node-approved-fill);
+        --node-stroke: var(--node-approved-stroke);
+      }
+      .status-integrated,
+      .status-verified {
+        --node-fill: var(--node-done-fill);
+        --node-stroke: var(--node-done-stroke);
+      }
+      .node rect {
+        fill: var(--node-fill);
+        stroke: var(--node-stroke);
+        stroke-width: 1.5;
+      }
+      /* Blocked and ready are both neutral; the dash tells them apart
+         without relying on the fill. */
+      .node.status-blocked rect {
+        stroke-dasharray: 5 3;
+      }
+      .node-current rect {
+        stroke-width: 3;
       }
       .node-id {
-        fill: #101828;
+        fill: var(--text);
         font: 700 13px var(--mono);
       }
+      .node-status {
+        fill: var(--dim);
+        font: 500 11px var(--sans);
+      }
       .node-title {
-        fill: #344054;
+        fill: var(--dim);
         font: 12px var(--sans);
+      }
+      .node .badge rect {
+        fill: var(--accent);
+        stroke: none;
+      }
+      .node .badge text {
+        fill: var(--bg);
+        font: 600 11px var(--sans);
       }
       .legend {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 4px 16px;
         margin-top: 8px;
         color: var(--dim);
         font-size: 13px;
@@ -406,9 +606,95 @@
         width: 12px;
         height: 12px;
         margin-right: 6px;
-        border: 1.5px solid;
-        border-radius: 3px;
+        border: 1.5px solid var(--node-stroke);
+        border-radius: var(--radius-sm);
+        background: var(--node-fill);
         vertical-align: -1px;
+      }
+      .swatch.status-blocked {
+        border-style: dashed;
+      }
+
+      @media (max-width: 600px) {
+        main {
+          padding: 24px 14px 48px;
+        }
+        .totals {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .total {
+          padding-inline: 0;
+        }
+        .total + .total {
+          border-left: 0;
+          border-top: 1px solid var(--border);
+        }
+        .tree {
+          padding: 10px 12px;
+        }
+        .row {
+          grid-template-columns: minmax(0, 1fr) 1.5ch 1.5ch 6ch 6ch;
+          gap: 6px;
+        }
+        .row-component {
+          grid-template-columns: minmax(0, 1fr) 1.5ch;
+        }
+        .row-component .owns {
+          grid-column: 1 / -1;
+          padding-left: 2ch;
+        }
+      }
+
+      @media print {
+        :root {
+          color-scheme: light;
+        }
+        body {
+          font-size: 10.5pt;
+        }
+        main {
+          max-width: none;
+          padding: 0;
+        }
+        .graph-bar {
+          display: none;
+        }
+        .tree,
+        .code,
+        .table-wrap {
+          overflow: visible;
+        }
+        .ln,
+        .name {
+          white-space: pre-wrap;
+        }
+        .row:hover {
+          background: none;
+        }
+        .excerpt,
+        .total,
+        tr,
+        figure,
+        .graph {
+          break-inside: avoid;
+        }
+        h2,
+        h3,
+        .excerpt-head {
+          break-after: avoid;
+        }
+      }
+      /* Pierre follows the system theme even on paper, so a dark system
+         prints the plain light versions kept on the page instead. */
+      @media print and (prefers-color-scheme: dark) {
+        .tree-rich,
+        .diff-rich {
+          display: none;
+        }
+        .tree[hidden],
+        .diff > .code[hidden] {
+          display: block;
+        }
       }
     </style>
   </head>
@@ -452,7 +738,8 @@
       // Upgrades the plain file tree and code excerpts with Pierre's open
       // source components, loaded from a CDN. Everything is already on the
       // page in plain form and stays that way when a library cannot load, so
-      // the brief still reads offline.
+      // the brief still reads offline. The plain versions are hidden, not
+      // removed, so a dark-system printout can fall back to them.
       const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
       const treeMount = document.querySelector(".tree[data-tree]");
@@ -476,16 +763,17 @@
                 ? [{ text: "bin" }]
                 : [
                     { text: `+${file.added}`, color: css("--add") },
-                    { text: `\u00a0\u00a0−${file.deleted}`, color: css("--del") },
+                    { text: `  −${file.deleted}`, color: css("--del") },
                   ];
               return {
                 text: "",
                 title: `${file.bucket}${file.from ? `, renamed from ${file.from}` : ""}`,
-                parts: [{ text: `${file.bucket[0].toUpperCase()}\u00a0\u00a0\u00a0`, color: css("--dim") }, ...counts],
+                parts: [{ text: `${file.bucket[0].toUpperCase()}   `, color: css("--dim") }, ...counts],
               };
             },
           }).render({ containerWrapper: mount });
-          treeMount.replaceWith(mount);
+          treeMount.after(mount);
+          treeMount.hidden = true;
         } catch (error) {
           console.warn("brief: kept the plain file tree", error);
         }
@@ -519,7 +807,8 @@
                   containerWrapper: mount,
                 });
               }
-              excerpt.replaceChildren(mount);
+              for (const plain of excerpt.children) plain.hidden = true;
+              excerpt.append(mount);
             } catch (error) {
               console.warn("brief: kept the plain excerpt", error);
             }
@@ -530,13 +819,19 @@
       }
     </script>
     <script>
-      // Pan and zoom for the task graph: drag to pan, scroll or pinch to zoom.
-      // The chart is SVG, so it stays sharp at any zoom and needs no library.
-      for (const svg of document.querySelectorAll(".graph svg")) {
+      // Pan and zoom for the task graph: drag or arrow keys to pan; Ctrl or
+      // Cmd with the wheel, a pinch, or + and - to zoom. A plain wheel is left
+      // to the page so scrolling past the graph never gets stuck on it. The
+      // chart is SVG, so it stays sharp at any zoom and needs no library.
+      for (const svg of document.querySelectorAll(".graph > svg")) {
         const full = svg.viewBox.baseVal;
         const home = { x: full.x, y: full.y, width: full.width, height: full.height };
         const view = { ...home };
         const apply = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.width} ${view.height}`);
+        const reset = () => {
+          Object.assign(view, home);
+          apply();
+        };
         const zoom = (factor, clientX, clientY) => {
           const box = svg.getBoundingClientRect();
           const width = Math.min(home.width * 4, Math.max(home.width / 8, view.width * factor));
@@ -553,11 +848,28 @@
         svg.addEventListener(
           "wheel",
           (event) => {
+            // Browsers report a trackpad pinch as a wheel event with ctrlKey.
+            if (!event.ctrlKey && !event.metaKey) return;
             event.preventDefault();
             zoom(event.deltaY > 0 ? 1.1 : 1 / 1.1, event.clientX, event.clientY);
           },
           { passive: false },
         );
+
+        const PAN = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+        svg.addEventListener("keydown", (event) => {
+          if (event.ctrlKey || event.metaKey || event.altKey) return;
+          const pan = PAN[event.key];
+          if (pan) {
+            view.x += pan[0] * view.width * 0.1;
+            view.y += pan[1] * view.height * 0.1;
+            apply();
+          } else if (event.key === "+" || event.key === "=") zoom(1 / 1.3);
+          else if (event.key === "-" || event.key === "_") zoom(1.3);
+          else if (event.key === "0") reset();
+          else return;
+          event.preventDefault();
+        });
 
         let drag;
         svg.addEventListener("pointerdown", (event) => {
@@ -583,10 +895,7 @@
         const tools = svg.parentElement.querySelector(".graph-tools");
         tools.querySelector("[data-zoom=in]").addEventListener("click", () => zoom(1 / 1.3));
         tools.querySelector("[data-zoom=out]").addEventListener("click", () => zoom(1.3));
-        tools.querySelector("[data-zoom=fit]").addEventListener("click", () => {
-          Object.assign(view, home);
-          apply();
-        });
+        tools.querySelector("[data-zoom=fit]").addEventListener("click", reset);
       }
     </script>
   </body>
