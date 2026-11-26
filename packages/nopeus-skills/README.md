@@ -11,8 +11,8 @@ The canonical collection of shared agent skills, organized as the workspace pack
 - `summarize`: brief the human on each code change as one fixed-format HTML page, and guide design in specs.
 - `audit`: simplify specs and code changes, reusing test coverage and removing redundancy.
 - `graph`: maintain tasks, dependencies, parallelism constraints, and completion evidence in context.
-- `implement`: take an idea through planning and human-approved trunk integration in one conversation.
-- `orchestrate`: coordinate parallel graph tasks, validation, independent review, and human approval before each trunk integration.
+- `implement`: take an idea through planning, human-approved tasks on a feature branch, and a PR to trunk in one conversation.
+- `orchestrate`: coordinate parallel graph tasks on a feature branch, with validation, independent review, and human approval before each task merges, then open one PR.
 - `create-pr`: concise pull request titles and descriptions.
 - `create-ticket`: concise product tickets and bug reports.
 
@@ -32,10 +32,11 @@ are persisted. Ready independent tasks run in parallel within available capacity
 task change before human approval, and builds one for the combined outcome. A
 bundled Node script renders every brief from Git and a small data file, so the
 layout and the numbers never vary. `audit` simplifies
-plans and code. `orchestrate` requires independent correctness review and explicit
-human approval before integrating each task as one commit on trunk. Workers may
-make any number of checkpoint commits. Tickets and PRs are created only when
-requested; feature branches are not required. `adhd` applies throughout.
+plans and code. Every graph runs on one feature branch: `orchestrate` requires
+independent correctness review and explicit human approval before integrating
+each task as one commit on that branch, then opens one PR from the branch to
+trunk. Workers may make any number of checkpoint commits. Tickets are created
+only when requested. `adhd` applies throughout.
 
 ## Installation
 
