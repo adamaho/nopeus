@@ -60,6 +60,7 @@ independent work when another part is blocked.
 | Clarify contracts | [spec](../spec/SKILL.md), when useful | Concise architecture, public contracts, and acceptance examples in context. |
 | Plan tasks | [graph](../graph/SKILL.md) | In-context tasks, dependencies, parallelism constraints, completion requirements, and a flowchart. |
 | Coordinate implementation | [orchestrate](../orchestrate/SKILL.md) | A feature branch, parallel workers, validation, independent review, and human-approved integration of each task into that branch. |
+| Check changes | [review](../review/SKILL.md) | An independent review of each task and of the combined feature. |
 | Explain changes | [summarize](../summarize/SKILL.md) | A brief for each human approval and one for the combined outcome. |
 | Propose the feature | [create-pr](../create-pr/SKILL.md) | One PR from the feature branch to trunk. |
 
