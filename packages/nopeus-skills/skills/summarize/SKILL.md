@@ -153,8 +153,20 @@ Text fields accept `` `code` `` and `**bold**` only. Keep each to one line.
 the real diff. Point at it; do not retype it.
 
 - `file` and `lines` name the range in the head version, such as `"42-44"` or
-  `"12-14,30"`. The script shows the added, removed, and unchanged lines in that
-  range. For an interface that was deleted, give `oldLines` instead.
+  `"12-14,30"`. For an interface that was deleted, give `oldLines` instead.
+- The script shows a diff only where a diff says something, so choose the range
+  for what you want the human to see:
+
+  | The range holds | Shown as |
+  | --- | --- |
+  | Changed lines next to lines that survived | Diff, labelled Changed |
+  | Only added lines, as in a new type or function | Plain code, labelled New |
+  | Only removed lines | Plain code, labelled Removed |
+  | No changed lines, as in a usage example | Plain code, labelled Unchanged |
+
+  For a changed signature, include the lines around the change so the diff has
+  context. For a new interface, select just its signature or type; it is not a
+  diff, so do not pad the range to make it look like one.
 - Select the smallest range that shows the contract: function signatures,
   exported types and schemas, endpoint definitions, props, UI-state types,
   navigation arguments, table definitions, config shape. Leave implementation

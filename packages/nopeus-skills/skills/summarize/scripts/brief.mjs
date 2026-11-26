@@ -30,6 +30,7 @@ const STATUSES = {
 const DONE = new Set(["integrated", "verified"]);
 const BUCKETS = ["production", "tests", "other"];
 const OUT_DIR = "briefs";
+const GIT_STATUS = { A: "added", M: "modified", D: "deleted", R: "renamed", C: "added" };
 const MIME = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
@@ -431,7 +432,30 @@ function renderTree() {
     });
   };
   walk(root, "", true);
-  return `<div class="tree">${rows.join("\n")}</div>`;
+  // The same tree as data, for the interactive file tree that replaces this
+  // plain one when its library loads.
+  const payload = {
+    rows: rows.length,
+    files: treeEntries().map((entry) =>
+      entry.group
+        ? {
+            path: entry.path.replace("\u0000", `${entry.count} generated ${entry.count === 1 ? "file" : "files"}`),
+            bucket: "other",
+            added: entry.added,
+            deleted: entry.deleted,
+          }
+        : {
+            path: entry.path,
+            status: entry.untracked ? "untracked" : GIT_STATUS[entry.status],
+            bucket: entry.bucket,
+            added: entry.added,
+            deleted: entry.deleted,
+            binary: entry.binary,
+            from: entry.oldPath,
+          },
+    ),
+  };
+  return `<div class="tree" data-tree="${esc(JSON.stringify(payload))}">${rows.join("\n")}</div>`;
 }
 
 function renderFileRow(file, branch) {
@@ -518,7 +542,23 @@ function excerpt(entry) {
   return lines;
 }
 
-function renderCode(lines) {
+// A diff is only useful when the range mixes changed and surviving lines.
+// Wholly new, wholly removed, or untouched code reads better as plain code
+// with a label, so the reader is not left hunting for what changed.
+function excerptKind(lines) {
+  const signs = new Set(lines.map((line) => line.sign));
+  if (signs.size > 1) return "changed";
+  return signs.has("+") ? "new" : signs.has("-") ? "removed" : "unchanged";
+}
+
+function dedent(lines) {
+  const indent = Math.min(
+    ...lines.filter((line) => line.text.trim() !== "").map((line) => line.text.match(/^[ \t]*/)[0].length),
+  );
+  return lines.map((line) => line.text.slice(Number.isFinite(indent) ? indent : 0));
+}
+
+function renderCode(lines, plain) {
   // Strip shared indentation so nested signatures stay readable.
   const indent = Math.min(
     ...lines.filter((line) => line.text.trim() !== "").map((line) => line.text.match(/^[ \t]*/)[0].length),
@@ -526,6 +566,7 @@ function renderCode(lines) {
   const strip = Number.isFinite(indent) ? indent : 0;
   return `<pre class="code">${lines
     .map((line) => {
+      if (plain) return `<span class="ln">${esc(line.text.slice(strip)) || " "}</span>`;
       const kind = line.sign === "+" ? "plus" : line.sign === "-" ? "minus" : "ctx";
       return `<span class="ln ln-${kind}"><span class="sign">${line.sign === " " ? " " : line.sign}</span>${esc(line.text.slice(strip)) || " "}</span>`;
     })
@@ -566,10 +607,15 @@ function renderExcerpt(entry, label) {
   if (lines.length > 40) {
     console.error(`brief: warning: ${entry.file}:${spec} is ${lines.length} lines; show signatures and types only`);
   }
+  const kind = excerptKind(lines);
+  const source =
+    kind === "changed"
+      ? `data-patch="${esc(toPatch(entry.file, lines))}"`
+      : `data-name="${esc(basename(entry.file))}" data-code="${esc(dedent(lines).join("\n"))}"`;
   return `<div class="excerpt">
-  <div class="excerpt-head"><code>${esc(entry.file)}:${esc(spec)}</code></div>
+  <div class="excerpt-head"><code>${esc(entry.file)}:${esc(spec)}</code> <span class="chip chip-${kind}">${cap(kind)}</span></div>
   ${entry.note ? `<p class="excerpt-note">${inline(entry.note)}</p>` : ""}
-  <div class="diff" data-patch="${esc(toPatch(entry.file, lines))}">${renderCode(lines)}</div>
+  <div class="diff" ${source}>${renderCode(lines, kind !== "changed")}</div>
 </div>`;
 }
 

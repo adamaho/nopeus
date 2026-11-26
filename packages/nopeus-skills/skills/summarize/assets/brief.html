@@ -217,6 +217,16 @@
         background: var(--panel);
         overflow-x: auto;
       }
+      .chip-unchanged {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        color: var(--dim);
+      }
+      .tree-rich {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
       .diff-rich {
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -267,6 +277,7 @@
         font-weight: 600;
         white-space: nowrap;
       }
+      .chip-new,
       .chip-pass,
       .chip-added,
       .chip-modified,
@@ -274,11 +285,13 @@
         background: var(--add-bg);
         color: var(--add);
       }
+      .chip-removed,
       .chip-fail,
       .chip-gap {
         background: var(--del-bg);
         color: var(--del);
       }
+      .chip-changed,
       .chip-not-run,
       .chip-manual,
       .chip-unrelated {
@@ -412,26 +425,76 @@
       <!--{{graph}}-->
     </main>
     <script type="module">
-      // Upgrades each excerpt to a syntax-highlighted diff with @pierre/diffs,
-      // loaded from a CDN. The plain coloured excerpt already on the page stays
-      // when the library cannot load, so the brief still reads offline.
-      const excerpts = [...document.querySelectorAll(".diff[data-patch]")];
+      // Upgrades the plain file tree and code excerpts with Pierre's open
+      // source components, loaded from a CDN. Everything is already on the
+      // page in plain form and stays that way when a library cannot load, so
+      // the brief still reads offline.
+      const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+      const treeMount = document.querySelector(".tree[data-tree]");
+      if (treeMount) {
+        try {
+          const { FileTree, FILE_TREE_DEFAULT_ITEM_HEIGHT } = await import("https://esm.sh/@pierre/trees@1.0.0");
+          const { files, rows } = JSON.parse(treeMount.dataset.tree);
+          const byPath = new Map(files.map((file) => [file.path, file]));
+          const mount = document.createElement("div");
+          mount.className = "tree-rich";
+          mount.style.height = `${rows * FILE_TREE_DEFAULT_ITEM_HEIGHT + 16}px`;
+          new FileTree({
+            paths: files.map((file) => file.path),
+            gitStatus: files.filter((file) => file.status).map((file) => ({ path: file.path, status: file.status })),
+            initialExpansion: "open",
+            flattenEmptyDirectories: true,
+            renderRowDecoration: ({ item }) => {
+              const file = byPath.get(item.path);
+              if (!file) return null;
+              const counts = file.binary
+                ? [{ text: "bin" }]
+                : [
+                    { text: `+${file.added}`, color: css("--add") },
+                    { text: `\u00a0\u00a0−${file.deleted}`, color: css("--del") },
+                  ];
+              return {
+                text: "",
+                title: `${file.bucket}${file.from ? `, renamed from ${file.from}` : ""}`,
+                parts: [{ text: `${file.bucket[0].toUpperCase()}\u00a0\u00a0\u00a0`, color: css("--dim") }, ...counts],
+              };
+            },
+          }).render({ containerWrapper: mount });
+          treeMount.replaceWith(mount);
+        } catch (error) {
+          console.warn("brief: kept the plain file tree", error);
+        }
+      }
+
+      const excerpts = [...document.querySelectorAll(".diff")];
       if (excerpts.length > 0) {
         try {
-          const { FileDiff, getSingularPatch } = await import("https://esm.sh/@pierre/diffs@1.7.2");
+          const { File, FileDiff, getSingularPatch } = await import("https://esm.sh/@pierre/diffs@1.7.2");
+          const shared = {
+            disableFileHeader: true,
+            overflow: "scroll",
+            theme: { dark: "pierre-dark", light: "pierre-light" },
+            themeType: "system",
+          };
           for (const excerpt of excerpts) {
             const mount = document.createElement("div");
             mount.className = "diff-rich";
             try {
-              new FileDiff({
-                diffStyle: "unified",
-                disableFileHeader: true,
-                diffIndicators: "classic",
-                hunkSeparators: "simple",
-                overflow: "scroll",
-                theme: { dark: "pierre-dark", light: "pierre-light" },
-                themeType: "system",
-              }).render({ fileDiff: getSingularPatch(excerpt.dataset.patch), containerWrapper: mount });
+              if (excerpt.dataset.patch) {
+                // Only a range that mixes changed and surviving lines is a diff.
+                new FileDiff({
+                  ...shared,
+                  diffStyle: "unified",
+                  diffIndicators: "classic",
+                  hunkSeparators: "simple",
+                }).render({ fileDiff: getSingularPatch(excerpt.dataset.patch), containerWrapper: mount });
+              } else {
+                new File({ ...shared, disableLineNumbers: true }).render({
+                  file: { name: excerpt.dataset.name, contents: excerpt.dataset.code },
+                  containerWrapper: mount,
+                });
+              }
               excerpt.replaceChildren(mount);
             } catch (error) {
               console.warn("brief: kept the plain excerpt", error);
