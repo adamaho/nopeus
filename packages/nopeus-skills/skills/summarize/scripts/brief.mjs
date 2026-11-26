@@ -355,7 +355,7 @@ function renderTotals() {
   const cells = rows
     .map(
       (row) => `<div class="total total-${row.bucket}">
-  <dt>${row.bucket[0].toUpperCase()}${row.bucket.slice(1)}</dt>
+  <dt><span class="share-key share-${row.bucket}"></span>${row.bucket[0].toUpperCase()}${row.bucket.slice(1)}</dt>
   <dd class="total-added">${signed(row.added, "+")}</dd>
   <dd class="total-meta"><span class="del">${signed(row.deleted, "−")}</span> · ${row.count} ${row.count === 1 ? "file" : "files"}</dd>
 </div>`,
@@ -370,7 +370,18 @@ function renderTotals() {
     .map(([status, count]) => `${count} ${labels[status]}`)
     .join(", ");
 
-  return { html: `<dl class="totals">${cells}</dl>`, summary: `${files.length} files: ${summary}`, rows };
+  // A proportional bar turns the three counts into a shape: a change that is
+  // mostly tests or mostly lockfile reads differently before any number does.
+  const totalAdded = rows.reduce((sum, row) => sum + row.added, 0);
+  const share =
+    totalAdded === 0
+      ? ""
+      : `<div class="share" role="img" aria-label="${rows.map((row) => `${row.bucket} ${Math.round((row.added / totalAdded) * 100)}%`).join(", ")} of added lines">${rows
+          .filter((row) => row.added > 0)
+          .map((row) => `<span class="share-${row.bucket}" style="flex-grow:${row.added}"></span>`)
+          .join("")}</div>`;
+
+  return { html: `<dl class="totals">${cells}</dl>${share}`, summary: `${files.length} files: ${summary}`, rows };
 }
 
 function treeEntries() {
@@ -663,13 +674,18 @@ function renderInterfaces() {
 
 const cap = (value) => `${value[0].toUpperCase()}${value.slice(1)}`;
 
+// A count beside a heading says how much is in a section before reading it.
+function count(n) {
+  return n > 0 ? `<span class="count">${n}</span>` : "";
+}
+
 function renderTests() {
   const summary = `<ul>${data.tests.summary.map((bullet) => `<li>${inline(bullet)}</li>`).join("")}</ul>`;
   const gaps =
     data.tests.gaps.length === 0
       ? `<p class="none">No known gaps</p>`
       : `<ul>${data.tests.gaps.map((gap) => `<li>${inline(gap)}</li>`).join("")}</ul>`;
-  return `${summary}<h3>Not covered</h3>${gaps}`;
+  return `${summary}<h3>Not covered${count(data.tests.gaps.length)}</h3>${gaps}`;
 }
 
 function renderValidation() {
@@ -678,7 +694,8 @@ function renderValidation() {
   // Checks that ran on another revision do not vouch for this one; say so.
   const stale = uncommitted ? claimed.toLowerCase() !== "working tree" : resolved !== headSha;
   const target = uncommitted ? "the working tree" : short(headSha);
-  const ran = `<p class="ran">Ran on <code>${esc(resolved ? short(resolved) : claimed)}</code>${
+  const passed = data.validation.checks.filter((row) => row.result.toLowerCase() === "pass").length;
+  const ran = `<p class="ran">${passed} of ${data.validation.checks.length} passed · ran on <code>${esc(resolved ? short(resolved) : claimed)}</code>${
     stale ? ` <span class="chip chip-fail">Stale: this brief covers ${esc(target)}</span>` : ""
   }</p>`;
   const rows = data.validation.checks
@@ -714,8 +731,12 @@ function renderScreenshots() {
 
 function renderAttention() {
   if (data.attention.length === 0) return `<p class="none">None</p>`;
-  return `<ul>${data.attention
-    .map((item) => `<li><strong>${esc(item.tag)}:</strong> ${inline(item.text)}</li>`)
+  // The tag sits in its own column so the list can be scanned by kind.
+  return `<ul class="tagged">${data.attention
+    .map(
+      (item) =>
+        `<li><span class="chip tag-${item.tag.toLowerCase().replace(" ", "-")}">${esc(item.tag)}</span><span>${inline(item.text)}</span></li>`,
+    )
     .join("")}</ul>`;
 }
 
@@ -938,9 +959,47 @@ const scopeParts = [
 const totals = renderTotals();
 const diffCommand = `git diff ${diffRange.map(short).join(" ")}`;
 
+// The verdict signals a reviewer looks for first, each linking to its section.
+// Green means nothing to do there; anything else is worth a look.
+const checkRows = data.validation.checks.map((row) => row.result.toLowerCase());
+const checksPassed = checkRows.filter((result) => result === "pass").length;
+const checkTone = checkRows.includes("fail") ? "bad" : checksPassed === checkRows.length ? "good" : "warn";
+const many = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
+const glance = [
+  { href: "#snapshot", tone: "plain", text: many(files.length, "file") },
+  { href: "#validation", tone: checkTone, text: `${checksPassed} of ${many(checkRows.length, "check")} passed` },
+  {
+    href: "#tests",
+    tone: data.tests.gaps.length === 0 ? "good" : "warn",
+    text: data.tests.gaps.length === 0 ? "No test gaps" : many(data.tests.gaps.length, "test gap"),
+  },
+  {
+    href: "#attention",
+    tone: data.attention.length === 0 ? "good" : "warn",
+    text: data.attention.length === 0 ? "Nothing needs attention" : `${data.attention.length} need attention`,
+  },
+]
+  .map((item) => `<a class="glance glance-${item.tone}" href="${item.href}">${esc(item.text)}</a>`)
+  .join("");
+
+const navItems = [
+  ["outcome", "Outcome"],
+  ["snapshot", "Snapshot"],
+  ["interfaces", "Interfaces", data.interfaces.length],
+  ["tests", "Tests"],
+  ["validation", "Validation"],
+  ["attention", "Attention", data.attention.length],
+  ...(data.graph ? [["graph", "Graph"]] : []),
+]
+  .map(([id, label, n]) => `<a href="#${id}">${label}${n ? `<span class="count">${n}</span>` : ""}</a>`)
+  .join("");
+
 const slots = {
   title: esc(`${heading} · ${repoName}`),
-  scope: `<h1>${esc(heading)}</h1><p class="scope">${scopeParts.join(" · ")}</p>`,
+  scope: `<h1>${esc(heading)}</h1><p class="scope">${scopeParts.join(" · ")}</p><p class="glances">${glance}</p>`,
+  nav: `<nav class="toc" aria-label="Sections">${navItems}</nav>`,
+  n_interfaces: count(data.interfaces.length),
+  n_attention: count(data.attention.length),
   outcome: `<ul>${data.outcome.map((bullet) => `<li>${inline(bullet)}</li>`).join("")}</ul>`,
   snapshot: `${totals.html}<p class="ran">${esc(totals.summary)} · <code>${esc(diffCommand)}</code></p>${renderTree()}`,
   interfaces: renderInterfaces(),

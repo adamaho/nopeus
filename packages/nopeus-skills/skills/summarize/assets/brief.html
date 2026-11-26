@@ -143,8 +143,109 @@
         color: var(--dim);
         font-size: 14px;
       }
+      /* The verdict row: size, checks, test gaps and open items at a glance,
+         each a link to its section. */
+      .glances {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        max-width: none;
+        margin: 16px 0 0;
+      }
+      .glance {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        text-decoration: none;
+      }
+      .glance:hover {
+        border-color: var(--border-strong);
+        background: var(--hover);
+      }
+      .glance::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--edge);
+      }
+      .glance-good::before {
+        background: var(--add);
+      }
+      .glance-warn::before {
+        background: var(--node-review-stroke);
+      }
+      .glance-bad::before {
+        background: var(--del);
+      }
+
+      /* Section links stay in reach while scrolling a long brief. */
+      .toc {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        gap: 4px;
+        margin: 20px -8px 0;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .toc a {
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+        color: var(--dim);
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .toc a:hover,
+      .toc a[aria-current] {
+        background: var(--hover);
+        color: var(--text);
+      }
+      .count {
+        display: inline-block;
+        min-width: 1.6em;
+        margin-left: 8px;
+        padding: 0 6px;
+        border-radius: var(--radius-sm);
+        background: var(--hover);
+        color: var(--dim);
+        font-size: 12px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.6;
+        text-align: center;
+        vertical-align: 0.1em;
+      }
+      .toc .count {
+        margin-left: 6px;
+        background: none;
+        padding: 0;
+        min-width: 0;
+      }
       section {
         margin-top: 40px;
+        /* Clears the sticky section links when jumping to an anchor. */
+        scroll-margin-top: 52px;
+      }
+      /* The outcome is the lead; it reads a size up from the evidence. */
+      #outcome ul {
+        font-size: 16px;
+      }
+      #outcome li + li {
+        margin-top: 8px;
       }
       h2 {
         margin: 0 0 14px;
@@ -248,6 +349,68 @@
       .total-meta {
         color: var(--dim);
         font-size: 13px;
+      }
+      .share {
+        display: flex;
+        gap: 2px;
+        height: 6px;
+        margin-top: 10px;
+      }
+      .share span {
+        min-width: 3px;
+        border-radius: 2px;
+      }
+      .share-key {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin-right: 8px;
+        border-radius: 2px;
+      }
+      .share-production {
+        background: var(--accent);
+      }
+      .share-tests {
+        background: var(--add);
+      }
+      .share-other {
+        background: var(--edge);
+      }
+
+      /* Tag in a fixed column, text beside it: scan down the tags, then read. */
+      .tagged {
+        max-width: none;
+        padding: 0;
+        list-style: none;
+      }
+      .tagged li {
+        display: grid;
+        grid-template-columns: 7rem minmax(0, var(--measure));
+        gap: 12px;
+        align-items: baseline;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .tagged li + li {
+        margin-top: 0;
+      }
+      .tagged .chip {
+        justify-self: start;
+      }
+      .tag-breaking,
+      .tag-known-issue {
+        background: var(--del-bg);
+        color: var(--del);
+      }
+      .tag-decision,
+      .tag-scope {
+        background: var(--warn-bg);
+        color: var(--warn);
+      }
+      .tag-deferred,
+      .tag-unverified {
+        background: var(--hover);
+        color: var(--dim);
       }
 
       .tree {
@@ -643,6 +806,10 @@
           grid-column: 1 / -1;
           padding-left: 2ch;
         }
+        .tagged li {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 4px;
+        }
       }
 
       @media print {
@@ -656,7 +823,8 @@
           max-width: none;
           padding: 0;
         }
-        .graph-bar {
+        .graph-bar,
+        .toc {
           display: none;
         }
         .tree,
@@ -701,6 +869,7 @@
   <body>
     <main>
       <header><!--{{scope}}--></header>
+      <!--{{nav}}-->
 
       <section id="outcome">
         <h2>Outcome</h2>
@@ -713,7 +882,7 @@
       </section>
 
       <section id="interfaces">
-        <h2>Interfaces</h2>
+        <h2>Interfaces<!--{{n_interfaces}}--></h2>
         <!--{{interfaces}}-->
       </section>
 
@@ -728,12 +897,30 @@
       </section>
 
       <section id="attention">
-        <h2>Needs attention</h2>
+        <h2>Needs attention<!--{{n_attention}}--></h2>
         <!--{{attention}}-->
       </section>
 
       <!--{{graph}}-->
     </main>
+    <script>
+      // Marks the section in view in the sticky links, so the reader always
+      // knows where they are in a long brief.
+      const links = new Map(
+        [...document.querySelectorAll(".toc a")].map((link) => [link.getAttribute("href").slice(1), link]),
+      );
+      const watcher = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            for (const link of links.values()) link.removeAttribute("aria-current");
+            links.get(entry.target.id)?.setAttribute("aria-current", "true");
+          }
+        },
+        { rootMargin: "-15% 0px -75% 0px" },
+      );
+      for (const id of links.keys()) watcher.observe(document.getElementById(id));
+    </script>
     <script type="module">
       // Upgrades the plain file tree and code excerpts with Pierre's open
       // source components, loaded from a CDN. Everything is already on the
