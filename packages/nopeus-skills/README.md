@@ -8,7 +8,7 @@ The canonical collection of shared agent skills, organized as the workspace pack
 - `adhd`: clear, concise communication on any topic.
 - `refine`: explore software ideas and resolve decisions with the human.
 - `spec`: clarify behavior, architecture, contracts, and acceptance in conversation context.
-- `summarize`: brief the human on each code change as one fixed-format HTML page, and guide design in specs.
+- `summarize`: brief the human on each code change in one fixed format, as markdown or an HTML page on request, and guide design in specs.
 - `review`: critically review a code change for missed requirements, bugs, security holes, and unclear code, and report findings.
 - `audit`: simplify specs and code changes, reusing test coverage and removing redundancy.
 - `graph`: maintain tasks, dependencies, parallelism constraints, and completion evidence in context.
