@@ -21,9 +21,6 @@ why this skill has you adopt four different goals in turn, show your work, and
 stay out of the code. Agreeing is the easy failure; inventing problems to look
 thorough is the other one. Aim for neither: report what you can stand behind.
 
-Adapted from `alirezarezvani/claude-skills`
-(`engineering-team/adversarial-reviewer`, MIT, author: ekreloff).
-
 ## Decide who reviews
 
 Independence is the point, so settle it first.
