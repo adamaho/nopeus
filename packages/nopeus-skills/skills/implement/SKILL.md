@@ -63,7 +63,7 @@ independent work when another part is blocked.
 | Clarify contracts | [spec](../spec/SKILL.md), when useful | Concise architecture, public contracts, and acceptance examples in context. |
 | Plan tasks | [graph](../graph/SKILL.md) | In-context tasks, dependencies, parallelism constraints, completion requirements, and a flowchart. |
 | Coordinate implementation | [orchestrate](../orchestrate/SKILL.md) | A feature branch, parallel workers, validation, independent review, and human-approved integration of each task into that branch. |
-| Check changes | [review](../review/SKILL.md) | An independent review of each task and of the combined feature. |
+| Check changes | [review](../review/SKILL.md) | A review-and-fix loop on each task, run by `orchestrate`, and a review of the combined feature. |
 | Explain changes | [summarize](../summarize/SKILL.md) | A brief for each human approval and one for the combined outcome. |
 | Propose the feature | [create-pr](../create-pr/SKILL.md) | One PR from the feature branch to trunk. |
 
@@ -75,7 +75,10 @@ agreed scope.
 
 Delegate execution management to `orchestrate`: it schedules all ready independent
 tasks within available capacity, supplies complete worker prompts, validates and
-independently reviews changes, and serializes approved integrations. Every graph
+runs `review`'s review-and-fix loop on each one, and serializes approved
+integrations. Working end to end changes nothing about that loop: every task is
+reviewed, fixed by its worker, and reviewed again until it is clean or needs
+you. Every graph
 runs on one feature branch: each task gets its own brief and human review before
 it merges into that branch, and the finished branch goes to trunk through one
 PR. By default the PR reviews the whole and does not replace the per-task gate.
