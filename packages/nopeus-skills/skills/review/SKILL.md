@@ -179,9 +179,9 @@ When you split, you coordinate and do not read the diff yourself:
    stated intent and acceptance examples, the validation evidence, and a path
    for its report in a scratch or temp folder outside the change. Do not
    pass your conversation or the author's account of why the code is right. A
-   small change gets one reviewer for all four lenses; a large or sensitive one
-   gets a reviewer per lens, in parallel, so none anchors on another's
-   conclusions. Give the audit pass to the new-hire reviewer. Tell each reviewer
+   small change gets one reviewer for all four lenses; a large or sensitive
+   one, or a whole feature branch before its PR, gets a reviewer per lens, in
+   parallel, so none anchors on another's conclusions. Give the audit pass to the new-hire reviewer. Tell each reviewer
    not to start reviewers of its own.
 2. **Merge their summaries** into one list, combining findings that share a
    cause. Work from the summaries; leave the full reports in their files.

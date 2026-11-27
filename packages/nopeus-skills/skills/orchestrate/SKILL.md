@@ -245,8 +245,9 @@ files or claim that context will survive. Verify actual state on resume.
 As tasks integrate, verify their combined behavior on the feature branch against
 feature acceptance examples and relevant regressions. Obtain an independent
 [review](../review/SKILL.md) of the combined changes, coordinated the same way,
-with the whole feature branch against trunk as its scope, so interactions across
-tasks are covered. Record the exact revisions covered. New defects become follow-up tasks
+with the whole feature branch against trunk as its scope. Always give this one a
+reviewer per lens, whatever its size: each task was reviewed alone, and this is
+the only review that sees how they interact. Record the exact revisions covered. New defects become follow-up tasks
 that pass through the same validation and human approval gates.
 
 When every task is integrated or verified, bring the feature branch up to date
