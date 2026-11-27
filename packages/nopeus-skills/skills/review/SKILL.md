@@ -176,16 +176,18 @@ are coordinating other agents' work and need your own context for that.
 When you split, you coordinate and do not read the diff yourself:
 
 1. **Brief each reviewer from scratch.** Give it this skill, the scope, the
-   stated intent and acceptance examples, and the validation evidence. Do not
+   stated intent and acceptance examples, the validation evidence, and a path
+   for its report in a scratch or temp folder outside the change. Do not
    pass your conversation or the author's account of why the code is right. A
    small change gets one reviewer for all four lenses; a large or sensitive one
    gets a reviewer per lens, in parallel, so none anchors on another's
    conclusions. Give the audit pass to the new-hire reviewer. Tell each reviewer
    not to start reviewers of its own.
-2. **Merge their reports** into one, combining findings that share a cause.
+2. **Merge their summaries** into one list, combining findings that share a
+   cause. Work from the summaries; leave the full reports in their files.
 3. **Validate what matters.** Give each Critical and Warning to a fresh
-   validator with only the finding and access to the code, and ask one
-   question: is this real? It answers confirmed, rejected, or unresolved, with
+   validator with only the finding, the path of the report it came from, and
+   access to the code, and ask one question: is this real? It answers confirmed, rejected, or unresolved, with
    its evidence.
    - Confirmed: keep it, and say `Confirmed by validator`.
    - Rejected: drop it, unless the finding concerns data loss, authentication or
@@ -201,6 +203,21 @@ When you split, you coordinate and do not read the diff yourself:
 When a split was called for and you could not make one, as a reviewer that is
 itself a subagent usually cannot, run the lenses in order and say so in
 `Examined`.
+
+**Reports go to files; summaries come back.** A coordinator that takes every
+reviewer's full report into its own context runs out of room on a long job, and
+it does not need the detail to decide what happens next. So when a coordinator
+gave you a report path:
+
+- Write the full report, in the format below, to that file.
+- Reply with a summary only: the header line; one line for each Critical and
+  Warning with its title, `file:line`, and Confirmed or Suspected; the count of
+  Notes; anything you declined to judge that another lens should see; and the
+  path.
+
+Validators and implementers are given the paths and read the full reports
+themselves. The coordinator reads a full report only when it has to write the
+final one for a human.
 
 **When you are given one lens,** you are part of a split:
 
@@ -274,7 +291,10 @@ check it before asserting it. Look up:
   wrote by hand.
 
 Do not browse for other ways the code could have been written. A lookup settles
-a question the review raised; it is not a search for more to say.
+a question the review raised; it is not a search for more to say. When two
+approaches are equally sound, the author's choice stands. A built-in that
+replaces hand-written code is the exception worth reporting, as an `Audit`
+finding with its source.
 
 - **Read the version first,** from the lockfile or manifest, and put it in the
   query and the finding. If you cannot tell the version, say so and do not
@@ -323,20 +343,6 @@ of these hold:
 List Notes most valuable first, each with its fix. Drop the rest; do not
 mention that you dropped them.
 
-**Alternatives are separate from defects.** "This is wrong" and "there is
-another way" are different claims, and mixing them makes a report feel like an
-argument about taste. Reviewers' after-the-fact alternatives are the comments
-authors act on least, so offer one only when it is better on a criterion you can
-name, and you can point to why:
-
-- correctness or security;
-- a documented deprecation;
-- a built-in or an installed dependency that replaces hand-written code.
-
-Give each its source. List at most three, strongest first. When two approaches
-are equally sound, the author's choice stands and you say nothing. Alternatives
-never change the verdict.
-
 ## Report
 
 Reply with this report and nothing else. It is the same whether a human or the
@@ -360,11 +366,6 @@ authoring agent reads it.
 1. **Rename `data` to `invoice`** · New hire
    `src/orders/service.ts:41`: the next reader will not need to open the caller.
 
-### Alternatives
-1. **`Intl.NumberFormat` in place of the hand-written currency formatter** · built-in replaces custom code
-   `src/orders/format.ts:8-31`: 24 lines reimplement grouping and rounding.
-   Source: MDN, Intl.NumberFormat
-
 ### Examined
 - Traced `createOrder` for empty, single, and 1,000-item carts.
 - Ran `pnpm test orders`: 42 passed.
@@ -375,12 +376,11 @@ authoring agent reads it.
 
 - **Header:** the comparison, the verdict, and the counts. Add
   `Not independent: reviewed by the authoring session` when that applies.
-- **Sections:** Critical, Warnings, Notes, Alternatives, in that order. Leave
-  out an empty one.
+- **Sections:** Critical, Warnings, Notes, in that order. Leave out an empty one.
 - **Each finding:** a title, how it was established, and the lens or lenses on
   the first line; then `file:line` with the quoted code, the failure, and when
   it happens; a source when it rests on a lookup; then a fix concrete enough to
-  apply. Notes and Alternatives carry no Confirmed or Suspected label.
+  apply. Notes carry no Confirmed or Suspected label.
 - **Examined:** always present. List what you traced, what you ran and its
   result, what you looked up, anything you could not read or run, and the single
   most fragile assumption the change rests on. Also list what you declined to
@@ -425,7 +425,8 @@ Each round:
 
 1. **Review.** Coordinate reviewers as above, then validate.
 2. **Decide.** A Clean verdict ends the loop.
-3. **Fix.** Send the report to an implementer: the agent that wrote the change,
+3. **Fix.** Send the validated findings, with the report paths, to an
+   implementer: the agent that wrote the change,
    in its existing session, when there is one, because it already knows the
    code; otherwise a fresh one. Use one implementer unless the findings touch
    separate files, so fixes do not collide. Have it load
@@ -433,7 +434,8 @@ Each round:
    finding. A fix is where complexity creeps in: told that a value can be
    absent, an implementer adds three guards where one belongs.
 4. **Check.** The implementer reruns the checks its fixes could affect and
-   reports what it changed, what it declined and why, and the results.
+   reports, in a few lines, what it changed, what it declined and why, and the
+   results.
 
 Then review again, with fresh reviewers, scoped to the fixes:
 
@@ -455,7 +457,6 @@ Findings close by severity:
   Warning goes to the human to accept or reject.
 - **Note:** the implementer's call. It applies the ones it agrees with, lists
   the ones it skipped, and they are not re-reviewed.
-- **Alternative:** the implementer's call, like a Note.
 
 Stop the loop and go to the human, with both sides' evidence, when:
 
