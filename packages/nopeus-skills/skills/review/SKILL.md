@@ -94,7 +94,13 @@ read-through agrees its way past.
   away, and an agent under pressure to finish will take it. For each one ask
   whether it silences the failure the check existed to catch. Unless the change
   itself shows why the check was wrong, it is at least a Warning, so a person
-  sees it.
+  sees it. When a test was replaced and not just loosened, judge it by what
+  coverage was lost: a rewrite that asserts more and drops nothing is not a
+  finding; one that stops exercising a case is, for that case.
+- When the stated intent itself looks mistaken, such as a promised
+  compatibility path for something that never shipped, do not overrule it and do
+  not stay silent. Report it as a Warning that says what the intent promises and
+  why it looks wrong. The author or the human decides.
 
 ### Saboteur
 
@@ -145,8 +151,8 @@ used.
 - Does it follow the conventions of the code around it?
 
 Look for names that hide intent, unexplained constants, and knowledge that
-lives only in the author's head. Leave complexity, unnecessary abstraction, and
-redundant tests to [audit](../audit/SKILL.md).
+lives only in the author's head. Leave complexity, unnecessary abstraction,
+duplicated values or logic, and redundant tests to [audit](../audit/SKILL.md).
 
 ### Then audit
 
@@ -174,7 +180,8 @@ When you split, you coordinate and do not read the diff yourself:
    pass your conversation or the author's account of why the code is right. A
    small change gets one reviewer for all four lenses; a large or sensitive one
    gets a reviewer per lens, in parallel, so none anchors on another's
-   conclusions. Tell each reviewer not to start reviewers of its own.
+   conclusions. Give the audit pass to the new-hire reviewer. Tell each reviewer
+   not to start reviewers of its own.
 2. **Merge their reports** into one, combining findings that share a cause.
 3. **Validate what matters.** Give each Critical and Warning to a fresh
    validator with only the finding and access to the code, and ask one
@@ -194,6 +201,18 @@ When you split, you coordinate and do not read the diff yourself:
 When a split was called for and you could not make one, as a reviewer that is
 itself a subagent usually cannot, run the lenses in order and say so in
 `Examined`.
+
+**When you are given one lens,** you are part of a split:
+
+- Apply that lens and no other, and skip the audit pass unless it was assigned
+  to you.
+- Read in full the files your lens depends on and search the rest for what it
+  looks for; say in `Examined` which was which.
+- Name your lens in the header, as in `Saboteur lens only`. Your verdict covers
+  your lens; the coordinator derives the overall one.
+- When you notice something that belongs to another lens, do not pursue it.
+  List it under `Declined to judge` with the lens it belongs to, so the
+  coordinator can check that reviewer saw it.
 
 ## Read against your own assumptions
 
@@ -215,7 +234,11 @@ exist, so say how you know.
   a specific input that fails. Give the input or the command.
 - **Suspected:** plausible from reading, not confirmed. Say what would confirm
   it. A trace that depends on timing or on the order a framework schedules work
-  is Suspected until something runs it.
+  is Suspected until something runs it, unless the code as written fixes the
+  order; then say what the order depends on.
+
+A hypothesis you checked and refuted is worth a line in `Examined`: it tells the
+reader that the obvious worry was looked at and why it does not hold.
 
 Run what helps: the project's own tests and checks, a focused script, or a
 throwaway test. Keep anything you write for this out of the change. A Critical
@@ -227,6 +250,12 @@ it true, with its `file:line`. If you cannot quote the line, you have not
 established the finding: label it Suspected. This is what stops a claim that a
 function "doesn't handle null" about a function that does. For code a framework
 generates, read what generates it before claiming something is missing.
+
+- A finding that spans several sites quotes each one.
+- For something removed, quote the removed line with its location in the
+  revision before the change, and the line that replaced it if there is one.
+- For something absent, cite the search that shows it: what you searched for,
+  where, and that it returned nothing.
 
 Write every finding plainly either way. Name the failure and when it happens:
 "throws when `user` is undefined after logout", not "this might be a concern".
@@ -252,7 +281,9 @@ a question the review raised; it is not a search for more to say.
   assert version-specific behavior.
 - **Prefer what is authoritative:** the installed package's own types and
   source, then official documentation for that version, then the changelog and
-  advisory databases. A blog post or an answer on a forum is a lead to confirm,
+  advisory databases. Reading installed dependencies is fine in a repository you
+  must not change; check that the installed version matches the lockfile at the
+  revision under review. A blog post or an answer on a forum is a lead to confirm,
   never the authority.
 - **Keep the project out of the query.** Search on public names: the library,
   its version, the symbol, the error class. Never include source code, file
@@ -285,7 +316,8 @@ of these hold:
 
 - You would make the change yourself, and can state its benefit in one clause.
 - It is in code this change added or modified.
-- No formatter, linter, or type checker would catch it.
+- No formatter, linter, or type checker would catch it. When you cannot tell
+  whether the project's tooling covers it, drop it.
 - It is not a matter of taste where the code already matches the repository.
 
 List Notes most valuable first, each with its fix. Drop the rest; do not
