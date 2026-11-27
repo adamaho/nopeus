@@ -178,7 +178,7 @@ change adds, not the whole suite.
 
 Fold its findings into the same report, ranked by the same severities, with
 `Audit` where a lens name would go. Anything `audit` covers is reported once,
-from `audit`.
+from `audit`. When it finds nothing, one line in `Examined` says so.
 
 ## Coordinate reviewers
 
@@ -231,7 +231,7 @@ gave you a report path:
   lens; one line for each Critical and
   Warning with its title, `file:line`, and Confirmed or Suspected; the count of
   Notes; anything you declined to judge that another lens should see; and the
-  path.
+  paths of the report and of any screenshots.
 
 Validators and implementers are given the paths and read the full reports
 themselves. The coordinator reads a full report only when it has to write the
@@ -257,7 +257,11 @@ use it the way its user would:
 
 - **An interface:** start the app and drive it with a browser tool. Click
   through the path, fill the forms, and look at what appears. Try the empty
-  state, a failure, and going back.
+  state, a failure, and going back. When the app needs services you cannot
+  start, the project's own harness that mounts real pages with mocked services
+  is the next best thing; say which you used. For a change to how something is
+  displayed, vary the data and the viewport: none, one, many, and oversized
+  values, at narrow and wide sizes.
 - **A server or API:** start it and send real requests, with `curl` or the
   project's client. Check the status, the body, and what was stored or sent as
   a result. Send the request a caller would get wrong.
@@ -268,7 +272,11 @@ the project's own run and seed scripts. Then:
 
 - **Run the revision under review,** in a checkout of your own or the one you
   were given. Do not edit the change to make it run; if it will not run, that
-  is a finding.
+  is a finding. A scratch test may sit inside the checkout when the harness
+  only finds tests there; leave it untracked and remove it afterwards. Expect
+  an install to run the project's scripts, so use a checkout you can discard.
+- **Run the base too when the claim is a fix.** "Restores" or "fixes" is only
+  shown by seeing it broken before and working after.
 - **Stay local.** Use development or test configuration and seeded data. Never
   point at production, never use real credentials, and do nothing with effects
   outside the machine: no deploys, no real messages or payments, no writes to
@@ -378,7 +386,9 @@ of these hold:
 - It is not a matter of taste where the code already matches the repository.
 
 List Notes most valuable first, each with its fix. Drop the rest; do not
-mention that you dropped them.
+mention that you dropped them. A behavior you reproduced that a user would trip
+over, but that may be intended, is a Note that asks the question and says what
+you saw.
 
 ## Report
 
